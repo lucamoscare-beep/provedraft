@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Draft Serie A – Ultimate Edition</title>
+
+<!-- Google Fonts: Poppins -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+
+<!-- SheetJS (Excel Parser) -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<!-- FontAwesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+:root {
+    --bg-dark: #0f172a;
+    --card-bg: rgba(30, 41, 59, 0.85);
+    --card-border: rgba(255, 255, 255, 0.12);
+    --accent-green: #10b981;
+    --accent-neon-green: #4ade80;
+    --accent-blue: #60a5fa;
+    --accent-gold: #fbbf24;
+    --accent-red: #f87171;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    
+    --role-por: #fbbf24;
+    --role-dif: #34d399;
+    --role-cen: #38bdf8;
+    --role-att: #f87171;
+
+    /* ERBA CAMPO DA GIOCO */
+    --grass-dark: #1b4332;
+    --grass-light: #2d6a4f;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg-dark);
+    background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 75%);
+    color: var(--text-main);
+    margin: 0;
+    padding: 10px;
+    min-height: 100vh;
+}
+
+h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
+
+#main-app {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 1450px;
+    margin: 0 auto;
+}
+
+#left { display: flex; flex-direction: column; order: 2; }
+#right { display: flex; flex-direction: column; order: 1; }
+
+.section-rosa { order: 3; }
+.section-panchina { order: 4; }
+
+@media (min-width: 1024px) {
+    body { padding: 20px; }
+    #main-app { flex-direction: row; gap: 25px; }
+    #left, #right { width: 50%; }
+    #left { order: 1; }
+    #right { order: 2; }
+    .section-rosa { order: unset; }
+    .section-panchina { order: unset; }
+}
+
+.panel {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+.dashboard-header {
+    display: flex;
+    gap: 6px;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border: 1.5px solid rgba(16, 185, 129, 0.4);
+    border-radius: 14px;
+    padding: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+}
+
+.dash-box {
+    flex: 1;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid var(--card-border);
+    padding: 6px 4px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.dash-box span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #cbd5e1;
+    margin-bottom: 2px;
+    font-weight: 700;
+}
+
+.dash-box strong {
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1;
+    display: block;
+}
+
+@media (min-width: 600px) {
+    .dash-box strong { font-size: 36px; }
+    .dash-box span { font-size: 12px; }
+    .dashboard-header { padding: 16px; gap: 12px; }
+}
+
+.dash-box.budget strong { color: var(--accent-neon-green); }
+.dash-box.slots strong { color: var(--accent-gold); }
+.dash-box.pick strong { color: var(--accent-blue); }
+
+.progress-bar-container {
+    width: 100%;
+    height: 6px;
+    background: #1e293b;
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-blue), var(--accent-neon-green));
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.start-container {
+    text-align: center;
+    padding: 5px 0;
+}
+
+#start-btn {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: 800;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    display: inline-block;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    text-transform: uppercase;
+    width: 100%;
+    max-width: 320px;
+}
+
+.players-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+.player-card {
+    background: linear-gradient(145deg, #1e293b, #0f172a);
+    border: 1px solid var(--card-border);
+    width: 48%;
+    max-width: 170px;
+    padding: 8px 6px;
+    border-radius: 12px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.player-card.Portiere { border-top: 3px solid var(--role-por); }
+.player-card.Difensore { border-top: 3px solid var(--role-dif); }
+.player-card.Centrocampista { border-top: 3px solid var(--role-cen); }
+.player-card.Attaccante { border-top: 3px solid var(--role-att); }
+
+.player-name { font-weight: 800; font-size: 12px; color: #fff; margin-bottom: 2px; }
+.player-team { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 4px; }
+.player-role { font-size: 9px; font-weight: 700; margin-bottom: 4px; display: inline-block; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.06); }
+
+.valore-badge-draft {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #0f172a;
+    font-weight: 900;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 13px;
+    display: inline-block;
+    margin: 2px 0;
+}
+
+.valore-badge-slot {
+    background: rgba(251, 191, 36, 0.15);
+    border: 1px solid var(--accent-gold);
+    color: var(--accent-gold);
+    font-weight: 800;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: 10px;
+}
+
+.draft-btn {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    padding: 6px 8px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 4px;
+    font-weight: 800;
+    font-size: 11px;
+    text-transform: uppercase;
+    width: 100%;
+}
+
+.role-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    margin: 10px 0 4px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.slot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    height: 34px;
+    border-radius: 6px;
+    margin: 3px 0;
+    font-weight: 600;
+    cursor: pointer;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--card-border);
+    font-size: 11px;
+    transition: all 0.2s ease;
+}
+
+.slot.Portiere { border-left: 3px solid var(--role-por); }
+.slot.Difensore { border-left: 3px solid var(--role-dif); }
+.slot.Centrocampista { border-left: 3px solid var(--role-cen); }
+.slot.Attaccante { border-left: 3px solid var(--role-att); }
+
+.slot.schierato {
+    opacity: 0.45;
+    background: rgba(15, 23, 42, 0.9);
+    filter: grayscale(80%);
+    border-style: dashed;
+    cursor: not-allowed;
+}
+
+.slot-tag {
+    font-size: 9px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+.slot-tag.campo { background: rgba(16, 185, 129, 0.25); color: var(--accent-neon-green); border: 1px solid var(--accent-green); }
+.slot-tag.panchina { background: rgba(251, 191, 36, 0.25); color: var(--accent-gold); border: 1px solid var(--accent-gold); }
+
+/* CAMPO DA GIOCO */
+.campo-style {
+    width: 100%;
+    height: 420px;
+    background-color: var(--grass-dark);
+    background-image: repeating-linear-gradient(
+        0deg,
+        var(--grass-dark),
+        var(--grass-dark) 35px,
+        var(--grass-light) 35px,
+        var(--grass-light) 70px
+    );
+    border: 3px solid #ffffff;
+    border-radius: 12px;
+    position: relative;
+    box-shadow: inset 0 0 25px rgba(0,0,0,0.6), 0 8px 20px rgba(0,0,0,0.4);
+    overflow: hidden;
+}
+
+.campo-style::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 0; right: 0;
+    height: 2px; background: rgba(255,255,255,0.85);
+}
+.campo-style::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 80px; height: 80px;
+    border: 2px solid rgba(255,255,255,0.85);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.pos {
+    position: absolute;
+    width: 84px;
+    height: 30px;
+    background: rgba(15, 23, 42, 0.92);
+    border: 1px solid var(--accent-blue);
+    border-radius: 6px;
+    text-align: center;
+    line-height: 30px;
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 3px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.6);
+}
+
+@media (min-width: 600px) {
+    .campo-style { height: 550px; }
+    .pos { width: 110px; height: 36px; line-height: 36px; font-size: 11px; }
+}
+
+/* PANCHINA GRAFICA */
+.panchina-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.panchina-role-group {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 6px 8px;
+}
+
+.panchina-role-header {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.bench-slots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 6px;
+}
+
+.bench-card-slot {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    padding: 4px 6px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    position: relative;
+}
+
+.bench-card-slot.filled {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+    border: 1px solid var(--accent-blue);
+}
+
+.bench-order-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--accent-gold);
+    color: #000;
+    font-size: 8px;
+    font-weight: 900;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-conferma {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 800;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    text-transform: uppercase;
+}
+
+#recap-screen {
+    display: none;
+    max-width: 1200px;
+    margin: 0 auto;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    padding: 12px;
+    border-radius: 14px;
+}
+
+.recap-content { display: flex; flex-direction: column; gap: 15px; }
+
+@media (min-width: 768px) {
+    #recap-screen { padding: 25px; }
+    .recap-content { flex-direction: row; gap: 25px; }
+    .recap-left { width: 55%; }
+    .recap-right { width: 45%; }
+}
+
+.recap-bench-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.voti-box {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--accent-blue);
+    border-radius: 10px;
+    padding: 12px;
+    margin-top: 15px;
+}
+
+#tabellino-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.voti-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(30, 41, 59, 0.9);
+    border-radius: 6px;
+    margin-top: 8px;
+}
+.voti-table th, .voti-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--card-border); font-size: 11px; }
+.voti-table th { background: #334155; color: var(--text-muted); text-transform: uppercase; font-size: 9px; }
+
+/* STILI ICONE BONUS MALUS */
+.bonus-icon-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.totale-punteggio {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #000;
+    font-size: 18px;
+    font-weight: 800;
+    text-align: center;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 12px;
+}
+</style>
+</head>
+<body>
+
+<div id="main-app">
+    <div id="left">
+        <div class="panel" id="header-panel">
+            <h1><i class="fa-solid fa-trophy" style="color: var(--accent-gold);"></i> Draft Serie A</h1>
+            
+            <div class="start-container">
+                <button id="start-btn" onclick="startDraft()">AVVIA IL TUO DRAFT</button>
+            </div>
+        </div>
+
+        <div class="panel" id="draft-panel" style="display:none;">
+            <h2>Giocatori Disponibili</h2>
+            <div id="players" class="players-container"></div>
+        </div>
+
+        <div class="panel">
+            <h2>Schieramento Titolari</h2>
+            <div id="campo" class="campo-style"></div>
+        </div>
+
+        <div class="panel section-panchina">
+            <h2><i class="fa-solid fa-couch" style="color: var(--accent-gold);"></i> Panchina Ufficiale</h2>
+            <div id="panchina-grafica" class="panchina-container"></div>
+
+            <div id="conferma-container" style="display: none; margin-top: 12px;">
+                <button class="btn-conferma" onclick="confermaFormazione()">🔒 CONFERMA E BLOCCA FORMAZIONE</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="right">
+        <div class="dashboard-header">
+            <div class="dash-box budget">
+                <span><i class="fa-solid fa-coins"></i> Crediti</span>
+                <strong><span id="budget-display">600</span></strong>
+            </div>
+
+            <div class="dash-box slots">
+                <span><i class="fa-solid fa-user-plus"></i> Liberi</span>
+                <strong><span id="slots-left-display">24</span></strong>
+            </div>
+            
+            <div class="dash-box pick">
+                <span><i class="fa-solid fa-hashtag"></i> Pick</span>
+                <strong><span id="turno">0</span><small style="font-size:12px; color:var(--text-muted); font-weight:700;">/24</small></strong>
+            </div>
+        </div>
+
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progress-bar"></div>
+        </div>
+
+        <div class="panel section-rosa">
+            <h2>La Tua Rosa</h2>
+
+            <div class="role-title">
+                <span><i class="fa-solid fa-hand" style="color: var(--role-por);"></i> Portieri</span>
+                <span class="role-count" id="count-Portiere">0 / 3</span>
+            </div>
+            <div id="slot-Portiere"></div>
+
+            <div class="role-title">
+                <span><i class="fa-solid fa-shield-halved" style="color: var(--role-dif);"></i> Difensori</span>
+                <span class="role-count" id="count-Difensore">0 / 7</span>
+            </div>
+            <div id="slot-Difensore"></div>
+
+            <div class="role-title">
+                <span><i class="fa-solid fa-person-running" style="color: var(--role-cen);"></i> Centrocampisti</span>
+                <span class="role-count" id="count-Centrocampista">0 / 8</span>
+            </div>
+            <div id="slot-Centrocampista"></div>
+
+            <div class="role-title">
+                <span><i class="fa-solid fa-futbol" style="color: var(--role-att);"></i> Attaccanti</span>
+                <span class="role-count" id="count-Attaccante">0 / 6</span>
+            </div>
+            <div id="slot-Attaccante"></div>
+        </div>
+    </div>
+</div>
+
+<div id="recap-screen">
+    <div style="text-align: center; margin-bottom: 15px;">
+        <div class="lock-badge" style="display:inline-block; background:rgba(239, 68, 68, 0.2); border:1px solid var(--accent-red); color:var(--accent-red); padding:3px 10px; border-radius:16px; font-size:10px; font-weight:700; margin-bottom:6px;">🔒 Formazione Convalidata</div>
+        <h1>Riepilogo Squadra e Giornata</h1>
+        <p style="color: var(--text-muted); font-size:12px;">Modulo: <strong id="recap-modulo-title" style="color: #fff;">-</strong></p>
+    </div>
+
+    <div class="recap-content">
+        <div class="recap-left">
+            <h3>Titolari in Campo</h3>
+            <div id="recap-campo" class="campo-style"></div>
+        </div>
+
+        <div class="recap-right">
+            <h3>Panchina Ordinata</h3>
+            <div id="recap-panchina"></div>
+        </div>
+    </div>
+
+    <div class="voti-box">
+        <h2 style="text-align: center; font-size:16px;">📊 Calcola il tuo punteggio di giornata</h2>
+        <div style="text-align:center; margin-bottom:12px;">
+            <button class="btn-voti" id="btn-fetch-voti" onclick="calcolaVotiDaExcelOnline()" style="background:var(--accent-blue); color:#fff; border:none; padding:8px 16px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">📊 Carica i Fantavoti di giornata</button>
+        </div>
+        <div id="tabellino-container"></div>
+    </div>
+</div>
+
+<script>
+let customPlayersList = [];
+let availablePlayers = [];
+let budget = 600;
+
+const limits = { Portiere: 3, Difensore: 7, Centrocampista: 8, Attaccante: 6 };
+const roleIcons = {
+    Portiere: "fa-solid fa-hand",
+    Difensore: "fa-solid fa-shield-halved",
+    Centrocampista: "fa-solid fa-person-running",
+    Attaccante: "fa-solid fa-futbol"
+};
+
+let rosa = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
+let schierati = [];
+let riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
+
+let turno = 0;
+let moduloSelezionato = "";
+let votiGiornata = {};
+let formazioneBloccata = false;
+
+document.addEventListener("DOMContentLoaded", () => {
+    caricaGiocatoriDaExcel();
+});
+
+async function caricaGiocatoriDaExcel() {
+    try {
+        const response = await fetch("giocatori.xlsx");
+        if (!response.ok) throw new Error("File giocatori.xlsx non trovato nello spazio web");
+
+        const arrayBuffer = await response.arrayBuffer();
+        const data = new Uint8Array(arrayBuffer);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+        if (jsonData.length === 0) throw new Error("Il file giocatori.xlsx è vuoto!");
+
+        parseAndSetPlayers(jsonData);
+
+    } catch (error) {
+        console.error("Errore nel caricamento giocatori.xlsx:", error);
+    }
+}
+
+function parseAndSetPlayers(data) {
+    customPlayersList = data.map(row => {
+        let r = row.ruolo || row.Ruolo || row.RUOLO || "Centrocampista";
+        let rUpper = String(r).trim().toUpperCase();
+        if (rUpper === 'P' || rUpper === 'PORTIERE') r = 'Portiere';
+        else if (rUpper === 'D' || rUpper === 'DIFENSORE') r = 'Difensore';
+        else if (rUpper === 'C' || rUpper === 'CENTROCAMPISTA') r = 'Centrocampista';
+        else if (rUpper === 'A' || rUpper === 'ATTACCANTE') r = 'Attaccante';
+
+        let val = parseInt(row.valore || row.Valore || row.VALORE || row.costo || 1);
+        if (isNaN(val) || val < 1) val = 1;
+
+        return {
+            nome: row.nome || row.Nome || row.NOME || "Sconosciuto",
+            ruolo: r,
+            squadra: row.squadra || row.Squadra || "N/D",
+            valore: val
+        };
+    });
+}
+
+function updateDashboardCounters() {
+    document.getElementById("budget-display").innerText = budget;
+    let totalAcquistati = Object.values(rosa).reduce((acc, curr) => acc + curr.length, 0);
+    let slotsRimanenti = 24 - totalAcquistati;
+    document.getElementById("slots-left-display").innerText = slotsRimanenti;
+
+    ["Portiere", "Difensore", "Centrocampista", "Attaccante"].forEach(r => {
+        let mancano = limits[r] - rosa[r].length;
+        document.getElementById(`count-${r}`).innerText = `${rosa[r].length} / ${limits[r]} (${mancano} mancanti)`;
+    });
+}
+
+function updateProgressBar() {
+    let percentage = (turno / 24) * 100;
+    document.getElementById("progress-bar").style.width = percentage + "%";
+}
+
+function startDraft() {
+    if (customPlayersList.length < 24) {
+        alert("Caricamento giocatori in corso o file giocatori.xlsx non valido. Riprova tra qualche secondo.");
+        return;
+    }
+
+    document.getElementById("header-panel").style.display = "none";
+    document.getElementById("draft-panel").style.display = "block";
+    
+    budget = 600;
+    updateDashboardCounters();
+    availablePlayers = [...customPlayersList];
+    nextPick();
+}
+
+function nextPick() {
+    turno++;
+    updateProgressBar();
+    updateDashboardCounters();
+    
+    if (turno > 24) {
+        document.getElementById("turno").innerText = 24;
+        showModuloSelection();
+        return;
+    }
+
+    document.getElementById("turno").innerText = turno;
+    renderPlayers();
+}
+
+function renderPlayers() {
+    const container = document.getElementById("players");
+    container.innerHTML = "";
+
+    let totalAcquistati = Object.values(rosa).reduce((acc, curr) => acc + curr.length, 0);
+    let maxCostAllowed = budget - (24 - totalAcquistati - 1);
+
+    let candidates = availablePlayers.filter(p => rosa[p.ruolo].length < limits[p.ruolo] && p.valore <= maxCostAllowed);
+    if (candidates.length === 0) candidates = availablePlayers.filter(p => p.valore <= maxCostAllowed);
+
+    if (candidates.length === 0) {
+        alert(`Nessun giocatore disponibile rientra nel budget residuo!`);
+        showModuloSelection();
+        return;
+    }
+
+    const five = candidates.sort(() => Math.random() - 0.5).slice(0, 5);
+
+    five.forEach(p => {
+        const card = document.createElement("div");
+        card.className = `player-card ${p.ruolo}`;
+
+        card.innerHTML = `
+            <div>
+                <div class="player-name">${p.nome}</div>
+                <div class="player-team">${p.squadra}</div>
+                <span class="player-role"><i class="${roleIcons[p.ruolo]}"></i> ${p.ruolo}</span><br>
+                <div class="valore-badge-draft">💰 ${p.valore} <span style="font-size:9px; font-weight:800;">CR</span></div>
+            </div>
+            <button class="draft-btn" onclick="draft('${p.nome.replace(/'/g, "\\'")}')">Acquista</button>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function draft(nome) {
+    const p = availablePlayers.find(x => x.nome === nome);
+    if (!p || p.valore > budget) return;
+
+    budget -= p.valore;
+    rosa[p.ruolo].push(p);
+    availablePlayers = availablePlayers.filter(x => x.nome !== nome);
+
+    renderSlots();
+    nextPick();
+}
+
+function renderSlots() {
+    ["Portiere","Difensore","Centrocampista","Attaccante"].forEach(ruolo => {
+        const div = document.getElementById("slot-" + ruolo);
+        div.innerHTML = "";
+        rosa[ruolo].forEach(p => {
+            const isTit = schierati.some(s => s.nome === p.nome);
+            const isBench = riserveSelezionate[ruolo].some(r => r.nome === p.nome);
+
+            const slot = document.createElement("div");
+            let statusClass = (isTit || isBench) ? "schierato" : "";
+            
+            let tagStatus = "";
+            if (isTit) tagStatus = `<span class="slot-tag campo">Campo</span>`;
+            else if (isBench) tagStatus = `<span class="slot-tag panchina">Panchina</span>`;
+
+            slot.className = `slot ${ruolo} ${statusClass}`;
+            slot.innerHTML = `
+                <span><i class="${roleIcons[ruolo]}"></i> ${p.nome}</span>
+                <div>
+                    ${tagStatus}
+                    <span class="valore-badge-slot">💰 ${p.valore} cr</span>
+                </div>
+            `;
+            slot.onclick = () => schieraGiocatore(p, ruolo);
+            div.appendChild(slot);
+        });
+    });
+}
+
+function schieraGiocatore(playerObj, ruolo) {
+    if (formazioneBloccata) return;
+
+    if (schierati.some(p => p.nome === playerObj.nome)) {
+        return alert(`${playerObj.nome} è già schierato in campo! Clicca sulla sua casella sul campo per rimuoverlo.`);
+    }
+
+    const zone = document.querySelectorAll(`.dropzone[data-ruolo="${ruolo}"]`);
+    const libera = Array.from(zone).find(z => z.dataset.player === "");
+
+    if (libera) {
+        libera.innerText = playerObj.nome;
+        libera.dataset.player = playerObj.nome;
+        schierati.push(playerObj);
+
+        riserveSelezionate[ruolo] = riserveSelezionate[ruolo].filter(p => p.nome !== playerObj.nome);
+    } else {
+        if (riserveSelezionate[ruolo].some(r => r.nome === playerObj.nome)) {
+            riserveSelezionate[ruolo] = riserveSelezionate[ruolo].filter(p => p.nome !== playerObj.nome);
+        } else {
+            if (riserveSelezionate[ruolo].length >= 2) {
+                return alert(`Hai già selezionato le 2 riserve per il ruolo: ${ruolo}`);
+            }
+            riserveSelezionate[ruolo].push(playerObj);
+        }
+    }
+
+    renderSlots();
+    renderPanchinaGrafica();
+}
+
+function showModuloSelection() {
+    document.getElementById("draft-panel").innerHTML = `
+        <h3 style="text-align:center;">Draft Completato!</h3>
+        <p style="text-align:center; font-size:12px;">Seleziona il modulo tattico:</p>
+        <select id="modulo" onchange="setModulo()" style="display:block; margin: 0 auto; padding: 8px; border-radius: 8px; background: #1e293b; color: white; border:1px solid var(--card-border);">
+            <option value="">-- Scegli Modulo --</option>
+            <option value="4-4-2">4-4-2</option>
+            <option value="4-3-3">4-3-3</option>
+            <option value="3-4-3">3-4-3</option>
+            <option value="4-5-1">4-5-1</option>
+            <option value="3-5-2">3-5-2</option>
+        </select>
+    `;
+}
+
+function distribuisciOrizzontalmente(n) {
+    const step = 100 / (n + 1);
+    return Array.from({length: n}, (_, i) => step * (i + 1));
+}
+
+function setModulo() {
+    moduloSelezionato = document.getElementById("modulo").value;
+    if (!moduloSelezionato) return;
+
+    const [D, C, A] = moduloSelezionato.split("-").map(n => parseInt(n));
+    const campo = document.getElementById("campo");
+    campo.innerHTML = "";
+
+    schierati = [];
+    riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
+
+    let isMobile = window.innerWidth < 600;
+    let topPOR = isMobile ? 15 : 30;
+    let topDIF = isMobile ? 105 : 150;
+    let topCEN = isMobile ? 215 : 310;
+    let topATT = isMobile ? 325 : 470;
+
+    createDropZone(campo, "Portiere", topPOR, 50);
+    distribuisciOrizzontalmente(D).forEach(left => createDropZone(campo, "Difensore", topDIF, left));
+    distribuisciOrizzontalmente(C).forEach(left => createDropZone(campo, "Centrocampista", topCEN, left));
+    distribuisciOrizzontalmente(A).forEach(left => createDropZone(campo, "Attaccante", topATT, left));
+
+    renderSlots();
+    renderPanchinaGrafica();
+    document.getElementById("conferma-container").style.display = "block";
+}
+
+function createDropZone(campo, ruolo, top, left) {
+    const dz = document.createElement("div");
+    dz.className = "pos dropzone";
+    dz.style.top = top + "px";
+    dz.style.left = left + "%";
+    dz.dataset.ruolo = ruolo;
+    dz.dataset.player = "";
+
+    dz.onclick = () => {
+        if (formazioneBloccata || !dz.dataset.player) return;
+        schierati = schierati.filter(p => p.nome !== dz.dataset.player);
+        dz.innerText = "";
+        dz.dataset.player = "";
+        renderSlots();
+        renderPanchinaGrafica();
+    };
+    campo.appendChild(dz);
+}
+
+function renderPanchinaGrafica() {
+    const container = document.getElementById("panchina-grafica");
+    container.innerHTML = "";
+
+    ["Portiere", "Difensore", "Centrocampista", "Attaccante"].forEach(ruolo => {
+        const group = document.createElement("div");
+        group.className = "panchina-role-group";
+
+        const nonSchierati = rosa[ruolo].filter(p => !schierati.some(s => s.nome === p.nome));
+        const riserveRuolo = riserveSelezionate[ruolo];
+
+        let html = `
+            <div class="panchina-role-header">
+                <i class="${roleIcons[ruolo]}"></i> ${ruolo} (${riserveRuolo.length}/2)
+            </div>
+            <div class="bench-slots-grid">
+        `;
+
+        nonSchierati.forEach(p => {
+            let indexInBench = riserveRuolo.findIndex(r => r.nome === p.nome);
+            let isBench = indexInBench !== -1;
+            let badgeOrder = isBench ? `<span class="bench-order-badge">R${indexInBench + 1}</span>` : "";
+
+            html += `
+                <div class="bench-card-slot ${isBench ? 'filled' : ''}" onclick="togglePanchina('${ruolo}', '${p.nome.replace(/'/g, "\\'")}')">
+                    ${badgeOrder}
+                    <div style="font-size:10px; font-weight:700; color:#fff;">${p.nome}</div>
+                    <div style="font-size:8px; color:var(--text-muted);">💰${p.valore}cr</div>
+                </div>
+            `;
+        });
+
+        html += `</div>`;
+        group.innerHTML = html;
+        container.appendChild(group);
+    });
+}
+
+function togglePanchina(ruolo, nomePlayer) {
+    if (formazioneBloccata) return;
+
+    let pObj = rosa[ruolo].find(p => p.nome === nomePlayer);
+    if (!pObj) return;
+
+    let index = riserveSelezionate[ruolo].findIndex(r => r.nome === nomePlayer);
+
+    if (index !== -1) {
+        riserveSelezionate[ruolo].splice(index, 1);
+    } else {
+        if (riserveSelezionate[ruolo].length >= 2) {
+            return alert(`Puoi selezionare al massimo 2 riserve per il ruolo ${ruolo}!`);
+        }
+        riserveSelezionate[ruolo].push(pObj);
+    }
+
+    renderSlots();
+    renderPanchinaGrafica();
+}
+
+function confermaFormazione() {
+    if (schierati.length < 11) return alert("Devi schierare tutti gli 11 titolari!");
+
+    if (confirm("Confermi la formazione? L'operazione è definitiva.")) {
+        formazioneBloccata = true;
+        showFinalRecap();
+    }
+}
+
+function showFinalRecap() {
+    document.getElementById("main-app").style.display = "none";
+    document.getElementById("recap-screen").style.display = "block";
+    document.getElementById("recap-modulo-title").innerText = moduloSelezionato;
+
+    const recapCampo = document.getElementById("recap-campo");
+    recapCampo.innerHTML = document.getElementById("campo").innerHTML;
+
+    const panchinaDiv = document.getElementById("recap-panchina");
+    panchinaDiv.innerHTML = "";
+
+    ["Portiere", "Difensore", "Centrocampista", "Attaccante"].forEach(ruolo => {
+        const riserve = riserveSelezionate[ruolo];
+        riserve.forEach((ris, i) => {
+            const card = document.createElement("div");
+            card.className = "recap-bench-card";
+            card.innerHTML = `
+                <div>
+                    <span class="player-role"><i class="${roleIcons[ruolo]}"></i> ${ruolo} (R${i+1})</span>
+                    <div style="font-weight:700; color:#fff; margin-top:2px; font-size:12px;">${ris.nome}</div>
+                </div>
+                <span class="valore-badge-slot">💰 ${ris.valore} cr</span>
+            `;
+            panchinaDiv.appendChild(card);
+        });
+    });
+}
+
+// HELPER PER LEGGERE I VALORI DELLE COLONNE
+function parseColumnVal(row, colNames) {
+    for (let col of colNames) {
+        for (let key in row) {
+            if (key.trim().toLowerCase() === col.toLowerCase()) {
+                let val = parseInt(row[key]);
+                return isNaN(val) ? 0 : val;
+            }
+        }
+    }
+    return 0;
+}
+
+// CARICAMENTO VOTI ED ESTRAZIONE COLONNE SPECIFICHE
+async function calcolaVotiDaExcelOnline() {
+    const btn = document.getElementById("btn-fetch-voti");
+    btn.innerText = "⏳ Lettura voti.xlsx...";
+    btn.disabled = true;
+
+    votiGiornata = {};
+    const tutteLeRiserve = Object.values(riserveSelezionate).flat();
+    const tuttiGiocatori = [...schierati, ...tutteLeRiserve];
+
+    try {
+        const response = await fetch("voti.xlsx");
+        if (!response.ok) throw new Error("File voti.xlsx non trovato!");
+
+        const arrayBuffer = await response.arrayBuffer();
+        const data = new Uint8Array(arrayBuffer);
+        const workbook = XLSX.read(data, { type: 'array' });
+
+        let nomeFoglioVoti = workbook.SheetNames.find(s => s.trim().toLowerCase() === "voti") || workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[nomeFoglioVoti];
+        const rows = XLSX.utils.sheet_to_json(worksheet);
+
+        tuttiGiocatori.forEach(p => {
+            let nomePulito = p.nome.trim().toLowerCase();
+
+            let matchRow = rows.find(row => {
+                let nomeInRow = String(row.nome || row.Nome || row.NOME || row.calciatore || row.Calciatore || row.Giocatore || "").trim().toLowerCase();
+                return nomeInRow === nomePulito || nomeInRow.includes(nomePulito) || nomePulito.includes(nomeInRow);
+            });
+
+            if (matchRow) {
+                let rawFanta = parseFloat(matchRow.fantavoto || matchRow.Fantavoto || matchRow.FANTAVOTO || matchRow.voto || matchRow.Voto || 0);
+
+                if (!isNaN(rawFanta) && rawFanta > 0) {
+                    votiGiornata[p.nome] = {
+                        voto: rawFanta,
+                        fantavoto: rawFanta,
+                        sv: false,
+                        // LETTURA ESATTA DELLE TUE COLONNE
+                        gf: parseColumnVal(matchRow, ["gf"]),
+                        gs: parseColumnVal(matchRow, ["gs"]),
+                        rp: parseColumnVal(matchRow, ["rp"]),
+                        rf: parseColumnVal(matchRow, ["rf"]),
+                        au: parseColumnVal(matchRow, ["au"]),
+                        amm: parseColumnVal(matchRow, ["Amm", "amm"]),
+                        esp: parseColumnVal(matchRow, ["esp"]),
+                        ass: parseColumnVal(matchRow, ["ass"])
+                    };
+                    return;
+                }
+            }
+
+            votiGiornata[p.nome] = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, rp:0, rf:0, au:0, amm:0, esp:0, ass:0 };
+        });
+
+    } catch (err) {
+        alert("Attenzione: Impossibile leggere voti.xlsx (" + err.message + ").");
+        tuttiGiocatori.forEach(p => {
+            votiGiornata[p.nome] = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, rp:0, rf:0, au:0, amm:0, esp:0, ass:0 };
+        });
+    }
+
+    btn.innerText = "📊 Carica i Fantavoti di giornata";
+    btn.disabled = false;
+
+    mostraTabellinoVoti();
+}
+
+// GENERATORE ICONE IN BASE AI REQUISITI
+function generaIconeBonusMalus(vInfo) {
+    if (!vInfo || vInfo.sv) return `<span style="color:var(--text-muted); font-size:10px;">-</span>`;
+
+    let html = `<div class="bonus-icon-group">`;
+    let count = 0;
+
+    // 🟢 "gf": Gol Fatti -> Pallone verde
+    if (vInfo.gf > 0) {
+        count++;
+        for(let i=0; i < vInfo.gf; i++) {
+            html += `<i class="fa-solid fa-futbol" style="color:var(--accent-neon-green);" title="Gol Fatto"></i>`;
+        }
+    }
+
+    // 🟢 "rf": Rigore Segnato -> Pallone verde
+    if (vInfo.rf > 0) {
+        count++;
+        for(let i=0; i < vInfo.rf; i++) {
+            html += `<i class="fa-solid fa-futbol" style="color:var(--accent-neon-green);" title="Rigore Segnato"></i>`;
+        }
+    }
+
+    // 🔴 "gs": Gol Subiti -> Pallone rosso
+    if (vInfo.gs > 0) {
+        count++;
+        for(let i=0; i < vInfo.gs; i++) {
+            html += `<i class="fa-solid fa-futbol" style="color:var(--accent-red);" title="Gol Subito"></i>`;
+        }
+    }
+
+    // 🧤 "rp": Rigore Parato -> Guanto da portiere
+    if (vInfo.rp > 0) {
+        count++;
+        for(let i=0; i < vInfo.rp; i++) {
+            html += `<i class="fa-solid fa-hand-back-fist" style="color:var(--accent-gold);" title="Rigore Parato"></i>`;
+        }
+    }
+
+    // 🔴⬇️ "au": Autogol -> Pallone rosso con freccia rossa in basso
+    if (vInfo.au > 0) {
+        count++;
+        for(let i=0; i < vInfo.au; i++) {
+            html += `<span style="position:relative; display:inline-block; margin-right:3px;" title="Autogol">
+                <i class="fa-solid fa-futbol" style="color:var(--accent-red);"></i>
+                <i class="fa-solid fa-arrow-down" style="color:var(--accent-red); position:absolute; bottom:-3px; right:-4px; font-size:8px; font-weight:900;"></i>
+            </span>`;
+        }
+    }
+
+    // 👟 "ass": Assist -> Scarpino verde
+    if (vInfo.ass > 0) {
+        count++;
+        for(let i=0; i < vInfo.ass; i++) {
+            html += `<i class="fa-solid fa-shoe-prints" style="color:var(--accent-neon-green);" title="Assist"></i>`;
+        }
+    }
+
+    // 🟨 "Amm": Ammonizione -> Quadrato giallo
+    if (vInfo.amm > 0) {
+        count++;
+        for(let i=0; i < vInfo.amm; i++) {
+            html += `<i class="fa-solid fa-square" style="color:#facc15;" title="Ammonizione"></i>`;
+        }
+    }
+
+    // 🟥 "esp": Espulsione -> Quadrato rosso
+    if (vInfo.esp > 0) {
+        count++;
+        for(let i=0; i < vInfo.esp; i++) {
+            html += `<i class="fa-solid fa-square" style="color:var(--accent-red);" title="Espulsione"></i>`;
+        }
+    }
+
+    html += `</div>`;
+    return count > 0 ? html : `<span style="color:var(--text-muted); font-size:10px;">-</span>`;
+}
+
+// TABELLA FINALE VOTI
+function mostraTabellinoVoti() {
+    const container = document.getElementById("tabellino-container");
+    let html = `<table class="voti-table"><thead><tr><th>Ruolo</th><th>Calciatore</th><th>Stato</th><th>Bonus / Malus</th><th>Fantavoto</th></tr></thead><tbody>`;
+    let totale = 0;
+
+    let riserveGiaSubentrate = new Set();
+
+    schierati.forEach(tit => {
+        let vInfo = votiGiornata[tit.nome];
+        let eff = vInfo;
+        let note = "<span style='color:var(--accent-green)'>Titolare</span>";
+
+        if (!vInfo || vInfo.sv) {
+            let riserveRuolo = riserveSelezionate[tit.ruolo] || [];
+            let riservaValida = null;
+
+            for (let ris of riserveRuolo) {
+                if (!riserveGiaSubentrate.has(ris.nome)) {
+                    let risInfo = votiGiornata[ris.nome];
+                    if (risInfo && !risInfo.sv) {
+                        riservaValida = { obj: ris, info: risInfo };
+                        riserveGiaSubentrate.add(ris.nome);
+                        break;
+                    }
+                }
+            }
+
+            if (riservaValida) {
+                eff = riservaValida.info;
+                note = `<span style='color:var(--accent-gold)'>🔁 Subentra (${riservaValida.obj.nome})</span>`;
+            } else {
+                note = "<span style='color:var(--accent-red)'>❌ S.V.</span>";
+                eff = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, rp:0, rf:0, au:0, amm:0, esp:0, ass:0 };
+            }
+        }
+
+        totale += eff.fantavoto;
+        let iconeHtml = generaIconeBonusMalus(eff);
+
+        html += `<tr>
+            <td><i class="${roleIcons[tit.ruolo]}"></i></td>
+            <td><strong>${tit.nome}</strong></td>
+            <td>${note}</td>
+            <td>${iconeHtml}</td>
+            <td><strong style="color:var(--accent-blue);">${eff.fantavoto}</strong></td>
+        </tr>`;
+    });
+
+    html += `</tbody></table><div class="totale-punteggio">🏆 Totale Squadra: ${totale} Punti</div>`;
+    container.innerHTML = html;
+}
+</script>
+</body>
+</html>
