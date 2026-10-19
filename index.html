@@ -510,6 +510,54 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
     margin-top: 12px;
 }
 
+/* PULSANTI DI AZIONE FINALI (Riprova, Salva Rosa, Cancella Rosa) */
+.recap-actions-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.btn-action {
+    flex: 1;
+    min-width: 160px;
+    max-width: 250px;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 800;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.btn-action.retry {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #fff;
+}
+
+.btn-action.save {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+}
+
+.btn-action.delete {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #fff;
+}
+
+.btn-action:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
 /* OVERLAY LOGIN/REGISTRAZIONE */
 .auth-overlay {
     position: fixed;
@@ -787,6 +835,7 @@ const firebaseConfig = {
   messagingSenderId: "382868267295",
   appId: "1:382868267295:web:f958edb9ffb50fc984102a",
   measurementId: "G-THYVRMRWWH"
+
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -839,7 +888,13 @@ async function handleRegister(e) {
             nome: nome,
             cognome: cognome,
             email: email,
-            creatoIl: new Date()
+            creatoIl: new Date(),
+            rosa: rosa,
+            schierati: schierati,
+            riserveSelezionate: riserveSelezionate,
+            budget: budget,
+            moduloSelezionato: moduloSelezionato,
+            formazioneBloccata: formazioneBloccata
         });
 
         alert(`Registrazione completata! Benvenuto, ${nome}.`);
@@ -1418,6 +1473,7 @@ function generaIconeBonusMalus(vInfo) {
     return count > 0 ? html : `<span style="color:var(--text-muted); font-size:10px;">-</span>`;
 }
 
+// TABELLA FINALE VOTI CON L'ORDINE: Calciatore, Stato, Voto, Bonus/Malus, Fantavoto + PULSANTI
 function mostraTabellinoVoti() {
     const container = document.getElementById("tabellino-container");
     let html = `<table class="voti-table">
@@ -1479,8 +1535,91 @@ function mostraTabellinoVoti() {
         </tr>`;
     });
 
-    html += `</tbody></table><div class="totale-punteggio">🏆 Totale Squadra: ${totale} Punti</div>`;
+    html += `</tbody></table>
+    <div class="totale-punteggio">🏆 Totale Squadra: ${totale} Punti</div>
+
+    <!-- I TRE PULSANTI DI AZIONE -->
+    <div class="recap-actions-container">
+        <button class="btn-action retry" onclick="riprovaDraft()">
+            <i class="fa-solid fa-rotate-right"></i> Riprova
+        </button>
+        <button class="btn-action save" onclick="salvaRosaManuale()">
+            <i class="fa-solid fa-floppy-disk"></i> Salva Rosa
+        </button>
+        <button class="btn-action delete" onclick="cancellaRosaFirebase()">
+            <i class="fa-solid fa-trash-can"></i> Cancella Rosa
+        </button>
+    </div>`;
+
     container.innerHTML = html;
+}
+
+// AZIONI PER I PULSANTI FINALI
+function riprovaDraft() {
+    if (!confirm("Sei sicuro di voler ricominciare il draft? La formazione corrente verrà azzerata in locale.")) return;
+
+    rosa = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
+    schierati = [];
+    riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
+    turno = 0;
+    budget = 600;
+    moduloSelezionato = "";
+    formazioneBloccata = false;
+    votiGiornata = {};
+
+    document.getElementById("recap-screen").style.display = "none";
+    document.getElementById("main-app").style.display = "flex";
+    document.getElementById("draft-panel").style.display = "none";
+    document.getElementById("header-panel").style.display = "block";
+    document.getElementById("conferma-container").style.display = "none";
+    document.getElementById("campo").innerHTML = "";
+    document.getElementById("panchina-grafica").innerHTML = "";
+
+    updateDashboardCounters();
+    renderSlots();
+
+    alert("Draft azzerato! Clicca su 'AVVIA IL TUO DRAFT' per ripartire.");
+}
+
+async function salvaRosaManuale() {
+    if (!currentUser) {
+        alert("Devi accedere per poter salvare la rosa su Firebase!");
+        return;
+    }
+
+    try {
+        await salvaSquadraCloud();
+        alert("✅ Rosa e formazione salvate con successo su Firebase!");
+    } catch (err) {
+        alert("❌ Errore durante il salvataggio: " + err.message);
+    }
+}
+
+async function cancellaRosaFirebase() {
+    if (!currentUser) {
+        alert("Devi accedere per poter eliminare i dati da Firebase!");
+        return;
+    }
+
+    if (!confirm("⚠️ Sei sicuro di voler cancellare definitivamente la tua rosa salvata su Firebase? L'operazione non può essere annullata.")) return;
+
+    try {
+        await db.collection("utenti").doc(currentUser.uid).update({
+            rosa: firebase.firestore.FieldValue.delete(),
+            schierati: firebase.firestore.FieldValue.delete(),
+            riserveSelezionate: firebase.firestore.FieldValue.delete(),
+            budget: firebase.firestore.FieldValue.delete(),
+            moduloSelezionato: firebase.firestore.FieldValue.delete(),
+            formazioneBloccata: firebase.firestore.FieldValue.delete(),
+            ultimoAggiornamento: new Date()
+        });
+
+        alert("🗑️ Rosa eliminata da Firebase con successo!");
+        riprovaDraft();
+
+    } catch (err) {
+        alert("❌ Errore durante l'eliminazione da Firebase: " + err.message);
+    }
 }
 </script>
 </body>
