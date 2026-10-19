@@ -479,12 +479,19 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
 .voti-table th, .voti-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--card-border); font-size: 11px; }
 .voti-table th { background: #334155; color: var(--text-muted); text-transform: uppercase; font-size: 9px; }
 
-/* STILI ICONE BONUS MALUS */
+/* STILI ICONE PNG PERSONALIZZATE */
 .bonus-icon-group {
     display: inline-flex;
     align-items: center;
     gap: 4px;
     flex-wrap: wrap;
+}
+
+.fanta-icon-img {
+    height: 18px;
+    width: auto;
+    vertical-align: middle;
+    display: inline-block;
 }
 
 .totale-punteggio {
@@ -999,7 +1006,7 @@ function parseColumnVal(row, colNames) {
     for (let col of colNames) {
         for (let key in row) {
             if (key.trim().toLowerCase() === col.toLowerCase()) {
-                let val = parseInt(row[key]);
+                let val = parseFloat(row[key]);
                 return isNaN(val) ? 0 : val;
             }
         }
@@ -1038,34 +1045,38 @@ async function calcolaVotiDaExcelOnline() {
             });
 
             if (matchRow) {
-                let rawFanta = parseFloat(matchRow.fantavoto || matchRow.Fantavoto || matchRow.FANTAVOTO || matchRow.voto || matchRow.Voto || 0);
+                let rawVotoPuro = parseColumnVal(matchRow, ["voto", "Voto", "VOTO"]);
+                let rawFanta = parseColumnVal(matchRow, ["fantavoto", "Fantavoto", "FANTAVOTO"]);
 
-                if (!isNaN(rawFanta) && rawFanta > 0) {
+                if (rawFanta === 0 && rawVotoPuro > 0) rawFanta = rawVotoPuro;
+
+                if (rawFanta > 0 || rawVotoPuro > 0) {
                     votiGiornata[p.nome] = {
-                        voto: rawFanta,
+                        voto: rawVotoPuro,
                         fantavoto: rawFanta,
                         sv: false,
-                        // LETTURA ESATTA DELLE TUE COLONNE
+                        // LETTURA DELLE COLONNE DALL'EXCEL
                         gf: parseColumnVal(matchRow, ["gf"]),
                         gs: parseColumnVal(matchRow, ["gs"]),
-                        rp: parseColumnVal(matchRow, ["rp"]),
-                        rf: parseColumnVal(matchRow, ["rf"]),
+                        ass: parseColumnVal(matchRow, ["ass"]),
                         au: parseColumnVal(matchRow, ["au"]),
-                        amm: parseColumnVal(matchRow, ["Amm", "amm"]),
-                        esp: parseColumnVal(matchRow, ["esp"]),
-                        ass: parseColumnVal(matchRow, ["ass"])
+                        esp: parseColumnVal(matchRow, ["Esp", "esp"]),
+                        amm: parseColumnVal(matchRow, ["amm", "Amm"]),
+                        rp: parseColumnVal(matchRow, ["rp"]),
+                        rs: parseColumnVal(matchRow, ["rs"]),
+                        rf: parseColumnVal(matchRow, ["rf"])
                     };
                     return;
                 }
             }
 
-            votiGiornata[p.nome] = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, rp:0, rf:0, au:0, amm:0, esp:0, ass:0 };
+            votiGiornata[p.nome] = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
         });
 
     } catch (err) {
         alert("Attenzione: Impossibile leggere voti.xlsx (" + err.message + ").");
         tuttiGiocatori.forEach(p => {
-            votiGiornata[p.nome] = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, rp:0, rf:0, au:0, amm:0, esp:0, ass:0 };
+            votiGiornata[p.nome] = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
         });
     }
 
@@ -1075,77 +1086,83 @@ async function calcolaVotiDaExcelOnline() {
     mostraTabellinoVoti();
 }
 
-// GENERATORE ICONE IN BASE AI REQUISITI
+// GENERATORE ICONE PNG DALLA CARTELLA "icone/"
 function generaIconeBonusMalus(vInfo) {
     if (!vInfo || vInfo.sv) return `<span style="color:var(--text-muted); font-size:10px;">-</span>`;
 
     let html = `<div class="bonus-icon-group">`;
     let count = 0;
 
-    // 🟢 "gf": Gol Fatti -> Pallone verde
+    // "gf": Gol fatti -> gol.png
     if (vInfo.gf > 0) {
         count++;
         for(let i=0; i < vInfo.gf; i++) {
-            html += `<i class="fa-solid fa-futbol" style="color:var(--accent-neon-green);" title="Gol Fatto"></i>`;
+            html += `<img src="icone/gol.png" class="fanta-icon-img" alt="Gol" title="Gol segnato">`;
         }
     }
 
-    // 🟢 "rf": Rigore Segnato -> Pallone verde
+    // "rf": Rigore segnato -> rigore_segnato.png
     if (vInfo.rf > 0) {
         count++;
         for(let i=0; i < vInfo.rf; i++) {
-            html += `<i class="fa-solid fa-futbol" style="color:var(--accent-neon-green);" title="Rigore Segnato"></i>`;
+            html += `<img src="icone/rigore_segnato.png" class="fanta-icon-img" alt="Rigore Segnato" title="Rigore segnato">`;
         }
     }
 
-    // 🔴 "gs": Gol Subiti -> Pallone rosso
+    // "gs": Gol subiti -> gol_subito.png
     if (vInfo.gs > 0) {
         count++;
         for(let i=0; i < vInfo.gs; i++) {
-            html += `<i class="fa-solid fa-futbol" style="color:var(--accent-red);" title="Gol Subito"></i>`;
+            html += `<img src="icone/gol_subito.png" class="fanta-icon-img" alt="Gol Subito" title="Gol subito">`;
         }
     }
 
-    // 🧤 "rp": Rigore Parato -> Guanto da portiere
-    if (vInfo.rp > 0) {
-        count++;
-        for(let i=0; i < vInfo.rp; i++) {
-            html += `<i class="fa-solid fa-hand-back-fist" style="color:var(--accent-gold);" title="Rigore Parato"></i>`;
-        }
-    }
-
-    // 🔴⬇️ "au": Autogol -> Pallone rosso con freccia rossa in basso
-    if (vInfo.au > 0) {
-        count++;
-        for(let i=0; i < vInfo.au; i++) {
-            html += `<span style="position:relative; display:inline-block; margin-right:3px;" title="Autogol">
-                <i class="fa-solid fa-futbol" style="color:var(--accent-red);"></i>
-                <i class="fa-solid fa-arrow-down" style="color:var(--accent-red); position:absolute; bottom:-3px; right:-4px; font-size:8px; font-weight:900;"></i>
-            </span>`;
-        }
-    }
-
-    // 👟 "ass": Assist -> Scarpino verde
+    // "ass": Assist -> assist.png
     if (vInfo.ass > 0) {
         count++;
         for(let i=0; i < vInfo.ass; i++) {
-            html += `<i class="fa-solid fa-shoe-prints" style="color:var(--accent-neon-green);" title="Assist"></i>`;
+            html += `<img src="icone/assist.png" class="fanta-icon-img" alt="Assist" title="Assist">`;
         }
     }
 
-    // 🟨 "Amm": Ammonizione -> Quadrato giallo
-    if (vInfo.amm > 0) {
+    // "au": Autogol -> autogol.png
+    if (vInfo.au > 0) {
         count++;
-        for(let i=0; i < vInfo.amm; i++) {
-            html += `<i class="fa-solid fa-square" style="color:#facc15;" title="Ammonizione"></i>`;
+        for(let i=0; i < vInfo.au; i++) {
+            html += `<img src="icone/autogol.png" class="fanta-icon-img" alt="Autogol" title="Autogol">`;
         }
     }
 
-    // 🟥 "esp": Espulsione -> Quadrato rosso
+    // "rp": Rigore parato -> rigore_parato.png
+    if (vInfo.rp > 0) {
+        count++;
+        for(let i=0; i < vInfo.rp; i++) {
+            html += `<img src="icone/rigore_parato.png" class="fanta-icon-img" alt="Rigore Parato" title="Rigore parato">`;
+        }
+    }
+
+    // "rs": Rigore sbagliato -> rigore_sbagliato.png
+    if (vInfo.rs > 0) {
+        count++;
+        for(let i=0; i < vInfo.rs; i++) {
+            html += `<img src="icone/rigore_sbagliato.png" class="fanta-icon-img" alt="Rigore Sbagliato" title="Rigore sbagliato">`;
+        }
+    }
+
+    // "amm": Ammonizione / Doppia Ammonizione
+    if (vInfo.amm === 1) {
+        count++;
+        html += `<img src="icone/ammonizione.png" class="fanta-icon-img" alt="Ammonizione" title="Ammonizione">`;
+    } else if (vInfo.amm >= 2) {
+        count++;
+        html += `<img src="icone/doppia_ammonizione.png" class="fanta-icon-img" alt="Doppia Ammonizione" title="Doppia Ammonizione">`;
+    }
+
+    // "esp": Espulsione -> espulsione.png
     if (vInfo.esp > 0) {
         count++;
         for(let i=0; i < vInfo.esp; i++) {
-            html += `<i class="fa-solid fa-square" style="color:var(--accent-red);" title="Espulsione"></i>`;
+            html += `<img src="icone/espulsione.png" class="fanta-icon-img" alt="Espulsione" title="Espulsione">`;
         }
     }
 
@@ -1153,10 +1170,21 @@ function generaIconeBonusMalus(vInfo) {
     return count > 0 ? html : `<span style="color:var(--text-muted); font-size:10px;">-</span>`;
 }
 
-// TABELLA FINALE VOTI
+// TABELLA FINALE VOTI CON L'ORDINE CHIESTO: Calciatore, Stato, Voto, Bonus/Malus, Fantavoto
 function mostraTabellinoVoti() {
     const container = document.getElementById("tabellino-container");
-    let html = `<table class="voti-table"><thead><tr><th>Ruolo</th><th>Calciatore</th><th>Stato</th><th>Bonus / Malus</th><th>Fantavoto</th></tr></thead><tbody>`;
+    let html = `<table class="voti-table">
+        <thead>
+            <tr>
+                <th>Ruolo</th>
+                <th>Calciatore</th>
+                <th>Stato</th>
+                <th>Voto</th>
+                <th>Bonus / Malus</th>
+                <th>Fantavoto</th>
+            </tr>
+        </thead>
+        <tbody>`;
     let totale = 0;
 
     let riserveGiaSubentrate = new Set();
@@ -1186,19 +1214,21 @@ function mostraTabellinoVoti() {
                 note = `<span style='color:var(--accent-gold)'>🔁 Subentra (${riservaValida.obj.nome})</span>`;
             } else {
                 note = "<span style='color:var(--accent-red)'>❌ S.V.</span>";
-                eff = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, rp:0, rf:0, au:0, amm:0, esp:0, ass:0 };
+                eff = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
             }
         }
 
         totale += eff.fantavoto;
         let iconeHtml = generaIconeBonusMalus(eff);
+        let votoPuroTxt = eff.sv ? "-" : (eff.voto > 0 ? eff.voto : "-");
 
         html += `<tr>
             <td><i class="${roleIcons[tit.ruolo]}"></i></td>
             <td><strong>${tit.nome}</strong></td>
             <td>${note}</td>
+            <td><strong style="color:#cbd5e1;">${votoPuroTxt}</strong></td>
             <td>${iconeHtml}</td>
-            <td><strong style="color:var(--accent-blue);">${eff.fantavoto}</strong></td>
+            <td><strong style="color:var(--accent-blue);">${eff.fantavoto > 0 ? eff.fantavoto : 0}</strong></td>
         </tr>`;
     });
 
