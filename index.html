@@ -14,6 +14,11 @@
 <!-- FontAwesome Icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
+<!-- Firebase App, Auth e Firestore SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
 <style>
 :root {
     --bg-dark: #0f172a;
@@ -479,7 +484,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
 .voti-table th, .voti-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--card-border); font-size: 11px; }
 .voti-table th { background: #334155; color: var(--text-muted); text-transform: uppercase; font-size: 9px; }
 
-/* STILI ICONE PNG PERSONALIZZATE */
+/* STILI ICONE PNG PERSONALIZZATE DALLA CARTELLA icone/ */
 .bonus-icon-group {
     display: inline-flex;
     align-items: center;
@@ -504,13 +509,167 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
     border-radius: 8px;
     margin-top: 12px;
 }
+
+/* OVERLAY LOGIN/REGISTRAZIONE */
+.auth-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(15px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+}
+
+.auth-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 25px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+
+.auth-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--card-border);
+}
+
+.auth-tabs button {
+    flex: 1;
+    padding: 10px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.auth-tabs button.active {
+    color: var(--accent-blue);
+    border-bottom: 2px solid var(--accent-blue);
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+    text-align: left;
+}
+
+.input-group label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.input-group input {
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid var(--card-border);
+    color: #fff;
+    font-size: 13px;
+    outline: none;
+}
+
+.btn-auth {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 800;
+    cursor: pointer;
+    margin-top: 10px;
+    text-transform: uppercase;
+}
+
+.user-info-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 12px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: 11px;
+}
+
+.btn-logout {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid var(--accent-red);
+    color: var(--accent-red);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+}
 </style>
 </head>
 <body>
 
+<!-- MODALE AUTENTICAZIONE FIREBASE -->
+<div id="auth-modal" class="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button id="tab-login-btn" class="active" onclick="switchAuthTab('login')">Accedi</button>
+      <button id="tab-register-btn" onclick="switchAuthTab('register')">Registrati</button>
+    </div>
+
+    <!-- FORM ACCEDI -->
+    <form id="login-form" onsubmit="handleLogin(event)">
+      <h2>Accedi al Fantacalcio</h2>
+      <div class="input-group">
+        <label>Email</label>
+        <input type="email" id="login-email" required placeholder="La tua email">
+      </div>
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="login-password" required placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn-auth">ACCEDI</button>
+    </form>
+
+    <!-- FORM REGISTRAZIONE -->
+    <form id="register-form" style="display: none;" onsubmit="handleRegister(event)">
+      <h2>Crea il tuo Account</h2>
+      <div class="input-group">
+        <label>Nome</label>
+        <input type="text" id="reg-nome" required placeholder="Mario">
+      </div>
+      <div class="input-group">
+        <label>Cognome</label>
+        <input type="text" id="reg-cognome" required placeholder="Rossi">
+      </div>
+      <div class="input-group">
+        <label>Email</label>
+        <input type="email" id="reg-email" required placeholder="mario.rossi@email.com">
+      </div>
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="reg-password" required minlength="6" placeholder="Minimo 6 caratteri">
+      </div>
+      <button type="submit" class="btn-auth">REGISTRATI</button>
+    </form>
+  </div>
+</div>
+
 <div id="main-app">
     <div id="left">
         <div class="panel" id="header-panel">
+            <div class="user-info-bar">
+                <span><i class="fa-solid fa-user"></i> <strong id="user-display-name">-</strong></span>
+                <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Esci</button>
+            </div>
             <h1><i class="fa-solid fa-trophy" style="color: var(--accent-gold);"></i> Draft Serie A</h1>
             
             <div class="start-container">
@@ -619,6 +778,22 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
 </div>
 
 <script>
+// CONFIGURAZIONE FIREBASE (SOSTITUISCI CON LE TUE CHIAVI DA FIREBASE CONSOLE)
+const firebaseConfig = {
+    apiKey: "AIzaSyAURiTLIXNg6fFkL1fnHkiHafMytsDHW8I",
+  authDomain: "draft-serie-a-4aadd.firebaseapp.com",
+  projectId: "draft-serie-a-4aadd",
+  storageBucket: "draft-serie-a-4aadd.firebasestorage.app",
+  messagingSenderId: "382868267295",
+  appId: "1:382868267295:web:f958edb9ffb50fc984102a",
+  measurementId: "G-THYVRMRWWH"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentUser = null;
 let customPlayersList = [];
 let availablePlayers = [];
 let budget = 600;
@@ -640,6 +815,110 @@ let moduloSelezionato = "";
 let votiGiornata = {};
 let formazioneBloccata = false;
 
+// AUTENTICAZIONE & SINCRONIZZAZIONE CLOUD
+function switchAuthTab(tab) {
+    const isLogin = tab === 'login';
+    document.getElementById('login-form').style.display = isLogin ? 'block' : 'none';
+    document.getElementById('register-form').style.display = isLogin ? 'none' : 'block';
+    document.getElementById('tab-login-btn').className = isLogin ? 'active' : '';
+    document.getElementById('tab-register-btn').className = isLogin ? '' : 'active';
+}
+
+async function handleRegister(e) {
+    e.preventDefault();
+    const nome = document.getElementById('reg-nome').value.trim();
+    const cognome = document.getElementById('reg-cognome').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-password').value;
+
+    try {
+        const res = await auth.createUserWithEmailAndPassword(email, password);
+        await res.user.updateProfile({ displayName: `${nome} ${cognome}` });
+        
+        await db.collection("utenti").doc(res.user.uid).set({
+            nome: nome,
+            cognome: cognome,
+            email: email,
+            creatoIl: new Date()
+        });
+
+        alert(`Registrazione completata! Benvenuto, ${nome}.`);
+    } catch (err) {
+        alert("Errore Registrazione: " + err.message);
+    }
+}
+
+async function handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+
+    try {
+        await auth.signInWithEmailAndPassword(email, password);
+    } catch (err) {
+        alert("Errore Login: " + err.message);
+    }
+}
+
+auth.onAuthStateChanged(async (user) => {
+    const modal = document.getElementById('auth-modal');
+    if (user) {
+        currentUser = user;
+        modal.style.display = 'none';
+        document.getElementById('user-display-name').innerText = user.displayName || user.email;
+        await caricaDatiSquadraCloud();
+    } else {
+        currentUser = null;
+        modal.style.display = 'flex';
+    }
+});
+
+function logout() {
+    auth.signOut().then(() => location.reload());
+}
+
+async function salvaSquadraCloud() {
+    if (!currentUser) return;
+    try {
+        await db.collection("utenti").doc(currentUser.uid).set({
+            rosa: rosa,
+            schierati: schierati,
+            riserveSelezionate: riserveSelezionate,
+            budget: budget,
+            moduloSelezionato: moduloSelezionato,
+            formazioneBloccata: formazioneBloccata,
+            ultimoAggiornamento: new Date()
+        }, { merge: true });
+    } catch (err) {
+        console.error("Errore salvataggio Cloud:", err);
+    }
+}
+
+async function caricaDatiSquadraCloud() {
+    if (!currentUser) return;
+    try {
+        const doc = await db.collection("utenti").doc(currentUser.uid).get();
+        if (doc.exists && doc.data().rosa) {
+            const data = doc.data();
+            rosa = data.rosa;
+            schierati = data.schierati || [];
+            riserveSelezionate = data.riserveSelezionate || { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
+            budget = data.budget ?? 600;
+            moduloSelezionato = data.moduloSelezionato || "";
+            formazioneBloccata = data.formazioneBloccata || false;
+
+            updateDashboardCounters();
+            renderSlots();
+            
+            if (formazioneBloccata) {
+                showFinalRecap();
+            }
+        }
+    } catch (err) {
+        console.error("Errore caricamento Cloud:", err);
+    }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     caricaGiocatoriDaExcel();
 });
@@ -647,7 +926,7 @@ document.addEventListener("DOMContentLoaded", () => {
 async function caricaGiocatoriDaExcel() {
     try {
         const response = await fetch("giocatori.xlsx");
-        if (!response.ok) throw new Error("File giocatori.xlsx non trovato nello spazio web");
+        if (!response.ok) throw new Error("File giocatori.xlsx non trovato");
 
         const arrayBuffer = await response.arrayBuffer();
         const data = new Uint8Array(arrayBuffer);
@@ -660,7 +939,7 @@ async function caricaGiocatoriDaExcel() {
         parseAndSetPlayers(jsonData);
 
     } catch (error) {
-        console.error("Errore nel caricamento giocatori.xlsx:", error);
+        console.error("Errore caricamento giocatori.xlsx:", error);
     }
 }
 
@@ -704,7 +983,7 @@ function updateProgressBar() {
 
 function startDraft() {
     if (customPlayersList.length < 24) {
-        alert("Caricamento giocatori in corso o file giocatori.xlsx non valido. Riprova tra qualche secondo.");
+        alert("Caricamento giocatori in corso o file giocatori.xlsx non valido.");
         return;
     }
 
@@ -776,6 +1055,7 @@ function draft(nome) {
     availablePlayers = availablePlayers.filter(x => x.nome !== nome);
 
     renderSlots();
+    salvaSquadraCloud();
     nextPick();
 }
 
@@ -837,6 +1117,7 @@ function schieraGiocatore(playerObj, ruolo) {
 
     renderSlots();
     renderPanchinaGrafica();
+    salvaSquadraCloud();
 }
 
 function showModuloSelection() {
@@ -884,6 +1165,7 @@ function setModulo() {
     renderSlots();
     renderPanchinaGrafica();
     document.getElementById("conferma-container").style.display = "block";
+    salvaSquadraCloud();
 }
 
 function createDropZone(campo, ruolo, top, left) {
@@ -901,6 +1183,7 @@ function createDropZone(campo, ruolo, top, left) {
         dz.dataset.player = "";
         renderSlots();
         renderPanchinaGrafica();
+        salvaSquadraCloud();
     };
     campo.appendChild(dz);
 }
@@ -962,6 +1245,7 @@ function togglePanchina(ruolo, nomePlayer) {
 
     renderSlots();
     renderPanchinaGrafica();
+    salvaSquadraCloud();
 }
 
 function confermaFormazione() {
@@ -970,6 +1254,7 @@ function confermaFormazione() {
     if (confirm("Confermi la formazione? L'operazione è definitiva.")) {
         formazioneBloccata = true;
         showFinalRecap();
+        salvaSquadraCloud();
     }
 }
 
@@ -1001,7 +1286,6 @@ function showFinalRecap() {
     });
 }
 
-// HELPER PER LEGGERE I VALORI DELLE COLONNE
 function parseColumnVal(row, colNames) {
     for (let col of colNames) {
         for (let key in row) {
@@ -1014,7 +1298,6 @@ function parseColumnVal(row, colNames) {
     return 0;
 }
 
-// CARICAMENTO VOTI ED ESTRAZIONE COLONNE SPECIFICHE
 async function calcolaVotiDaExcelOnline() {
     const btn = document.getElementById("btn-fetch-voti");
     btn.innerText = "⏳ Lettura voti.xlsx...";
@@ -1055,7 +1338,6 @@ async function calcolaVotiDaExcelOnline() {
                         voto: rawVotoPuro,
                         fantavoto: rawFanta,
                         sv: false,
-                        // LETTURA DELLE COLONNE DALL'EXCEL
                         gf: parseColumnVal(matchRow, ["gf"]),
                         gs: parseColumnVal(matchRow, ["gs"]),
                         ass: parseColumnVal(matchRow, ["ass"]),
@@ -1086,70 +1368,40 @@ async function calcolaVotiDaExcelOnline() {
     mostraTabellinoVoti();
 }
 
-// GENERATORE ICONE PNG DALLA CARTELLA "icone/"
 function generaIconeBonusMalus(vInfo) {
     if (!vInfo || vInfo.sv) return `<span style="color:var(--text-muted); font-size:10px;">-</span>`;
 
     let html = `<div class="bonus-icon-group">`;
     let count = 0;
 
-    // "gf": Gol fatti -> gol.png
     if (vInfo.gf > 0) {
         count++;
-        for(let i=0; i < vInfo.gf; i++) {
-            html += `<img src="icone/gol.png" class="fanta-icon-img" alt="Gol" title="Gol segnato">`;
-        }
+        for(let i=0; i < vInfo.gf; i++) html += `<img src="icone/gol.png" class="fanta-icon-img" alt="Gol" title="Gol segnato">`;
     }
-
-    // "rf": Rigore segnato -> rigore_segnato.png
     if (vInfo.rf > 0) {
         count++;
-        for(let i=0; i < vInfo.rf; i++) {
-            html += `<img src="icone/rigore_segnato.png" class="fanta-icon-img" alt="Rigore Segnato" title="Rigore segnato">`;
-        }
+        for(let i=0; i < vInfo.rf; i++) html += `<img src="icone/rigore_segnato.png" class="fanta-icon-img" alt="Rigore Segnato" title="Rigore segnato">`;
     }
-
-    // "gs": Gol subiti -> gol_subito.png
     if (vInfo.gs > 0) {
         count++;
-        for(let i=0; i < vInfo.gs; i++) {
-            html += `<img src="icone/gol_subito.png" class="fanta-icon-img" alt="Gol Subito" title="Gol subito">`;
-        }
+        for(let i=0; i < vInfo.gs; i++) html += `<img src="icone/gol_subito.png" class="fanta-icon-img" alt="Gol Subito" title="Gol subito">`;
     }
-
-    // "ass": Assist -> assist.png
     if (vInfo.ass > 0) {
         count++;
-        for(let i=0; i < vInfo.ass; i++) {
-            html += `<img src="icone/assist.png" class="fanta-icon-img" alt="Assist" title="Assist">`;
-        }
+        for(let i=0; i < vInfo.ass; i++) html += `<img src="icone/assist.png" class="fanta-icon-img" alt="Assist" title="Assist">`;
     }
-
-    // "au": Autogol -> autogol.png
     if (vInfo.au > 0) {
         count++;
-        for(let i=0; i < vInfo.au; i++) {
-            html += `<img src="icone/autogol.png" class="fanta-icon-img" alt="Autogol" title="Autogol">`;
-        }
+        for(let i=0; i < vInfo.au; i++) html += `<img src="icone/autogol.png" class="fanta-icon-img" alt="Autogol" title="Autogol">`;
     }
-
-    // "rp": Rigore parato -> rigore_parato.png
     if (vInfo.rp > 0) {
         count++;
-        for(let i=0; i < vInfo.rp; i++) {
-            html += `<img src="icone/rigore_parato.png" class="fanta-icon-img" alt="Rigore Parato" title="Rigore parato">`;
-        }
+        for(let i=0; i < vInfo.rp; i++) html += `<img src="icone/rigore_parato.png" class="fanta-icon-img" alt="Rigore Parato" title="Rigore parato">`;
     }
-
-    // "rs": Rigore sbagliato -> rigore_sbagliato.png
     if (vInfo.rs > 0) {
         count++;
-        for(let i=0; i < vInfo.rs; i++) {
-            html += `<img src="icone/rigore_sbagliato.png" class="fanta-icon-img" alt="Rigore Sbagliato" title="Rigore sbagliato">`;
-        }
+        for(let i=0; i < vInfo.rs; i++) html += `<img src="icone/rigore_sbagliato.png" class="fanta-icon-img" alt="Rigore Sbagliato" title="Rigore sbagliato">`;
     }
-
-    // "amm": Ammonizione / Doppia Ammonizione
     if (vInfo.amm === 1) {
         count++;
         html += `<img src="icone/ammonizione.png" class="fanta-icon-img" alt="Ammonizione" title="Ammonizione">`;
@@ -1157,20 +1409,15 @@ function generaIconeBonusMalus(vInfo) {
         count++;
         html += `<img src="icone/doppia_ammonizione.png" class="fanta-icon-img" alt="Doppia Ammonizione" title="Doppia Ammonizione">`;
     }
-
-    // "esp": Espulsione -> espulsione.png
     if (vInfo.esp > 0) {
         count++;
-        for(let i=0; i < vInfo.esp; i++) {
-            html += `<img src="icone/espulsione.png" class="fanta-icon-img" alt="Espulsione" title="Espulsione">`;
-        }
+        for(let i=0; i < vInfo.esp; i++) html += `<img src="icone/espulsione.png" class="fanta-icon-img" alt="Espulsione" title="Espulsione">`;
     }
 
     html += `</div>`;
     return count > 0 ? html : `<span style="color:var(--text-muted); font-size:10px;">-</span>`;
 }
 
-// TABELLA FINALE VOTI CON L'ORDINE CHIESTO: Calciatore, Stato, Voto, Bonus/Malus, Fantavoto
 function mostraTabellinoVoti() {
     const container = document.getElementById("tabellino-container");
     let html = `<table class="voti-table">
