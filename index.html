@@ -1000,7 +1000,8 @@ async function handleRegister(e) {
             riserveSelezionate: riserveSelezionate,
             budget: budget,
             moduloSelezionato: moduloSelezionato,
-            formazioneBloccata: formazioneBloccata
+            formazioneBloccata: formazioneBloccata,
+            votiGiornata: votiGiornata
         });
 
         alert(`Registrazione completata! Benvenuto, ${username}.`);
@@ -1028,7 +1029,7 @@ auth.onAuthStateChanged(async (user) => {
     if (user) {
         currentUser = user;
         modal.style.display = 'none';
-        globalHeader.style.display = 'flex'; // Mostra l'header permanente in alto
+        globalHeader.style.display = 'flex';
         document.getElementById('user-display-name').innerText = user.displayName || user.email;
         await caricaDatiSquadraCloud();
     } else {
@@ -1038,7 +1039,6 @@ auth.onAuthStateChanged(async (user) => {
     }
 });
 
-// LOGOUT UTENTE IN QUALSIASI MOMENTO
 function logout() {
     if (confirm("Vuoi davvero disconnetterti dal tuo account?")) {
         auth.signOut().then(() => location.reload());
@@ -1055,6 +1055,7 @@ async function salvaSquadraCloud() {
             budget: budget,
             moduloSelezionato: moduloSelezionato,
             formazioneBloccata: formazioneBloccata,
+            votiGiornata: votiGiornata,
             ultimoAggiornamento: new Date()
         }, { merge: true });
     } catch (err) {
@@ -1074,10 +1075,19 @@ async function caricaDatiSquadraCloud() {
             budget = data.budget ?? 600;
             moduloSelezionato = data.moduloSelezionato || "";
             formazioneBloccata = data.formazioneBloccata || false;
+            votiGiornata = data.votiGiornata || {};
 
             updateDashboardCounters();
-            renderSlots();
             
+            // Se c'è un modulo salvato, rigenera il campo tattico prima di mostrare
+            if (moduloSelezionato) {
+                ripristinaCampoTattico();
+            }
+
+            renderSlots();
+            renderPanchinaGrafica();
+            
+            // Se la formazione era già stata bloccata, riapre lo schermo finale
             if (formazioneBloccata) {
                 showFinalRecap();
             }
@@ -1085,6 +1095,36 @@ async function caricaDatiSquadraCloud() {
     } catch (err) {
         console.error("Errore caricamento Cloud:", err);
     }
+}
+
+// RIPRISTINO GRAFICO DEL CAMPO AL RIENTRO DELL'UTENTE
+function ripristinaCampoTattico() {
+    if (!moduloSelezionato) return;
+
+    const [D, C, A] = moduloSelezionato.split("-").map(n => parseInt(n));
+    const campo = document.getElementById("campo");
+    campo.innerHTML = "";
+
+    let isMobile = window.innerWidth < 600;
+    let topPOR = isMobile ? 15 : 30;
+    let topDIF = isMobile ? 105 : 150;
+    let topCEN = isMobile ? 215 : 310;
+    let topATT = isMobile ? 325 : 470;
+
+    createDropZone(campo, "Portiere", topPOR, 50);
+    distribuisciOrizzontalmente(D).forEach(left => createDropZone(campo, "Difensore", topDIF, left));
+    distribuisciOrizzontalmente(C).forEach(left => createDropZone(campo, "Centrocampista", topCEN, left));
+    distribuisciOrizzontalmente(A).forEach(left => createDropZone(campo, "Attaccante", topATT, left));
+
+    // Ripopola visivamente i nomi sui pallolini del campo
+    const dropzones = campo.querySelectorAll(".dropzone");
+    schierati.forEach(p => {
+        const libera = Array.from(dropzones).find(z => z.dataset.ruolo === p.ruolo && z.dataset.player === "");
+        if (libera) {
+            libera.innerText = p.nome;
+            libera.dataset.player = p.nome;
+        }
+    });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -1256,7 +1296,6 @@ function renderSlots() {
     });
 }
 
-// SCHIERAMENTO GIOCATORE CON CONTROLLO OBBLIGATORIO SUL MODULO
 function schieraGiocatore(playerObj, ruolo) {
     if (formazioneBloccata) return;
 
@@ -1318,23 +1357,10 @@ function setModulo() {
     moduloSelezionato = document.getElementById("modulo").value;
     if (!moduloSelezionato) return;
 
-    const [D, C, A] = moduloSelezionato.split("-").map(n => parseInt(n));
-    const campo = document.getElementById("campo");
-    campo.innerHTML = "";
-
     schierati = [];
     riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
 
-    let isMobile = window.innerWidth < 600;
-    let topPOR = isMobile ? 15 : 30;
-    let topDIF = isMobile ? 105 : 150;
-    let topCEN = isMobile ? 215 : 310;
-    let topATT = isMobile ? 325 : 470;
-
-    createDropZone(campo, "Portiere", topPOR, 50);
-    distribuisciOrizzontalmente(D).forEach(left => createDropZone(campo, "Difensore", topDIF, left));
-    distribuisciOrizzontalmente(C).forEach(left => createDropZone(campo, "Centrocampista", topCEN, left));
-    distribuisciOrizzontalmente(A).forEach(left => createDropZone(campo, "Attaccante", topATT, left));
+    ripristinaCampoTattico();
 
     renderSlots();
     renderPanchinaGrafica();
@@ -1437,6 +1463,7 @@ function confermaFormazione() {
     }
 }
 
+// MOSTRA LO SCHERMO DI RIEPILOGO E RIPRISTINA I VOTI SE GIÀ PRESENTI
 function showFinalRecap() {
     document.getElementById("main-app").style.display = "none";
     document.getElementById("recap-screen").style.display = "block";
@@ -1463,6 +1490,11 @@ function showFinalRecap() {
             panchinaDiv.appendChild(card);
         });
     });
+
+    // Se ci sono già voti salvati su Firebase, genera subito la tabella dei voti!
+    if (votiGiornata && Object.keys(votiGiornata).length > 0) {
+        mostraTabellinoVoti();
+    }
 }
 
 function parseColumnVal(row, colNames) {
@@ -1533,6 +1565,9 @@ async function calcolaVotiDaExcelOnline() {
 
             votiGiornata[p.nome] = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
         });
+
+        // Salva i voti appena calcolati anche nel Cloud
+        await salvaSquadraCloud();
 
     } catch (err) {
         alert("Attenzione: Impossibile leggere voti.xlsx (" + err.message + ").");
@@ -1735,6 +1770,7 @@ async function cancellaRosaFirebase() {
             budget: firebase.firestore.FieldValue.delete(),
             moduloSelezionato: firebase.firestore.FieldValue.delete(),
             formazioneBloccata: firebase.firestore.FieldValue.delete(),
+            votiGiornata: firebase.firestore.FieldValue.delete(),
             ultimoAggiornamento: new Date()
         });
 
