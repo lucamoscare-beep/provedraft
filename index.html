@@ -241,26 +241,32 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
     max-width: 320px;
 }
 
+/* OTTIMIZZAZIONE MOBILE PER I 5 GIOCATORI DEL DRAFT (IN UN'UNICA SCHERMATA COMPATTA) */
 .players-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
     justify-content: center;
 }
+
+@media (max-width: 768px) {
+    .players-container {
+        gap: 4px;
+    }
+}
+
 .player-card {
     background: linear-gradient(145deg, #1e293b, #0f172a);
     border: 1px solid var(--card-border);
-    width: 48%;
-    max-width: 170px;
-    padding: 8px 6px;
-    border-radius: 12px;
+    padding: 6px 3px;
+    border-radius: 8px;
     text-align: center;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
 }
 
 .player-card.Portiere { border-top: 3px solid var(--role-por); }
@@ -268,17 +274,17 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
 .player-card.Centrocampista { border-top: 3px solid var(--role-cen); }
 .player-card.Attaccante { border-top: 3px solid var(--role-att); }
 
-.player-name { font-weight: 800; font-size: 12px; color: #fff; margin-bottom: 2px; }
-.player-team { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 4px; }
-.player-role { font-size: 9px; font-weight: 700; margin-bottom: 4px; display: inline-block; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.06); }
+.player-name { font-weight: 800; font-size: 10px; color: #fff; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.player-team { font-size: 8px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 2px; }
+.player-role { font-size: 8px; font-weight: 700; margin-bottom: 2px; display: inline-block; padding: 1px 4px; border-radius: 3px; background: rgba(255,255,255,0.06); }
 
 .valore-badge-draft {
     background: linear-gradient(135deg, #fbbf24, #f59e0b);
     color: #0f172a;
     font-weight: 900;
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 13px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-size: 10px;
     display: inline-block;
     margin: 2px 0;
 }
@@ -296,13 +302,13 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
 .draft-btn {
     background: linear-gradient(135deg, #3b82f6, #2563eb);
     color: white;
-    padding: 6px 8px;
+    padding: 4px 2px;
     border: none;
-    border-radius: 6px;
+    border-radius: 4px;
     cursor: pointer;
-    margin-top: 4px;
+    margin-top: 2px;
     font-weight: 800;
-    font-size: 11px;
+    font-size: 9px;
     text-transform: uppercase;
     width: 100%;
 }
@@ -1000,7 +1006,7 @@ async function handleRegister(e) {
             riserveSelezionate: riserveSelezionate,
             budget: budget,
             moduloSelezionato: moduloSelezionato,
-            formazioneBloccata: formazioneBloccata,
+            formazioneBloccata: formationBloccata = false,
             votiGiornata: votiGiornata
         });
 
@@ -1079,7 +1085,6 @@ async function caricaDatiSquadraCloud() {
 
             updateDashboardCounters();
             
-            // Se c'è un modulo salvato, rigenera il campo tattico prima di mostrare
             if (moduloSelezionato) {
                 ripristinaCampoTattico();
             }
@@ -1087,7 +1092,6 @@ async function caricaDatiSquadraCloud() {
             renderSlots();
             renderPanchinaGrafica();
             
-            // Se la formazione era già stata bloccata, riapre lo schermo finale
             if (formazioneBloccata) {
                 showFinalRecap();
             }
@@ -1097,7 +1101,6 @@ async function caricaDatiSquadraCloud() {
     }
 }
 
-// RIPRISTINO GRAFICO DEL CAMPO AL RIENTRO DELL'UTENTE
 function ripristinaCampoTattico() {
     if (!moduloSelezionato) return;
 
@@ -1116,7 +1119,6 @@ function ripristinaCampoTattico() {
     distribuisciOrizzontalmente(C).forEach(left => createDropZone(campo, "Centrocampista", topCEN, left));
     distribuisciOrizzontalmente(A).forEach(left => createDropZone(campo, "Attaccante", topATT, left));
 
-    // Ripopola visivamente i nomi sui pallolini del campo
     const dropzones = campo.querySelectorAll(".dropzone");
     schierati.forEach(p => {
         const libera = Array.from(dropzones).find(z => z.dataset.ruolo === p.ruolo && z.dataset.player === "");
@@ -1219,6 +1221,7 @@ function nextPick() {
     renderPlayers();
 }
 
+// MOSTRA 5 GIOCATORI CON BLOCCO ANTI-RUOLO UNICO (A MENO DI OBBLIGO)
 function renderPlayers() {
     const container = document.getElementById("players");
     container.innerHTML = "";
@@ -1235,7 +1238,43 @@ function renderPlayers() {
         return;
     }
 
-    const five = candidates.sort(() => Math.random() - 0.5).slice(0, 5);
+    let ruoliDisponibili = new Set(candidates.map(p => p.ruolo));
+    let five = [];
+
+    // Se sono presenti più ruoli, evita di estrarre 5 giocatori dello stesso ruolo
+    if (ruoliDisponibili.size > 1) {
+        let tentativi = 0;
+        while (five.length < 5 && tentativi < 100) {
+            tentativi++;
+            let shuffled = [...candidates].sort(() => Math.random() - 0.5);
+            let tempSelection = [];
+
+            for (let p of shuffled) {
+                if (tempSelection.length >= 5) break;
+                let ruoliNelGruppo = tempSelection.map(x => x.ruolo);
+                let ugualiInGruppo = ruoliNelGruppo.filter(r => r === p.ruolo).length;
+
+                // Impedisce di metterne più di 3 dello stesso ruolo per garantire varietà
+                if (ugualiInGruppo < 3) {
+                    tempSelection.push(p);
+                }
+            }
+
+            if (tempSelection.length === 5) {
+                let primoRuolo = tempSelection[0].ruolo;
+                let tuttiUguali = tempSelection.every(p => p.ruolo === primoRuolo);
+                if (!tuttiUguali) {
+                    five = tempSelection;
+                    break;
+                }
+            }
+        }
+    }
+
+    // Fallback se sono rimasti solo giocatori dello stesso ruolo (es. obbligati)
+    if (five.length < 5) {
+        five = candidates.sort(() => Math.random() - 0.5).slice(0, 5);
+    }
 
     five.forEach(p => {
         const card = document.createElement("div");
@@ -1246,7 +1285,7 @@ function renderPlayers() {
                 <div class="player-name">${p.nome}</div>
                 <div class="player-team">${p.squadra}</div>
                 <span class="player-role"><i class="${roleIcons[p.ruolo]}"></i> ${p.ruolo}</span><br>
-                <div class="valore-badge-draft">💰 ${p.valore} <span style="font-size:9px; font-weight:800;">CR</span></div>
+                <div class="valore-badge-draft">💰 ${p.valore}</div>
             </div>
             <button class="draft-btn" onclick="draft('${p.nome.replace(/'/g, "\\'")}')">Acquista</button>
         `;
@@ -1463,7 +1502,6 @@ function confermaFormazione() {
     }
 }
 
-// MOSTRA LO SCHERMO DI RIEPILOGO E RIPRISTINA I VOTI SE GIÀ PRESENTI
 function showFinalRecap() {
     document.getElementById("main-app").style.display = "none";
     document.getElementById("recap-screen").style.display = "block";
@@ -1491,7 +1529,6 @@ function showFinalRecap() {
         });
     });
 
-    // Se ci sono già voti salvati su Firebase, genera subito la tabella dei voti!
     if (votiGiornata && Object.keys(votiGiornata).length > 0) {
         mostraTabellinoVoti();
     }
@@ -1566,7 +1603,6 @@ async function calcolaVotiDaExcelOnline() {
             votiGiornata[p.nome] = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
         });
 
-        // Salva i voti appena calcolati anche nel Cloud
         await salvaSquadraCloud();
 
     } catch (err) {
@@ -1632,7 +1668,6 @@ function generaIconeBonusMalus(vInfo) {
     return count > 0 ? html : `<span style="color:var(--text-muted); font-size:10px;">-</span>`;
 }
 
-// TABELLA FINALE VOTI CON L'ORDINE CHIESTO + I TRE PULSANTI FINALI
 function mostraTabellinoVoti() {
     const container = document.getElementById("tabellino-container");
     let html = `<table class="voti-table">
@@ -1697,7 +1732,6 @@ function mostraTabellinoVoti() {
     html += `</tbody></table>
     <div class="totale-punteggio">🏆 Totale Squadra: ${totale} Punti</div>
 
-    <!-- I TRE PULSANTI DI AZIONE FINALI -->
     <div class="recap-actions-container">
         <button class="btn-action retry" onclick="riprovaDraft()">
             <i class="fa-solid fa-rotate-right"></i> Riprova
@@ -1713,7 +1747,6 @@ function mostraTabellinoVoti() {
     container.innerHTML = html;
 }
 
-// AZIONI DEI TRE PULSANTI FINALI
 function riprovaDraft() {
     if (!confirm("Sei sicuro di voler ricominciare il draft? La formazione corrente verrà azzerata in locale.")) return;
 
