@@ -56,6 +56,70 @@ body {
 
 h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
 
+/* NAVBAR GLOBALE IN ALTO PER LOGOUT IN QUALSIASI MOMENTO */
+.global-header {
+    max-width: 1450px;
+    margin: 0 auto 15px auto;
+    background: rgba(30, 41, 59, 0.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+
+.global-header .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    font-size: 15px;
+    color: #fff;
+}
+
+.global-header .user-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent-blue);
+    border: 1px solid rgba(96, 165, 250, 0.3);
+}
+
+.btn-logout {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(220, 38, 38, 0.4));
+    border: 1px solid var(--accent-red);
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-logout:hover {
+    background: var(--accent-red);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
 #main-app {
     display: flex;
     flex-direction: column;
@@ -665,30 +729,26 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
     margin-top: 10px;
     text-transform: uppercase;
 }
-
-.user-info-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 6px 12px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 8px;
-    margin-bottom: 10px;
-    font-size: 11px;
-}
-
-.btn-logout {
-    background: rgba(239, 68, 68, 0.2);
-    border: 1px solid var(--accent-red);
-    color: var(--accent-red);
-    padding: 3px 8px;
-    border-radius: 6px;
-    font-weight: 700;
-    cursor: pointer;
-}
 </style>
 </head>
 <body>
+
+<!-- HEADER GLOBALE PERMANENTE CON PULSANTE DI LOGOUT -->
+<header id="global-header-bar" class="global-header" style="display: none;">
+    <div class="logo-area">
+        <i class="fa-solid fa-trophy" style="color: var(--accent-gold);"></i>
+        <span>Draft Serie A</span>
+    </div>
+    <div class="user-area">
+        <div class="user-badge">
+            <i class="fa-solid fa-user"></i>
+            <span id="user-display-name">-</span>
+        </div>
+        <button class="btn-logout" onclick="logout()" title="Disconnettiti dal tuo account">
+            <i class="fa-solid fa-right-from-bracket"></i> Esci
+        </button>
+    </div>
+</header>
 
 <!-- MODALE AUTENTICAZIONE FIREBASE -->
 <div id="auth-modal" class="auth-overlay">
@@ -749,12 +809,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
 <div id="main-app">
     <div id="left">
         <div class="panel" id="header-panel">
-            <div class="user-info-bar">
-                <span><i class="fa-solid fa-user"></i> <strong id="user-display-name">-</strong></span>
-                <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Esci</button>
-            </div>
-            <h1><i class="fa-solid fa-trophy" style="color: var(--accent-gold);"></i> Draft Serie A</h1>
-            
+            <h1><i class="fa-solid fa-gamepad" style="color: var(--accent-green);"></i> Benvenuto al Draft</h1>
             <div class="start-container">
                 <button id="start-btn" onclick="startDraft()">AVVIA IL TUO DRAFT</button>
             </div>
@@ -863,13 +918,14 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
 <script>
 // CONFIGURAZIONE FIREBASE (SOSTITUISCI CON LE TUE CHIAVI REALI DA FIREBASE CONSOLE)
 const firebaseConfig = {
- apiKey: "AIzaSyAURiTLIXNg6fFkL1fnHkiHafMytsDHW8I",
+    apiKey: "AIzaSyAURiTLIXNg6fFkL1fnHkiHafMytsDHW8I",
   authDomain: "draft-serie-a-4aadd.firebaseapp.com",
   projectId: "draft-serie-a-4aadd",
   storageBucket: "draft-serie-a-4aadd.firebasestorage.app",
   messagingSenderId: "382868267295",
   appId: "1:382868267295:web:f958edb9ffb50fc984102a",
   measurementId: "G-THYVRMRWWH"
+
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -967,19 +1023,26 @@ async function handleLogin(e) {
 
 auth.onAuthStateChanged(async (user) => {
     const modal = document.getElementById('auth-modal');
+    const globalHeader = document.getElementById('global-header-bar');
+    
     if (user) {
         currentUser = user;
         modal.style.display = 'none';
+        globalHeader.style.display = 'flex'; // Mostra l'header permanente in alto
         document.getElementById('user-display-name').innerText = user.displayName || user.email;
         await caricaDatiSquadraCloud();
     } else {
         currentUser = null;
         modal.style.display = 'flex';
+        globalHeader.style.display = 'none';
     }
 });
 
+// LOGOUT UTENTE IN QUALSIASI MOMENTO
 function logout() {
-    auth.signOut().then(() => location.reload());
+    if (confirm("Vuoi davvero disconnetterti dal tuo account?")) {
+        auth.signOut().then(() => location.reload());
+    }
 }
 
 async function salvaSquadraCloud() {
@@ -1193,8 +1256,14 @@ function renderSlots() {
     });
 }
 
+// SCHIERAMENTO GIOCATORE CON CONTROLLO OBBLIGATORIO SUL MODULO
 function schieraGiocatore(playerObj, ruolo) {
     if (formazioneBloccata) return;
+
+    if (!moduloSelezionato) {
+        alert("Scegli prima il modulo per schierare la formazione");
+        return;
+    }
 
     if (schierati.some(p => p.nome === playerObj.nome)) {
         return alert(`${playerObj.nome} è già schierato in campo! Clicca sulla sua casella sul campo per rimuoverlo.`);
@@ -1228,7 +1297,7 @@ function schieraGiocatore(playerObj, ruolo) {
 function showModuloSelection() {
     document.getElementById("draft-panel").innerHTML = `
         <h3 style="text-align:center;">Draft Completato!</h3>
-        <p style="text-align:center; font-size:12px;">Seleziona il modulo tattico:</p>
+        <p style="text-align:center; font-size:12px; color: var(--accent-gold); font-weight: 700;">Seleziona obbligatoriamente il modulo tattico per poter schierare i giocatori:</p>
         <select id="modulo" onchange="setModulo()" style="display:block; margin: 0 auto; padding: 8px; border-radius: 8px; background: #1e293b; color: white; border:1px solid var(--card-border);">
             <option value="">-- Scegli Modulo --</option>
             <option value="4-4-2">4-4-2</option>
@@ -1333,6 +1402,11 @@ function renderPanchinaGrafica() {
 
 function togglePanchina(ruolo, nomePlayer) {
     if (formazioneBloccata) return;
+
+    if (!moduloSelezionato) {
+        alert("Scegli prima il modulo per schierare la formazione");
+        return;
+    }
 
     let pObj = rosa[ruolo].find(p => p.nome === nomePlayer);
     if (!pObj) return;
