@@ -628,6 +628,31 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
     outline: none;
 }
 
+/* STILE MOSTRA/NASCONDI PASSWORD CON OCCHIO */
+.password-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-input-container input {
+    width: 100%;
+    padding-right: 40px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 14px;
+    transition: color 0.2s ease;
+}
+
+.toggle-password:hover {
+    color: var(--accent-blue);
+}
+
 .btn-auth {
     width: 100%;
     padding: 12px;
@@ -680,9 +705,12 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
         <label>Email</label>
         <input type="email" id="login-email" required placeholder="La tua email">
       </div>
-      <div class="input-group">
+      <div class="input-group password-wrapper">
         <label>Password</label>
-        <input type="password" id="login-password" required placeholder="••••••••">
+        <div class="password-input-container">
+          <input type="password" id="login-password" required placeholder="••••••••">
+          <i class="fa-solid fa-eye toggle-password" onclick="togglePasswordVisibility('login-password', this)"></i>
+        </div>
       </div>
       <button type="submit" class="btn-auth">ACCEDI</button>
     </form>
@@ -690,6 +718,10 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
     <!-- FORM REGISTRAZIONE -->
     <form id="register-form" style="display: none;" onsubmit="handleRegister(event)">
       <h2>Crea il tuo Account</h2>
+      <div class="input-group">
+        <label>Nome Utente (Username)</label>
+        <input type="text" id="reg-username" required placeholder="es. Bomber99">
+      </div>
       <div class="input-group">
         <label>Nome</label>
         <input type="text" id="reg-nome" required placeholder="Mario">
@@ -702,9 +734,12 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
         <label>Email</label>
         <input type="email" id="reg-email" required placeholder="mario.rossi@email.com">
       </div>
-      <div class="input-group">
+      <div class="input-group password-wrapper">
         <label>Password</label>
-        <input type="password" id="reg-password" required minlength="6" placeholder="Minimo 6 caratteri">
+        <div class="password-input-container">
+          <input type="password" id="reg-password" required minlength="6" placeholder="Minimo 6 caratteri">
+          <i class="fa-solid fa-eye toggle-password" onclick="togglePasswordVisibility('reg-password', this)"></i>
+        </div>
       </div>
       <button type="submit" class="btn-auth">REGISTRATI</button>
     </form>
@@ -826,16 +861,15 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
 </div>
 
 <script>
-// CONFIGURAZIONE FIREBASE (SOSTITUISCI CON LE TUE CHIAVI DA FIREBASE CONSOLE)
+// CONFIGURAZIONE FIREBASE (SOSTITUISCI CON LE TUE CHIAVI REALI DA FIREBASE CONSOLE)
 const firebaseConfig = {
-    apiKey: "AIzaSyAURiTLIXNg6fFkL1fnHkiHafMytsDHW8I",
+ apiKey: "AIzaSyAURiTLIXNg6fFkL1fnHkiHafMytsDHW8I",
   authDomain: "draft-serie-a-4aadd.firebaseapp.com",
   projectId: "draft-serie-a-4aadd",
   storageBucket: "draft-serie-a-4aadd.firebasestorage.app",
   messagingSenderId: "382868267295",
   appId: "1:382868267295:web:f958edb9ffb50fc984102a",
   measurementId: "G-THYVRMRWWH"
-
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -864,6 +898,20 @@ let moduloSelezionato = "";
 let votiGiornata = {};
 let formazioneBloccata = false;
 
+// TOGGLE MOSTRA/NASCONDI PASSWORD
+function togglePasswordVisibility(inputId, iconElement) {
+    const input = document.getElementById(inputId);
+    if (input.type === "password") {
+        input.type = "text";
+        iconElement.classList.remove("fa-eye");
+        iconElement.classList.add("fa-eye-slash");
+    } else {
+        input.type = "password";
+        iconElement.classList.remove("fa-eye-slash");
+        iconElement.classList.add("fa-eye");
+    }
+}
+
 // AUTENTICAZIONE & SINCRONIZZAZIONE CLOUD
 function switchAuthTab(tab) {
     const isLogin = tab === 'login';
@@ -875,6 +923,7 @@ function switchAuthTab(tab) {
 
 async function handleRegister(e) {
     e.preventDefault();
+    const username = document.getElementById('reg-username').value.trim();
     const nome = document.getElementById('reg-nome').value.trim();
     const cognome = document.getElementById('reg-cognome').value.trim();
     const email = document.getElementById('reg-email').value.trim();
@@ -882,9 +931,10 @@ async function handleRegister(e) {
 
     try {
         const res = await auth.createUserWithEmailAndPassword(email, password);
-        await res.user.updateProfile({ displayName: `${nome} ${cognome}` });
+        await res.user.updateProfile({ displayName: username });
         
         await db.collection("utenti").doc(res.user.uid).set({
+            username: username,
             nome: nome,
             cognome: cognome,
             email: email,
@@ -897,7 +947,7 @@ async function handleRegister(e) {
             formazioneBloccata: formazioneBloccata
         });
 
-        alert(`Registrazione completata! Benvenuto, ${nome}.`);
+        alert(`Registrazione completata! Benvenuto, ${username}.`);
     } catch (err) {
         alert("Errore Registrazione: " + err.message);
     }
@@ -981,7 +1031,7 @@ document.addEventListener("DOMContentLoaded", () => {
 async function caricaGiocatoriDaExcel() {
     try {
         const response = await fetch("giocatori.xlsx");
-        if (!response.ok) throw new Error("File giocatori.xlsx non trovato");
+        if (!response.ok) throw new Error("File giocatori.xlsx non trovato!");
 
         const arrayBuffer = await response.arrayBuffer();
         const data = new Uint8Array(arrayBuffer);
@@ -1473,7 +1523,7 @@ function generaIconeBonusMalus(vInfo) {
     return count > 0 ? html : `<span style="color:var(--text-muted); font-size:10px;">-</span>`;
 }
 
-// TABELLA FINALE VOTI CON L'ORDINE: Calciatore, Stato, Voto, Bonus/Malus, Fantavoto + PULSANTI
+// TABELLA FINALE VOTI CON L'ORDINE CHIESTO + I TRE PULSANTI FINALI
 function mostraTabellinoVoti() {
     const container = document.getElementById("tabellino-container");
     let html = `<table class="voti-table">
@@ -1538,7 +1588,7 @@ function mostraTabellinoVoti() {
     html += `</tbody></table>
     <div class="totale-punteggio">🏆 Totale Squadra: ${totale} Punti</div>
 
-    <!-- I TRE PULSANTI DI AZIONE -->
+    <!-- I TRE PULSANTI DI AZIONE FINALI -->
     <div class="recap-actions-container">
         <button class="btn-action retry" onclick="riprovaDraft()">
             <i class="fa-solid fa-rotate-right"></i> Riprova
@@ -1554,7 +1604,7 @@ function mostraTabellinoVoti() {
     container.innerHTML = html;
 }
 
-// AZIONI PER I PULSANTI FINALI
+// AZIONI DEI TRE PULSANTI FINALI
 function riprovaDraft() {
     if (!confirm("Sei sicuro di voler ricominciare il draft? La formazione corrente verrà azzerata in locale.")) return;
 
