@@ -1742,13 +1742,13 @@ function riprovaDraft() {
 
 async function salvaRosaManuale() {
     if (!currentUser) {
-        alert("Devi accedere per poter salvare la rosa su Firebase!");
+        alert("Devi accedere per poter salvare la rosa!");
         return;
     }
 
     try {
         await salvaSquadraCloud();
-        alert("✅ Rosa e formazione salvate con successo su Firebase!");
+        alert("✅ Rosa e formazione salvate con successo!");
     } catch (err) {
         alert("❌ Errore durante il salvataggio: " + err.message);
     }
@@ -1756,11 +1756,11 @@ async function salvaRosaManuale() {
 
 async function cancellaRosaFirebase() {
     if (!currentUser) {
-        alert("Devi accedere per poter eliminare i dati da Firebase!");
+        alert("Devi accedere per poter eliminare i dati!");
         return;
     }
 
-    if (!confirm("⚠️ Sei sicuro di voler cancellare definitivamente la tua rosa salvata su Firebase? L'operazione non può essere annullata.")) return;
+    if (!confirm("⚠️ Sei sicuro di voler cancellare definitivamente la tua rosa salvata? L'operazione non può essere annullata.")) return;
 
     try {
         await db.collection("utenti").doc(currentUser.uid).update({
@@ -1774,11 +1774,11 @@ async function cancellaRosaFirebase() {
             ultimoAggiornamento: new Date()
         });
 
-        alert("🗑️ Rosa eliminata da Firebase con successo!");
+        alert("🗑️ Rosa eliminata con successo!");
         riprovaDraft();
 
     } catch (err) {
-        alert("❌ Errore durante l'eliminazione da Firebase: " + err.message);
+        alert("❌ Errore durante l'eliminazione: " + err.message);
     }
 }
 </script>
