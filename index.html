@@ -580,7 +580,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
     margin-top: 12px;
 }
 
-/* PULSANTI DI AZIONE FINALI (Riprova, Salva Rosa, Cancella Rosa) */
+/* PULSANTI DI AZIONE FINALI */
 .recap-actions-container {
     display: flex;
     flex-wrap: wrap;
@@ -606,16 +606,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
     gap: 8px;
     transition: all 0.2s ease;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
-
-.btn-action.retry {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    color: #fff;
-}
-
-.btn-action.save {
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: #fff;
 }
 
 .btn-action.delete {
@@ -895,9 +885,14 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
 
 <div id="recap-screen">
     <div style="text-align: center; margin-bottom: 15px;">
-        <div class="lock-badge" style="display:inline-block; background:rgba(239, 68, 68, 0.2); border:1px solid var(--accent-red); color:var(--accent-red); padding:3px 10px; border-radius:16px; font-size:10px; font-weight:700; margin-bottom:6px;">🔒 Formazione Convalidata</div>
+        <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:6px; flex-wrap:wrap;">
+            <div class="lock-badge" style="display:inline-block; background:rgba(239, 68, 68, 0.2); border:1px solid var(--accent-red); color:var(--accent-red); padding:3px 10px; border-radius:16px; font-size:10px; font-weight:700;">🔒 Formazione Convalidata</div>
+            <button onclick="cancellaRosaFirebase()" class="btn-action delete" style="padding: 3px 10px; font-size:10px; min-width:auto; max-width:none;" title="Cancella rosa e ricomincia il draft">
+                <i class="fa-solid fa-trash-can"></i> Cancella Rosa e Ricomincia il Draft
+            </button>
+        </div>
         <h1>Riepilogo Squadra e Giornata</h1>
-        <p style="color: var(--text-muted); font-size:12px;">Modulo: <strong id="recap-modulo-title" style="color: #fff;">-</strong></p>
+        <p style="color: var(--text-muted); font-size:12px;">Squadra: <strong id="recap-nome-squadra" style="color:var(--accent-green);">-</strong> | Modulo: <strong id="recap-modulo-title" style="color: #fff;">-</strong></p>
     </div>
 
     <div class="recap-content">
@@ -922,16 +917,15 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
 </div>
 
 <script>
-// CONFIGURAZIONE FIREBASE (SOSTITUISCI CON LE TUE CHIAVI REALI DA FIREBASE CONSOLE)
+// CONFIGURAZIONE FIREBASE
 const firebaseConfig = {
     apiKey: "AIzaSyAURiTLIXNg6fFkL1fnHkiHafMytsDHW8I",
-  authDomain: "draft-serie-a-4aadd.firebaseapp.com",
-  projectId: "draft-serie-a-4aadd",
-  storageBucket: "draft-serie-a-4aadd.firebasestorage.app",
-  messagingSenderId: "382868267295",
-  appId: "1:382868267295:web:f958edb9ffb50fc984102a",
-  measurementId: "G-THYVRMRWWH"
-
+    authDomain: "draft-serie-a-4aadd.firebaseapp.com",
+    projectId: "draft-serie-a-4aadd",
+    storageBucket: "draft-serie-a-4aadd.firebasestorage.app",
+    messagingSenderId: "382868267295",
+    appId: "1:382868267295:web:f958edb9ffb50fc984102a",
+    measurementId: "G-THYVRMRWWH"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -957,6 +951,7 @@ let riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Atta
 
 let turno = 0;
 let moduloSelezionato = "";
+let nomeSquadra = "";
 let votiGiornata = {};
 let formazioneBloccata = false;
 
@@ -1001,12 +996,13 @@ async function handleRegister(e) {
             cognome: cognome,
             email: email,
             creatoIl: new Date(),
+            nomeSquadra: nomeSquadra,
             rosa: rosa,
             schierati: schierati,
             riserveSelezionate: riserveSelezionate,
             budget: budget,
             moduloSelezionato: moduloSelezionato,
-            formazioneBloccata: formationBloccata = false,
+            formazioneBloccata: false,
             votiGiornata: votiGiornata
         });
 
@@ -1055,6 +1051,7 @@ async function salvaSquadraCloud() {
     if (!currentUser) return;
     try {
         await db.collection("utenti").doc(currentUser.uid).set({
+            nomeSquadra: nomeSquadra,
             rosa: rosa,
             schierati: schierati,
             riserveSelezionate: riserveSelezionate,
@@ -1073,14 +1070,15 @@ async function caricaDatiSquadraCloud() {
     if (!currentUser) return;
     try {
         const doc = await db.collection("utenti").doc(currentUser.uid).get();
-        if (doc.exists && doc.data().rosa) {
+        if (doc.exists && doc.data().rosa && Object.keys(doc.data().rosa).length > 0) {
             const data = doc.data();
+            nomeSquadra = data.nomeSquadra || "";
             rosa = data.rosa;
             schierati = data.schierati || [];
             riserveSelezionate = data.riserveSelezionate || { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
             budget = data.budget ?? 600;
             moduloSelezionato = data.moduloSelezionato || "";
-            formazioneBloccata = data.formazioneBloccata || false;
+            formazioneBloccata = data.formazioneBloccata || true;
             votiGiornata = data.votiGiornata || {};
 
             updateDashboardCounters();
@@ -1092,9 +1090,8 @@ async function caricaDatiSquadraCloud() {
             renderSlots();
             renderPanchinaGrafica();
             
-            if (formazioneBloccata) {
-                showFinalRecap();
-            }
+            // Se esiste una rosa salvata, mostra direttamente il recap finale con blocco modifiche
+            showFinalRecap();
         }
     } catch (err) {
         console.error("Errore caricamento Cloud:", err);
@@ -1221,7 +1218,6 @@ function nextPick() {
     renderPlayers();
 }
 
-// MOSTRA 5 GIOCATORI CON BLOCCO ANTI-RUOLO UNICO (A MENO DI OBBLIGO)
 function renderPlayers() {
     const container = document.getElementById("players");
     container.innerHTML = "";
@@ -1241,7 +1237,6 @@ function renderPlayers() {
     let ruoliDisponibili = new Set(candidates.map(p => p.ruolo));
     let five = [];
 
-    // Se sono presenti più ruoli, evita di estrarre 5 giocatori dello stesso ruolo
     if (ruoliDisponibili.size > 1) {
         let tentativi = 0;
         while (five.length < 5 && tentativi < 100) {
@@ -1254,7 +1249,6 @@ function renderPlayers() {
                 let ruoliNelGruppo = tempSelection.map(x => x.ruolo);
                 let ugualiInGruppo = ruoliNelGruppo.filter(r => r === p.ruolo).length;
 
-                // Impedisce di metterne più di 3 dello stesso ruolo per garantire varietà
                 if (ugualiInGruppo < 3) {
                     tempSelection.push(p);
                 }
@@ -1271,7 +1265,6 @@ function renderPlayers() {
         }
     }
 
-    // Fallback se sono rimasti solo giocatori dello stesso ruolo (es. obbligati)
     if (five.length < 5) {
         five = candidates.sort(() => Math.random() - 0.5).slice(0, 5);
     }
@@ -1375,7 +1368,13 @@ function schieraGiocatore(playerObj, ruolo) {
 function showModuloSelection() {
     document.getElementById("draft-panel").innerHTML = `
         <h3 style="text-align:center;">Draft Completato!</h3>
-        <p style="text-align:center; font-size:12px; color: var(--accent-gold); font-weight: 700;">Seleziona obbligatoriamente il modulo tattico per poter schierare i giocatori:</p>
+        <p style="text-align:center; font-size:12px; color: var(--accent-gold); font-weight: 700;">Assegna un nome alla tua squadra e seleziona il modulo tattico:</p>
+        
+        <div class="input-group" style="max-width: 300px; margin: 0 auto 12px auto;">
+            <label>Nome Squadra</label>
+            <input type="text" id="nome-squadra-input" value="${nomeSquadra}" placeholder="es. FantaReal 2026" style="padding: 8px; border-radius: 8px; background: #1e293b; color: white; border:1px solid var(--card-border); width: 100%;">
+        </div>
+
         <select id="modulo" onchange="setModulo()" style="display:block; margin: 0 auto; padding: 8px; border-radius: 8px; background: #1e293b; color: white; border:1px solid var(--card-border);">
             <option value="">-- Scegli Modulo --</option>
             <option value="4-4-2">4-4-2</option>
@@ -1393,6 +1392,16 @@ function distribuisciOrizzontalmente(n) {
 }
 
 function setModulo() {
+    const inputNome = document.getElementById("nome-squadra-input");
+    if (inputNome) {
+        nomeSquadra = inputNome.value.trim();
+        if (!nomeSquadra) {
+            alert("Inserisci un nome valido per la squadra!");
+            document.getElementById("modulo").value = "";
+            return;
+        }
+    }
+
     moduloSelezionato = document.getElementById("modulo").value;
     if (!moduloSelezionato) return;
 
@@ -1505,16 +1514,38 @@ function confermaFormazione() {
 function showFinalRecap() {
     document.getElementById("main-app").style.display = "none";
     document.getElementById("recap-screen").style.display = "block";
-    document.getElementById("recap-modulo-title").innerText = moduloSelezionato;
+    document.getElementById("recap-nome-squadra").innerText = nomeSquadra || 'N/D';
+    document.getElementById("recap-modulo-title").innerText = moduloSelezionato || 'N/D';
 
     const recapCampo = document.getElementById("recap-campo");
-    recapCampo.innerHTML = document.getElementById("campo").innerHTML;
+    recapCampo.innerHTML = "";
+    
+    const [D, C, A] = (moduloSelezionato || "4-4-2").split("-").map(n => parseInt(n));
+    let isMobile = window.innerWidth < 600;
+    let topPOR = isMobile ? 15 : 30;
+    let topDIF = isMobile ? 105 : 150;
+    let topCEN = isMobile ? 215 : 310;
+    let topATT = isMobile ? 325 : 470;
+
+    createStaticDropZone(recapCampo, "Portiere", topPOR, 50);
+    distribuisciOrizzontalmente(D).forEach(left => createStaticDropZone(recapCampo, "Difensore", topDIF, left));
+    distribuisciOrizzontalmente(C).forEach(left => createStaticDropZone(recapCampo, "Centrocampista", topCEN, left));
+    distribuisciOrizzontalmente(A).forEach(left => createStaticDropZone(recapCampo, "Attaccante", topATT, left));
+
+    const dropzones = recapCampo.querySelectorAll(".dropzone");
+    schierati.forEach(p => {
+        const libera = Array.from(dropzones).find(z => z.dataset.ruolo === p.ruolo && z.dataset.player === "");
+        if (libera) {
+            libera.innerText = p.nome;
+            libera.dataset.player = p.nome;
+        }
+    });
 
     const panchinaDiv = document.getElementById("recap-panchina");
     panchinaDiv.innerHTML = "";
 
     ["Portiere", "Difensore", "Centrocampista", "Attaccante"].forEach(ruolo => {
-        const riserve = riserveSelezionate[ruolo];
+        const riserve = riserveSelezionate[ruolo] || [];
         riserve.forEach((ris, i) => {
             const card = document.createElement("div");
             card.className = "recap-bench-card";
@@ -1532,6 +1563,16 @@ function showFinalRecap() {
     if (votiGiornata && Object.keys(votiGiornata).length > 0) {
         mostraTabellinoVoti();
     }
+}
+
+function createStaticDropZone(campo, ruolo, top, left) {
+    const dz = document.createElement("div");
+    dz.className = "pos dropzone";
+    dz.style.top = top + "px";
+    dz.style.left = left + "%";
+    dz.dataset.ruolo = ruolo;
+    dz.dataset.player = "";
+    campo.appendChild(dz);
 }
 
 function parseColumnVal(row, colNames) {
@@ -1730,32 +1771,19 @@ function mostraTabellinoVoti() {
     });
 
     html += `</tbody></table>
-    <div class="totale-punteggio">🏆 Totale Squadra: ${totale} Punti</div>
-
-    <div class="recap-actions-container">
-        <button class="btn-action retry" onclick="riprovaDraft()">
-            <i class="fa-solid fa-rotate-right"></i> Riprova
-        </button>
-        <button class="btn-action save" onclick="salvaRosaManuale()">
-            <i class="fa-solid fa-floppy-disk"></i> Salva Rosa
-        </button>
-        <button class="btn-action delete" onclick="cancellaRosaFirebase()">
-            <i class="fa-solid fa-trash-can"></i> Cancella Rosa
-        </button>
-    </div>`;
+    <div class="totale-punteggio">🏆 Totale Squadra: ${totale} Punti</div>`;
 
     container.innerHTML = html;
 }
 
 function riprovaDraft() {
-    if (!confirm("Sei sicuro di voler ricominciare il draft? La formazione corrente verrà azzerata in locale.")) return;
-
     rosa = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
     schierati = [];
     riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
     turno = 0;
     budget = 600;
     moduloSelezionato = "";
+    nomeSquadra = "";
     formazioneBloccata = false;
     votiGiornata = {};
 
@@ -1769,22 +1797,6 @@ function riprovaDraft() {
 
     updateDashboardCounters();
     renderSlots();
-
-    alert("Draft azzerato! Clicca su 'AVVIA IL TUO DRAFT' per ripartire.");
-}
-
-async function salvaRosaManuale() {
-    if (!currentUser) {
-        alert("Devi accedere per poter salvare la rosa!");
-        return;
-    }
-
-    try {
-        await salvaSquadraCloud();
-        alert("✅ Rosa e formazione salvate con successo!");
-    } catch (err) {
-        alert("❌ Errore durante il salvataggio: " + err.message);
-    }
 }
 
 async function cancellaRosaFirebase() {
@@ -1793,10 +1805,11 @@ async function cancellaRosaFirebase() {
         return;
     }
 
-    if (!confirm("⚠️ Sei sicuro di voler cancellare definitivamente la tua rosa salvata? L'operazione non può essere annullata.")) return;
+    if (!confirm("⚠️ Sei sicuro di voler cancellare definitivamente la tua rosa salvata e ricominciare il draft? L'operazione non può essere annullata.")) return;
 
     try {
         await db.collection("utenti").doc(currentUser.uid).update({
+            nomeSquadra: firebase.firestore.FieldValue.delete(),
             rosa: firebase.firestore.FieldValue.delete(),
             schierati: firebase.firestore.FieldValue.delete(),
             riserveSelezionate: firebase.firestore.FieldValue.delete(),
@@ -1807,7 +1820,9 @@ async function cancellaRosaFirebase() {
             ultimoAggiornamento: new Date()
         });
 
-        alert("🗑️ Rosa eliminata con successo!");
+        alert("🗑️ Rosa eliminata con successo! Puoi iniziare un nuovo draft.");
+        document.getElementById("recap-screen").style.display = "none";
+        document.getElementById("main-app").style.display = "flex";
         riprovaDraft();
 
     } catch (err) {
