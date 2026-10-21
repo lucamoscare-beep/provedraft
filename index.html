@@ -895,12 +895,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
 
 <div id="recap-screen">
     <div style="text-align: center; margin-bottom: 15px;">
-        <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:6px;">
-            <div class="lock-badge" style="display:inline-block; background:rgba(239, 68, 68, 0.2); border:1px solid var(--accent-red); color:var(--accent-red); padding:3px 10px; border-radius:16px; font-size:10px; font-weight:700;">🔒 Formazione Convalidata</div>
-            <button onclick="cancellaRosaFirebase()" style="background: rgba(239, 68, 68, 0.2); border: 1px solid var(--accent-red); color: var(--accent-red); padding: 3px 10px; border-radius: 16px; font-size: 10px; font-weight: 700; cursor: pointer;" title="Cancella rosa e ricomincia il draft">
-                <i class="fa-solid fa-trash-can"></i> Cancella Rosa e Ricomincia
-            </button>
-        </div>
+        <div class="lock-badge" style="display:inline-block; background:rgba(239, 68, 68, 0.2); border:1px solid var(--accent-red); color:var(--accent-red); padding:3px 10px; border-radius:16px; font-size:10px; font-weight:700; margin-bottom:6px;">🔒 Formazione Convalidata</div>
         <h1>Riepilogo Squadra e Giornata</h1>
         <p style="color: var(--text-muted); font-size:12px;"><span id="recap-modulo-title">-</span></p>
     </div>
@@ -1093,7 +1088,7 @@ async function caricaDatiSquadraCloud() {
             riserveSelezionate = data.riserveSelezionate || { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
             budget = data.budget ?? 600;
             moduloSelezionato = data.moduloSelezionato || "";
-            formazioneBloccata = true; // Se rientra con rosa salvata, la formazione è bloccata per modifiche
+            formazioneBloccata = true;
             votiGiornata = data.votiGiornata || {};
 
             const NomiAcquistati = new Set(Object.values(rosa).flat().map(p => p.nome));
@@ -1107,8 +1102,6 @@ async function caricaDatiSquadraCloud() {
 
             renderSlots();
             renderPanchinaGrafica();
-            
-            // Mostra direttamente il riepilogo con la rosa e i titolari salvati
             showFinalRecap();
         } else {
             availablePlayers = [...customPlayersList];
@@ -1541,7 +1534,6 @@ function showFinalRecap() {
     const recapCampo = document.getElementById("recap-campo");
     recapCampo.innerHTML = "";
     
-    // Ricostruisce il campo sul recap con i titolari salvati
     const [D, C, A] = moduloSelezionato.split("-").map(n => parseInt(n));
     let isMobile = window.innerWidth < 600;
     let topPOR = isMobile ? 15 : 30;
@@ -1582,9 +1574,8 @@ function showFinalRecap() {
         });
     });
 
-    if (votiGiornata && Object.keys(votiGiornata).length > 0) {
-        mostraTabellinoVoti();
-    }
+    // Rigenera o aggiorna il tabellino voti e i pulsanti di azione finali
+    mostraTabellinoVoti();
 }
 
 function createStaticDropZone(campo, ruolo, top, left) {
@@ -1611,8 +1602,10 @@ function parseColumnVal(row, colNames) {
 
 async function calcolaVotiDaExcelOnline() {
     const btn = document.getElementById("btn-fetch-voti");
-    btn.innerText = "⏳ Lettura voti.xlsx...";
-    btn.disabled = true;
+    if (btn) {
+        btn.innerText = "⏳ Lettura voti.xlsx...";
+        btn.disabled = true;
+    }
 
     votiGiornata = {};
     const tutteLeRiserve = Object.values(riserveSelezionate).flat();
@@ -1669,14 +1662,15 @@ async function calcolaVotiDaExcelOnline() {
         await salvaSquadraCloud();
 
     } catch (err) {
-        alert("Attenzione: Impossibile leggere voti.xlsx (" + err.message + ").");
         tuttiGiocatori.forEach(p => {
             votiGiornata[p.nome] = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
         });
     }
 
-    btn.innerText = "📊 Carica i Fantavoti di giornata";
-    btn.disabled = false;
+    if (btn) {
+        btn.innerText = "📊 Carica i Fantavoti di giornata";
+        btn.disabled = false;
+    }
 
     mostraTabellinoVoti();
 }
@@ -1793,7 +1787,19 @@ function mostraTabellinoVoti() {
     });
 
     html += `</tbody></table>
-    <div class="totale-punteggio">🏆 Totale Squadra: ${totale} Punti</div>`;
+    <div class="totale-punteggio">🏆 Totale Squadra: ${totale} Punti</div>
+
+    <div class="recap-actions-container">
+        <button class="btn-action retry" onclick="riprovaDraft()">
+            <i class="fa-solid fa-rotate-right"></i> Riprova
+        </button>
+        <button class="btn-action save" onclick="salvaRosaManuale()">
+            <i class="fa-solid fa-floppy-disk"></i> Salva Rosa
+        </button>
+        <button class="btn-action delete" onclick="cancellaRosaFirebase()">
+            <i class="fa-solid fa-trash-can"></i> Cancella Rosa
+        </button>
+    </div>`;
 
     container.innerHTML = html;
 }
@@ -1819,6 +1825,20 @@ function riprovaDraft() {
 
     updateDashboardCounters();
     renderSlots();
+}
+
+async function salvaRosaManuale() {
+    if (!currentUser) {
+        alert("Devi accedere per poter salvare la rosa!");
+        return;
+    }
+
+    try {
+        await salvaSquadraCloud();
+        alert("✅ Rosa e formazione salvate con successo!");
+    } catch (err) {
+        alert("❌ Errore durante il salvataggio: " + err.message);
+    }
 }
 
 async function cancellaRosaFirebase() {
