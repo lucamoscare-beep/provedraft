@@ -897,7 +897,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
     <div style="text-align: center; margin-bottom: 15px;">
         <div class="lock-badge" style="display:inline-block; background:rgba(239, 68, 68, 0.2); border:1px solid var(--accent-red); color:var(--accent-red); padding:3px 10px; border-radius:16px; font-size:10px; font-weight:700; margin-bottom:6px;">🔒 Formazione Convalidata</div>
         <h1>Riepilogo Squadra e Giornata</h1>
-        <p style="color: var(--text-muted); font-size:12px;"><span id="recap-modulo-title">-</span></p>
+        <p style="color: var(--text-muted); font-size:12px;">Modulo: <strong id="recap-modulo-title" style="color: #fff;">-</strong></p>
     </div>
 
     <div class="recap-content">
@@ -922,15 +922,16 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
 </div>
 
 <script>
-// CONFIGURAZIONE FIREBASE
+// CONFIGURAZIONE FIREBASE (SOSTITUISCI CON LE TUE CHIAVI REALI DA FIREBASE CONSOLE)
 const firebaseConfig = {
     apiKey: "AIzaSyAURiTLIXNg6fFkL1fnHkiHafMytsDHW8I",
-    authDomain: "draft-serie-a-4aadd.firebaseapp.com",
-    projectId: "draft-serie-a-4aadd",
-    storageBucket: "draft-serie-a-4aadd.firebasestorage.app",
-    messagingSenderId: "382868267295",
-    appId: "1:382868267295:web:f958edb9ffb50fc984102a",
-    measurementId: "G-THYVRMRWWH"
+  authDomain: "draft-serie-a-4aadd.firebaseapp.com",
+  projectId: "draft-serie-a-4aadd",
+  storageBucket: "draft-serie-a-4aadd.firebasestorage.app",
+  messagingSenderId: "382868267295",
+  appId: "1:382868267295:web:f958edb9ffb50fc984102a",
+  measurementId: "G-THYVRMRWWH"
+
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -956,7 +957,6 @@ let riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Atta
 
 let turno = 0;
 let moduloSelezionato = "";
-let nomeSquadra = "";
 let votiGiornata = {};
 let formazioneBloccata = false;
 
@@ -1001,13 +1001,12 @@ async function handleRegister(e) {
             cognome: cognome,
             email: email,
             creatoIl: new Date(),
-            nomeSquadra: nomeSquadra,
             rosa: rosa,
             schierati: schierati,
             riserveSelezionate: riserveSelezionate,
             budget: budget,
             moduloSelezionato: moduloSelezionato,
-            formazioneBloccata: false,
+            formazioneBloccata: formationBloccata = false,
             votiGiornata: votiGiornata
         });
 
@@ -1056,8 +1055,6 @@ async function salvaSquadraCloud() {
     if (!currentUser) return;
     try {
         await db.collection("utenti").doc(currentUser.uid).set({
-            username: currentUser.displayName || "",
-            nomeSquadra: nomeSquadra,
             rosa: rosa,
             schierati: schierati,
             riserveSelezionate: riserveSelezionate,
@@ -1075,24 +1072,16 @@ async function salvaSquadraCloud() {
 async function caricaDatiSquadraCloud() {
     if (!currentUser) return;
     try {
-        if (customPlayersList.length === 0) {
-            await caricaGiocatoriDaExcel();
-        }
-
         const doc = await db.collection("utenti").doc(currentUser.uid).get();
-        if (doc.exists && doc.data().rosa && Object.keys(doc.data().rosa).length > 0) {
+        if (doc.exists && doc.data().rosa) {
             const data = doc.data();
-            nomeSquadra = data.nomeSquadra || "";
             rosa = data.rosa;
             schierati = data.schierati || [];
             riserveSelezionate = data.riserveSelezionate || { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
             budget = data.budget ?? 600;
             moduloSelezionato = data.moduloSelezionato || "";
-            formazioneBloccata = true;
+            formazioneBloccata = data.formazioneBloccata || false;
             votiGiornata = data.votiGiornata || {};
-
-            const NomiAcquistati = new Set(Object.values(rosa).flat().map(p => p.nome));
-            availablePlayers = customPlayersList.filter(p => !NomiAcquistati.has(p.nome));
 
             updateDashboardCounters();
             
@@ -1102,13 +1091,13 @@ async function caricaDatiSquadraCloud() {
 
             renderSlots();
             renderPanchinaGrafica();
-            showFinalRecap();
-        } else {
-            availablePlayers = [...customPlayersList];
+            
+            if (formazioneBloccata) {
+                showFinalRecap();
+            }
         }
     } catch (err) {
         console.error("Errore caricamento Cloud:", err);
-        availablePlayers = [...customPlayersList];
     }
 }
 
@@ -1232,6 +1221,7 @@ function nextPick() {
     renderPlayers();
 }
 
+// MOSTRA 5 GIOCATORI CON BLOCCO ANTI-RUOLO UNICO (A MENO DI OBBLIGO)
 function renderPlayers() {
     const container = document.getElementById("players");
     container.innerHTML = "";
@@ -1251,6 +1241,7 @@ function renderPlayers() {
     let ruoliDisponibili = new Set(candidates.map(p => p.ruolo));
     let five = [];
 
+    // Se sono presenti più ruoli, evita di estrarre 5 giocatori dello stesso ruolo
     if (ruoliDisponibili.size > 1) {
         let tentativi = 0;
         while (five.length < 5 && tentativi < 100) {
@@ -1263,6 +1254,7 @@ function renderPlayers() {
                 let ruoliNelGruppo = tempSelection.map(x => x.ruolo);
                 let ugualiInGruppo = ruoliNelGruppo.filter(r => r === p.ruolo).length;
 
+                // Impedisce di metterne più di 3 dello stesso ruolo per garantire varietà
                 if (ugualiInGruppo < 3) {
                     tempSelection.push(p);
                 }
@@ -1279,6 +1271,7 @@ function renderPlayers() {
         }
     }
 
+    // Fallback se sono rimasti solo giocatori dello stesso ruolo (es. obbligati)
     if (five.length < 5) {
         five = candidates.sort(() => Math.random() - 0.5).slice(0, 5);
     }
@@ -1382,20 +1375,14 @@ function schieraGiocatore(playerObj, ruolo) {
 function showModuloSelection() {
     document.getElementById("draft-panel").innerHTML = `
         <h3 style="text-align:center;">Draft Completato!</h3>
-        <p style="text-align:center; font-size:12px; color: var(--accent-gold); font-weight: 700;">Assegna un nome alla tua squadra e seleziona il modulo tattico:</p>
-        
-        <div class="input-group" style="max-width: 300px; margin: 0 auto 12px auto;">
-            <label>Nome Squadra</label>
-            <input type="text" id="nome-squadra-input" value="${nomeSquadra}" placeholder="es. FantaReal 2026" style="padding: 8px; border-radius: 8px; background: #1e293b; color: white; border:1px solid var(--card-border); width: 100%;">
-        </div>
-
+        <p style="text-align:center; font-size:12px; color: var(--accent-gold); font-weight: 700;">Seleziona obbligatoriamente il modulo tattico per poter schierare i giocatori:</p>
         <select id="modulo" onchange="setModulo()" style="display:block; margin: 0 auto; padding: 8px; border-radius: 8px; background: #1e293b; color: white; border:1px solid var(--card-border);">
             <option value="">-- Scegli Modulo --</option>
-            <option value="4-4-2" ${moduloSelezionato === '4-4-2' ? 'selected' : ''}>4-4-2</option>
-            <option value="4-3-3" ${moduloSelezionato === '4-3-3' ? 'selected' : ''}>4-3-3</option>
-            <option value="3-4-3" ${moduloSelezionato === '3-4-3' ? 'selected' : ''}>3-4-3</option>
-            <option value="4-5-1" ${moduloSelezionato === '4-5-1' ? 'selected' : ''}>4-5-1</option>
-            <option value="3-5-2" ${moduloSelezionato === '3-5-2' ? 'selected' : ''}>3-5-2</option>
+            <option value="4-4-2">4-4-2</option>
+            <option value="4-3-3">4-3-3</option>
+            <option value="3-4-3">3-4-3</option>
+            <option value="4-5-1">4-5-1</option>
+            <option value="3-5-2">3-5-2</option>
         </select>
     `;
 }
@@ -1406,16 +1393,6 @@ function distribuisciOrizzontalmente(n) {
 }
 
 function setModulo() {
-    const inputNome = document.getElementById("nome-squadra-input");
-    if (inputNome) {
-        nomeSquadra = inputNome.value.trim();
-        if (!nomeSquadra) {
-            alert("Inserisci un nome valido per la squadra!");
-            document.getElementById("modulo").value = "";
-            return;
-        }
-    }
-
     moduloSelezionato = document.getElementById("modulo").value;
     if (!moduloSelezionato) return;
 
@@ -1528,32 +1505,10 @@ function confermaFormazione() {
 function showFinalRecap() {
     document.getElementById("main-app").style.display = "none";
     document.getElementById("recap-screen").style.display = "block";
-    
-    document.getElementById("recap-modulo-title").innerHTML = `Squadra: <strong style="color:var(--accent-green);">${nomeSquadra || 'N/D'}</strong> | Modulo: <span style="color: #fff;">${moduloSelezionato}</span>`;
+    document.getElementById("recap-modulo-title").innerText = moduloSelezionato;
 
     const recapCampo = document.getElementById("recap-campo");
-    recapCampo.innerHTML = "";
-    
-    const [D, C, A] = moduloSelezionato.split("-").map(n => parseInt(n));
-    let isMobile = window.innerWidth < 600;
-    let topPOR = isMobile ? 15 : 30;
-    let topDIF = isMobile ? 105 : 150;
-    let topCEN = isMobile ? 215 : 310;
-    let topATT = isMobile ? 325 : 470;
-
-    createStaticDropZone(recapCampo, "Portiere", topPOR, 50);
-    distribuisciOrizzontalmente(D).forEach(left => createStaticDropZone(recapCampo, "Difensore", topDIF, left));
-    distribuisciOrizzontalmente(C).forEach(left => createStaticDropZone(recapCampo, "Centrocampista", topCEN, left));
-    distribuisciOrizzontalmente(A).forEach(left => createStaticDropZone(recapCampo, "Attaccante", topATT, left));
-
-    const dropzones = recapCampo.querySelectorAll(".dropzone");
-    schierati.forEach(p => {
-        const libera = Array.from(dropzones).find(z => z.dataset.ruolo === p.ruolo && z.dataset.player === "");
-        if (libera) {
-            libera.innerText = p.nome;
-            libera.dataset.player = p.nome;
-        }
-    });
+    recapCampo.innerHTML = document.getElementById("campo").innerHTML;
 
     const panchinaDiv = document.getElementById("recap-panchina");
     panchinaDiv.innerHTML = "";
@@ -1574,18 +1529,9 @@ function showFinalRecap() {
         });
     });
 
-    // Rigenera o aggiorna il tabellino voti e i pulsanti di azione finali
-    mostraTabellinoVoti();
-}
-
-function createStaticDropZone(campo, ruolo, top, left) {
-    const dz = document.createElement("div");
-    dz.className = "pos dropzone";
-    dz.style.top = top + "px";
-    dz.style.left = left + "%";
-    dz.dataset.ruolo = ruolo;
-    dz.dataset.player = "";
-    campo.appendChild(dz);
+    if (votiGiornata && Object.keys(votiGiornata).length > 0) {
+        mostraTabellinoVoti();
+    }
 }
 
 function parseColumnVal(row, colNames) {
@@ -1602,10 +1548,8 @@ function parseColumnVal(row, colNames) {
 
 async function calcolaVotiDaExcelOnline() {
     const btn = document.getElementById("btn-fetch-voti");
-    if (btn) {
-        btn.innerText = "⏳ Lettura voti.xlsx...";
-        btn.disabled = true;
-    }
+    btn.innerText = "⏳ Lettura voti.xlsx...";
+    btn.disabled = true;
 
     votiGiornata = {};
     const tutteLeRiserve = Object.values(riserveSelezionate).flat();
@@ -1662,15 +1606,14 @@ async function calcolaVotiDaExcelOnline() {
         await salvaSquadraCloud();
 
     } catch (err) {
+        alert("Attenzione: Impossibile leggere voti.xlsx (" + err.message + ").");
         tuttiGiocatori.forEach(p => {
             votiGiornata[p.nome] = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
         });
     }
 
-    if (btn) {
-        btn.innerText = "📊 Carica i Fantavoti di giornata";
-        btn.disabled = false;
-    }
+    btn.innerText = "📊 Carica i Fantavoti di giornata";
+    btn.disabled = false;
 
     mostraTabellinoVoti();
 }
@@ -1805,13 +1748,14 @@ function mostraTabellinoVoti() {
 }
 
 function riprovaDraft() {
+    if (!confirm("Sei sicuro di voler ricominciare il draft? La formazione corrente verrà azzerata in locale.")) return;
+
     rosa = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
     schierati = [];
     riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
     turno = 0;
     budget = 600;
     moduloSelezionato = "";
-    nomeSquadra = "";
     formazioneBloccata = false;
     votiGiornata = {};
 
@@ -1825,6 +1769,8 @@ function riprovaDraft() {
 
     updateDashboardCounters();
     renderSlots();
+
+    alert("Draft azzerato! Clicca su 'AVVIA IL TUO DRAFT' per ripartire.");
 }
 
 async function salvaRosaManuale() {
@@ -1847,11 +1793,10 @@ async function cancellaRosaFirebase() {
         return;
     }
 
-    if (!confirm("⚠️ Sei sicuro di voler cancellare definitivamente la tua rosa salvata e ricominciare il draft? L'operazione non può essere annullata.")) return;
+    if (!confirm("⚠️ Sei sicuro di voler cancellare definitivamente la tua rosa salvata? L'operazione non può essere annullata.")) return;
 
     try {
         await db.collection("utenti").doc(currentUser.uid).update({
-            nomeSquadra: firebase.firestore.FieldValue.delete(),
             rosa: firebase.firestore.FieldValue.delete(),
             schierati: firebase.firestore.FieldValue.delete(),
             riserveSelezionate: firebase.firestore.FieldValue.delete(),
@@ -1862,7 +1807,7 @@ async function cancellaRosaFirebase() {
             ultimoAggiornamento: new Date()
         });
 
-        alert("🗑️ Rosa eliminata con successo! Puoi iniziare un nuovo draft.");
+        alert("🗑️ Rosa eliminata con successo!");
         riprovaDraft();
 
     } catch (err) {
