@@ -895,7 +895,12 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
 
 <div id="recap-screen">
     <div style="text-align: center; margin-bottom: 15px;">
-        <div class="lock-badge" style="display:inline-block; background:rgba(239, 68, 68, 0.2); border:1px solid var(--accent-red); color:var(--accent-red); padding:3px 10px; border-radius:16px; font-size:10px; font-weight:700; margin-bottom:6px;">🔒 Formazione Convalidata</div>
+        <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:6px;">
+            <div class="lock-badge" style="display:inline-block; background:rgba(239, 68, 68, 0.2); border:1px solid var(--accent-red); color:var(--accent-red); padding:3px 10px; border-radius:16px; font-size:10px; font-weight:700;">🔒 Formazione Convalidata</div>
+            <button onclick="cancellaRosaFirebase()" style="background: rgba(239, 68, 68, 0.2); border: 1px solid var(--accent-red); color: var(--accent-red); padding: 3px 10px; border-radius: 16px; font-size: 10px; font-weight: 700; cursor: pointer;" title="Cancella rosa e ricomincia il draft">
+                <i class="fa-solid fa-trash-can"></i> Cancella Rosa e Ricomincia
+            </button>
+        </div>
         <h1>Riepilogo Squadra e Giornata</h1>
         <p style="color: var(--text-muted); font-size:12px;"><span id="recap-modulo-title">-</span></p>
     </div>
@@ -1075,8 +1080,12 @@ async function salvaSquadraCloud() {
 async function caricaDatiSquadraCloud() {
     if (!currentUser) return;
     try {
+        if (customPlayersList.length === 0) {
+            await caricaGiocatoriDaExcel();
+        }
+
         const doc = await db.collection("utenti").doc(currentUser.uid).get();
-        if (doc.exists && doc.data().rosa) {
+        if (doc.exists && doc.data().rosa && Object.keys(doc.data().rosa).length > 0) {
             const data = doc.data();
             nomeSquadra = data.nomeSquadra || "";
             rosa = data.rosa;
@@ -1084,8 +1093,11 @@ async function caricaDatiSquadraCloud() {
             riserveSelezionate = data.riserveSelezionate || { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
             budget = data.budget ?? 600;
             moduloSelezionato = data.moduloSelezionato || "";
-            formazioneBloccata = data.formazioneBloccata || false;
+            formazioneBloccata = true; // Se rientra con rosa salvata, la formazione è bloccata per modifiche
             votiGiornata = data.votiGiornata || {};
+
+            const NomiAcquistati = new Set(Object.values(rosa).flat().map(p => p.nome));
+            availablePlayers = customPlayersList.filter(p => !NomiAcquistati.has(p.nome));
 
             updateDashboardCounters();
             
@@ -1096,12 +1108,14 @@ async function caricaDatiSquadraCloud() {
             renderSlots();
             renderPanchinaGrafica();
             
-            if (formazioneBloccata) {
-                showFinalRecap();
-            }
+            // Mostra direttamente il riepilogo con la rosa e i titolari salvati
+            showFinalRecap();
+        } else {
+            availablePlayers = [...customPlayersList];
         }
     } catch (err) {
         console.error("Errore caricamento Cloud:", err);
+        availablePlayers = [...customPlayersList];
     }
 }
 
@@ -1225,7 +1239,6 @@ function nextPick() {
     renderPlayers();
 }
 
-// MOSTRA 5 GIOCATORI CON BLOCCO ANTI-RUOLO UNICO (A MENO DI OBBLIGO)
 function renderPlayers() {
     const container = document.getElementById("players");
     container.innerHTML = "";
@@ -1380,16 +1393,16 @@ function showModuloSelection() {
         
         <div class="input-group" style="max-width: 300px; margin: 0 auto 12px auto;">
             <label>Nome Squadra</label>
-            <input type="text" id="nome-squadra-input" placeholder="es. FantaReal 2026" style="padding: 8px; border-radius: 8px; background: #1e293b; color: white; border:1px solid var(--card-border); width: 100%;">
+            <input type="text" id="nome-squadra-input" value="${nomeSquadra}" placeholder="es. FantaReal 2026" style="padding: 8px; border-radius: 8px; background: #1e293b; color: white; border:1px solid var(--card-border); width: 100%;">
         </div>
 
         <select id="modulo" onchange="setModulo()" style="display:block; margin: 0 auto; padding: 8px; border-radius: 8px; background: #1e293b; color: white; border:1px solid var(--card-border);">
             <option value="">-- Scegli Modulo --</option>
-            <option value="4-4-2">4-4-2</option>
-            <option value="4-3-3">4-3-3</option>
-            <option value="3-4-3">3-4-3</option>
-            <option value="4-5-1">4-5-1</option>
-            <option value="3-5-2">3-5-2</option>
+            <option value="4-4-2" ${moduloSelezionato === '4-4-2' ? 'selected' : ''}>4-4-2</option>
+            <option value="4-3-3" ${moduloSelezionato === '4-3-3' ? 'selected' : ''}>4-3-3</option>
+            <option value="3-4-3" ${moduloSelezionato === '3-4-3' ? 'selected' : ''}>3-4-3</option>
+            <option value="4-5-1" ${moduloSelezionato === '4-5-1' ? 'selected' : ''}>4-5-1</option>
+            <option value="3-5-2" ${moduloSelezionato === '3-5-2' ? 'selected' : ''}>3-5-2</option>
         </select>
     `;
 }
@@ -1526,7 +1539,29 @@ function showFinalRecap() {
     document.getElementById("recap-modulo-title").innerHTML = `Squadra: <strong style="color:var(--accent-green);">${nomeSquadra || 'N/D'}</strong> | Modulo: <span style="color: #fff;">${moduloSelezionato}</span>`;
 
     const recapCampo = document.getElementById("recap-campo");
-    recapCampo.innerHTML = document.getElementById("campo").innerHTML;
+    recapCampo.innerHTML = "";
+    
+    // Ricostruisce il campo sul recap con i titolari salvati
+    const [D, C, A] = moduloSelezionato.split("-").map(n => parseInt(n));
+    let isMobile = window.innerWidth < 600;
+    let topPOR = isMobile ? 15 : 30;
+    let topDIF = isMobile ? 105 : 150;
+    let topCEN = isMobile ? 215 : 310;
+    let topATT = isMobile ? 325 : 470;
+
+    createStaticDropZone(recapCampo, "Portiere", topPOR, 50);
+    distribuisciOrizzontalmente(D).forEach(left => createStaticDropZone(recapCampo, "Difensore", topDIF, left));
+    distribuisciOrizzontalmente(C).forEach(left => createStaticDropZone(recapCampo, "Centrocampista", topCEN, left));
+    distribuisciOrizzontalmente(A).forEach(left => createStaticDropZone(recapCampo, "Attaccante", topATT, left));
+
+    const dropzones = recapCampo.querySelectorAll(".dropzone");
+    schierati.forEach(p => {
+        const libera = Array.from(dropzones).find(z => z.dataset.ruolo === p.ruolo && z.dataset.player === "");
+        if (libera) {
+            libera.innerText = p.nome;
+            libera.dataset.player = p.nome;
+        }
+    });
 
     const panchinaDiv = document.getElementById("recap-panchina");
     panchinaDiv.innerHTML = "";
@@ -1550,6 +1585,16 @@ function showFinalRecap() {
     if (votiGiornata && Object.keys(votiGiornata).length > 0) {
         mostraTabellinoVoti();
     }
+}
+
+function createStaticDropZone(campo, ruolo, top, left) {
+    const dz = document.createElement("div");
+    dz.className = "pos dropzone";
+    dz.style.top = top + "px";
+    dz.style.left = left + "%";
+    dz.dataset.ruolo = ruolo;
+    dz.dataset.player = "";
+    campo.appendChild(dz);
 }
 
 function parseColumnVal(row, colNames) {
@@ -1748,26 +1793,12 @@ function mostraTabellinoVoti() {
     });
 
     html += `</tbody></table>
-    <div class="totale-punteggio">🏆 Totale Squadra: ${totale} Punti</div>
-
-    <div class="recap-actions-container">
-        <button class="btn-action retry" onclick="riprovaDraft()">
-            <i class="fa-solid fa-rotate-right"></i> Riprova
-        </button>
-        <button class="btn-action save" onclick="salvaRosaManuale()">
-            <i class="fa-solid fa-floppy-disk"></i> Salva Rosa
-        </button>
-        <button class="btn-action delete" onclick="cancellaRosaFirebase()">
-            <i class="fa-solid fa-trash-can"></i> Cancella Rosa
-        </button>
-    </div>`;
+    <div class="totale-punteggio">🏆 Totale Squadra: ${totale} Punti</div>`;
 
     container.innerHTML = html;
 }
 
 function riprovaDraft() {
-    if (!confirm("Sei sicuro di voler ricominciare il draft? La formazione corrente verrà azzerata in locale.")) return;
-
     rosa = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
     schierati = [];
     riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
@@ -1788,22 +1819,6 @@ function riprovaDraft() {
 
     updateDashboardCounters();
     renderSlots();
-
-    alert("Draft azzerato! Clicca su 'AVVIA IL TUO DRAFT' per ripartire.");
-}
-
-async function salvaRosaManuale() {
-    if (!currentUser) {
-        alert("Devi accedere per poter salvare la rosa!");
-        return;
-    }
-
-    try {
-        await salvaSquadraCloud();
-        alert("✅ Rosa e formazione salvate con successo!");
-    } catch (err) {
-        alert("❌ Errore durante il salvataggio: " + err.message);
-    }
 }
 
 async function cancellaRosaFirebase() {
@@ -1812,7 +1827,7 @@ async function cancellaRosaFirebase() {
         return;
     }
 
-    if (!confirm("⚠️ Sei sicuro di voler cancellare definitivamente la tua rosa salvata? L'operazione non può essere annullata.")) return;
+    if (!confirm("⚠️ Sei sicuro di voler cancellare definitivamente la tua rosa salvata e ricominciare il draft? L'operazione non può essere annullata.")) return;
 
     try {
         await db.collection("utenti").doc(currentUser.uid).update({
@@ -1827,7 +1842,7 @@ async function cancellaRosaFirebase() {
             ultimoAggiornamento: new Date()
         });
 
-        alert("🗑️ Rosa eliminata con successo!");
+        alert("🗑️ Rosa eliminata con successo! Puoi iniziare un nuovo draft.");
         riprovaDraft();
 
     } catch (err) {
