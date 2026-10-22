@@ -53,7 +53,7 @@ body {
     min-height: 100vh;
 }
 
-h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
+h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 
 /* NAVBAR GLOBALE */
 .global-header {
@@ -205,8 +205,93 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
     margin-bottom: 12px;
 }
 
-#main-app {
+/* WELCOME / LANDING PAGE */
+#welcome-screen {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: block;
+}
+
+.welcome-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    margin-bottom: 20px;
+}
+
+.welcome-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--accent-neon-green);
+    margin-bottom: 8px;
+}
+
+.rules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.rule-box {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 15px;
+    text-align: left;
+}
+
+.rule-box i {
+    font-size: 24px;
+    color: var(--accent-gold);
+    margin-bottom: 10px;
+}
+
+.tokens-status-box {
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.4), rgba(15, 23, 42, 0.8));
+    border: 2px solid var(--accent-blue);
+    border-radius: 14px;
+    padding: 18px;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.token-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent-gold);
+    color: #000;
+    font-weight: 900;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.created-teams-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.team-card-item {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 12px;
     display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* MAIN DRAFT APP LAYOUT */
+#main-app {
+    display: none;
     flex-direction: column;
     gap: 12px;
     max-width: 1450px;
@@ -303,27 +388,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
     background: linear-gradient(90deg, var(--accent-blue), var(--accent-neon-green));
     width: 0%;
     transition: width 0.3s ease;
-}
-
-.start-container {
-    text-align: center;
-    padding: 5px 0;
-}
-
-#start-btn {
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: white;
-    padding: 12px 20px;
-    font-size: 16px;
-    font-weight: 800;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    display: inline-block;
-    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
-    text-transform: uppercase;
-    width: 100%;
-    max-width: 320px;
 }
 
 .players-container {
@@ -569,19 +633,39 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
     justify-content: center;
 }
 
-.btn-conferma {
+.btn-action-primary {
     background: linear-gradient(135deg, #10b981, #059669);
     color: white;
-    padding: 12px;
+    padding: 12px 20px;
     font-size: 14px;
     font-weight: 800;
     border: none;
     border-radius: 10px;
     cursor: pointer;
-    width: 100%;
     text-transform: uppercase;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
 }
 
+.btn-action-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    border: 1px solid #fca5a5;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* RECAP SCREEN (SOLA LETTURA) */
 #recap-screen {
     display: none;
     max-width: 1200px;
@@ -636,19 +720,8 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
 .voti-table th, .voti-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--card-border); font-size: 11px; }
 .voti-table th { background: #334155; color: var(--text-muted); text-transform: uppercase; font-size: 9px; }
 
-.bonus-icon-group {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    flex-wrap: wrap;
-}
-
-.fanta-icon-img {
-    height: 18px;
-    width: auto;
-    vertical-align: middle;
-    display: inline-block;
-}
+.bonus-icon-group { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.fanta-icon-img { height: 18px; width: auto; vertical-align: middle; display: inline-block; }
 
 .totale-punteggio {
     background: linear-gradient(135deg, #f59e0b, #d97706);
@@ -659,42 +732,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
     padding: 10px;
     border-radius: 8px;
     margin-top: 12px;
-}
-
-/* PULSANTI DI AZIONE FINALI ED ELEGANTE BOTTONE DI CANCELLAZIONE */
-.recap-header-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-    background: rgba(15, 23, 42, 0.6);
-    padding: 12px 16px;
-    border-radius: 12px;
-    border: 1px solid var(--card-border);
-    margin-bottom: 15px;
-    flex-wrap: wrap;
-}
-
-.btn-restart-rosa {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    color: white;
-    border: 1px solid #fca5a5;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 800;
-    cursor: pointer;
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.2s ease;
-    box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
-}
-
-.btn-restart-rosa:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0 18px rgba(239, 68, 68, 0.7);
 }
 
 /* OVERLAY LOGIN/REGISTRAZIONE E RECUPERO PASSWORD */
@@ -784,11 +821,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
     cursor: pointer;
     color: var(--text-muted);
     font-size: 14px;
-    transition: color 0.2s ease;
-}
-
-.toggle-password:hover {
-    color: var(--accent-blue);
 }
 
 .forgot-password-link {
@@ -905,34 +937,80 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
   </div>
 </div>
 
+<!-- LANDING PAGE / SCHERMATA DI BENVENUTO -->
+<div id="welcome-screen">
+    <!-- BANNER COUNTDOWN SPECIALE -->
+    <div class="deadline-banner">
+        <div class="deadline-info">
+            <i class="fa-solid fa-stopwatch"></i>
+            <span id="welcome-deadline-text">Iscrivi la tua squadra alla prossima giornata, entro:</span>
+        </div>
+        <div class="countdown-timer">
+            <div class="countdown-box"><div class="countdown-number" id="w-cd-days">00</div><div class="countdown-label">Giorni</div></div>
+            <div class="countdown-dots">:</div>
+            <div class="countdown-box"><div class="countdown-number" id="w-cd-hours">00</div><div class="countdown-label">Ore</div></div>
+            <div class="countdown-dots">:</div>
+            <div class="countdown-box"><div class="countdown-number" id="w-cd-mins">00</div><div class="countdown-label">Minuti</div></div>
+            <div class="countdown-dots">:</div>
+            <div class="countdown-box"><div class="countdown-number" id="w-cd-secs">00</div><div class="countdown-label">Secondi</div></div>
+        </div>
+    </div>
+
+    <div class="welcome-card">
+        <div class="welcome-title" id="welcome-greeting">Benvenuto nel Fantacalcio Draft!</div>
+        <p style="color:var(--text-muted); font-size:13px; line-height:1.6;">
+            Sfida gli altri fantallenatori nella prossima giornata di campionato! Costruisci le tue rose tramite il sistema di Draft live, seleziona il modulo tattico e schiera i tuoi titolari prima del fischio d'inizio.
+        </p>
+
+        <div class="rules-grid">
+            <div class="rule-box">
+                <i class="fa-solid fa-ticket"></i>
+                <h4 style="color:#fff; font-size:14px; margin-bottom:4px;">3 Gettoni Settimanali</h4>
+                <p style="color:var(--text-muted); font-size:11px; margin:0;">Ogni settimana hai 3 gettoni per schierare fino a 3 squadre differenti con nomi diversi.</p>
+            </div>
+            <div class="rule-box">
+                <i class="fa-solid fa-arrows-rotate"></i>
+                <h4 style="color:#fff; font-size:14px; margin-bottom:4px;">Draft Illimitati</h4>
+                <p style="color:var(--text-muted); font-size:11px; margin:0;">Puoi fare quanti tentativi di draft desideri. Il gettone viene consumato solo quando confermi la squadra!</p>
+            </div>
+            <div class="rule-box">
+                <i class="fa-solid fa-lock"></i>
+                <h4 style="color:#fff; font-size:14px; margin-bottom:4px;">Salvataggio Definitivo</h4>
+                <p style="color:var(--text-muted); font-size:11px; margin:0;">Una volta convalidata la formazione, la squadra è salvata ed entrerà ufficialmente in gara.</p>
+            </div>
+        </div>
+
+        <div class="tokens-status-box">
+            <div class="token-badge"><i class="fa-solid fa-coins"></i> GETTONI RIMASTI: <span id="tokens-count-display">3 / 3</span></div>
+            <div id="new-team-creation-area">
+                <p style="font-size:12px; color:#fff; font-weight:700; margin-bottom:10px;">Inserisci il nome della tua nuova squadra per iniziare un draft:</p>
+                <div style="display:flex; justify-content:center; gap:10px; max-width:450px; margin:0 auto; flex-wrap:wrap;">
+                    <input type="text" id="new-team-name-input" placeholder="es. Real Fanta 1" style="padding:10px; border-radius:8px; border:1px solid var(--card-border); background:#0f172a; color:#fff; font-size:13px; flex:1; min-width:200px;">
+                    <button onclick="preparaEAvviaDraft()" class="btn-action-primary"><i class="fa-solid fa-play"></i> INIZIA DRAFT</button>
+                </div>
+            </div>
+            <div id="tokens-exhausted-msg" style="display:none; color:var(--accent-gold); font-weight:700; font-size:13px; margin-top:10px;">
+                ⚠️ Hai utilizzato tutti i 3 gettoni a disposizione per questa giornata!
+            </div>
+        </div>
+
+        <div style="margin-top:25px;">
+            <h3 style="font-size:15px; color:#fff; border-bottom:1px solid var(--card-border); padding-bottom:6px;">Le Tue Squadre Create per Questa Giornata</h3>
+            <div id="created-teams-container" class="created-teams-list">
+                <p style="color:var(--text-muted); font-size:12px;">Nessuna squadra ancora creata per questo turno.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PAGINA PRINCIPALE DEL DRAFT (CAMPO E PICK) -->
 <div id="main-app">
     <div id="left">
-        <!-- BANNER COUNTDOWN SPECIALE -->
-        <div id="deadline-banner" class="deadline-banner">
-            <div class="deadline-info">
-                <i class="fa-solid fa-stopwatch"></i>
-                <span id="deadline-text">Iscrivi la tua squadra alla prossima giornata, entro:</span>
+        <div class="panel" id="draft-panel" style="display:block;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h2>Giocatori Disponibili</h2>
+                <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-arrow-rotate-left"></i> Ricomincia Draft</button>
             </div>
-            <div id="countdown-timer" class="countdown-timer">
-                <div class="countdown-box"><div class="countdown-number" id="cd-days">00</div><div class="countdown-label">Giorni</div></div>
-                <div class="countdown-dots">:</div>
-                <div class="countdown-box"><div class="countdown-number" id="cd-hours">00</div><div class="countdown-label">Ore</div></div>
-                <div class="countdown-dots">:</div>
-                <div class="countdown-box"><div class="countdown-number" id="cd-mins">00</div><div class="countdown-label">Minuti</div></div>
-                <div class="countdown-dots">:</div>
-                <div class="countdown-box"><div class="countdown-number" id="cd-secs">00</div><div class="countdown-label">Secondi</div></div>
-            </div>
-        </div>
-
-        <div class="panel" id="header-panel">
-            <h1><i class="fa-solid fa-gamepad" style="color: var(--accent-green);"></i> Benvenuto al Draft</h1>
-            <div class="start-container">
-                <button id="start-btn" onclick="startDraft()">AVVIA IL TUO DRAFT</button>
-            </div>
-        </div>
-
-        <div class="panel" id="draft-panel" style="display:none;">
-            <h2>Giocatori Disponibili</h2>
             <div id="players" class="players-container"></div>
         </div>
 
@@ -945,8 +1023,8 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
             <h2><i class="fa-solid fa-couch" style="color: var(--accent-gold);"></i> Panchina Ufficiale</h2>
             <div id="panchina-grafica" class="panchina-container"></div>
 
-            <div id="conferma-container" style="display: none; margin-top: 12px;">
-                <button class="btn-conferma" onclick="confermaFormazione()">🔒 CONFERMA E BLOCCA FORMAZIONE</button>
+            <div id="conferma-container" style="display: none; margin-top: 12px; text-align:center;">
+                <button class="btn-action-primary" style="width:100%;" onclick="confermaFormazioneDefinitiva()">🔒 CONFERMA E SALVA FORMAZIONE (Consuma 1 Gettone)</button>
             </div>
         </div>
     </div>
@@ -974,7 +1052,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
         </div>
 
         <div class="panel section-rosa">
-            <h2>La Tua Rosa</h2>
+            <h2 id="current-draft-team-title">La Tua Rosa</h2>
 
             <div class="role-title">
                 <span><i class="fa-solid fa-hand" style="color: var(--role-por);"></i> Portieri</span>
@@ -1003,22 +1081,17 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; font-size: 16px; }
     </div>
 </div>
 
+<!-- SCHERMATA RECAP IN SOLA LETTURA -->
 <div id="recap-screen">
-    <!-- BARRA DEDICATA CON MODIFICA NOME E PULSANTE CANCELLA BEN EVIDENZIATO -->
-    <div class="recap-header-bar">
+    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(15,23,42,0.6); padding:12px; border-radius:12px; border:1px solid var(--card-border); margin-bottom:15px; flex-wrap:wrap; gap:10px;">
         <div>
-            <div style="background:rgba(239, 68, 68, 0.2); border:1px solid var(--accent-red); color:var(--accent-red); padding:3px 10px; border-radius:16px; font-size:10px; font-weight:800; display:inline-block; margin-bottom:4px;">🔒 FORMAZIONE SALVATA E CONVALIDATA</div>
-            <div style="font-size:14px; font-weight:800; color:#fff;">
-                Squadra: <span id="recap-nome-squadra" style="color:var(--accent-neon-green);">-</span>
-            </div>
+            <span style="background:rgba(16, 185, 129, 0.2); border:1px solid var(--accent-neon-green); color:var(--accent-neon-green); padding:3px 10px; border-radius:16px; font-size:10px; font-weight:800;">🔒 SQUADRA SALVATA</span>
+            <h2 id="recap-nome-squadra" style="margin:4px 0 0 0; color:#fff;">-</h2>
         </div>
-        <button onclick="cancellaRosaFirebase()" class="btn-restart-rosa" title="Cancella rosa e ricomincia il draft da zero">
-            <i class="fa-solid fa-trash-can"></i> Cancella Rosa e Ricomincia
-        </button>
+        <button onclick="tornaAllaHome()" class="btn-action-primary" style="padding:8px 14px; font-size:12px;"><i class="fa-solid fa-house"></i> Torna alla Home</button>
     </div>
 
     <div style="text-align: center; margin-bottom: 15px;">
-        <h1>Riepilogo Squadra e Giornata</h1>
         <p style="color: var(--text-muted); font-size:12px;">Modulo Tattico: <strong id="recap-modulo-title" style="color: #fff;">-</strong></p>
     </div>
 
@@ -1072,15 +1145,16 @@ const roleIcons = {
     Attaccante: "fa-solid fa-futbol"
 };
 
+let userSquadre = []; // Lista delle squadre confermate dall'utente per la giornata
+let activeTeamIndex = -1; // Indice della squadra aperta in recap
+
+let tempNomeSquadra = "";
 let rosa = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
 let schierati = [];
 let riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
 
 let turno = 0;
 let moduloSelezionato = "";
-let nomeSquadra = "";
-let votiGiornata = {};
-let formazioneBloccata = false;
 
 // DEFINIZIONE SCADENZA PROSSIMA GIORNATA
 const MATCHDAY_DEADLINE = new Date("2026-10-23T20:45:00"); 
@@ -1091,8 +1165,8 @@ function initCountdown() {
         const diff = MATCHDAY_DEADLINE - now;
 
         if (diff <= 0) {
-            document.getElementById("countdown-timer").innerHTML = "<span style='color:var(--accent-red); font-size:18px; font-weight:900;'>❌ MERCATO CHIUSO</span>";
-            document.getElementById("deadline-text").innerText = "Tempo scaduto! Iscrizione e modifiche bloccate per questa giornata.";
+            document.querySelectorAll(".countdown-timer").forEach(el => el.innerHTML = "<span style='color:var(--accent-red); font-size:18px; font-weight:900;'>❌ MERCATO CHIUSO</span>");
+            document.getElementById("welcome-deadline-text").innerText = "Iscrizione e modifiche bloccate per questa giornata.";
             return;
         }
 
@@ -1101,10 +1175,10 @@ function initCountdown() {
         const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const secs = Math.floor((diff % (1000 * 60)) / 1000);
 
-        document.getElementById("cd-days").innerText = String(days).padStart(2, '0');
-        document.getElementById("cd-hours").innerText = String(hours).padStart(2, '0');
-        document.getElementById("cd-mins").innerText = String(mins).padStart(2, '0');
-        document.getElementById("cd-secs").innerText = String(secs).padStart(2, '0');
+        ["w-cd-days"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(days).padStart(2, '0'); });
+        ["w-cd-hours"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(hours).padStart(2, '0'); });
+        ["w-cd-mins"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(mins).padStart(2, '0'); });
+        ["w-cd-secs"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(secs).padStart(2, '0'); });
     }
 
     updateTimer();
@@ -1130,7 +1204,6 @@ function togglePasswordVisibility(inputId, iconElement) {
     }
 }
 
-// SWITCH TRA SCHERMATE DI AUTENTICAZIONE E RECUPERO PASSWORD
 function switchAuthTab(tab) {
     const loginForm = document.getElementById('login-form');
     const regForm = document.getElementById('register-form');
@@ -1164,7 +1237,7 @@ async function handleForgotPassword(e) {
 
     try {
         await auth.sendPasswordResetEmail(email);
-        alert("✉️ Email di ripristino inviata! Controlla la tua casella di posta elettronica.");
+        alert("✉️ Email di ripristino inviata! Controlla la tua casella di posta.");
         switchAuthTab('login');
     } catch (err) {
         alert("❌ Errore durante l'invio dell'email: " + err.message);
@@ -1188,15 +1261,8 @@ async function handleRegister(e) {
             nome: nome,
             cognome: cognome,
             email: email,
-            creatoIl: new Date(),
-            nomeSquadra: nomeSquadra,
-            rosa: rosa,
-            schierati: schierati,
-            riserveSelezionate: riserveSelezionate,
-            budget: budget,
-            moduloSelezionato: moduloSelezionato,
-            formazioneBloccata: false,
-            votiGiornata: votiGiornata
+            squadre: [],
+            creatoIl: new Date()
         });
 
         alert(`Registrazione completata! Benvenuto, ${username}.`);
@@ -1226,7 +1292,8 @@ auth.onAuthStateChanged(async (user) => {
         modal.style.display = 'none';
         globalHeader.style.display = 'flex';
         document.getElementById('user-display-name').innerText = user.displayName || user.email;
-        await caricaDatiSquadraCloud();
+        document.getElementById('welcome-greeting').innerText = `Bentornato, ${user.displayName || 'Fantallenatore'}!`;
+        await caricaDatiUtenteCloud();
     } else {
         currentUser = null;
         modal.style.display = 'flex';
@@ -1240,81 +1307,118 @@ function logout() {
     }
 }
 
-async function salvaSquadraCloud() {
-    if (!currentUser) return;
-    try {
-        await db.collection("utenti").doc(currentUser.uid).set({
-            nomeSquadra: nomeSquadra,
-            rosa: rosa,
-            schierati: schierati,
-            riserveSelezionate: riserveSelezionate,
-            budget: budget,
-            moduloSelezionato: moduloSelezionato,
-            formazioneBloccata: formazioneBloccata,
-            votiGiornata: votiGiornata,
-            ultimoAggiornamento: new Date()
-        }, { merge: true });
-    } catch (err) {
-        console.error("Errore salvataggio Cloud:", err);
-    }
-}
-
-async function caricaDatiSquadraCloud() {
+async function caricaDatiUtenteCloud() {
     if (!currentUser) return;
     try {
         const doc = await db.collection("utenti").doc(currentUser.uid).get();
-        if (doc.exists && doc.data().rosa && Object.keys(doc.data().rosa).length > 0) {
-            const data = doc.data();
-            nomeSquadra = data.nomeSquadra || "";
-            rosa = data.rosa;
-            schierati = data.schierati || [];
-            riserveSelezionate = data.riserveSelezionate || { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
-            budget = data.budget ?? 600;
-            moduloSelezionato = data.moduloSelezionato || "";
-            formazioneBloccata = data.formazioneBloccata || true;
-            votiGiornata = data.votiGiornata || {};
-
-            updateDashboardCounters();
-            
-            if (moduloSelezionato) {
-                ripristinaCampoTattico();
-            }
-
-            renderSlots();
-            renderPanchinaGrafica();
-            showFinalRecap();
+        if (doc.exists && doc.data().squadre) {
+            userSquadre = doc.data().squadre || [];
+        } else {
+            userSquadre = [];
         }
+        renderWelcomeScreen();
     } catch (err) {
-        console.error("Errore caricamento Cloud:", err);
+        console.error("Errore caricamento dati utente:", err);
     }
 }
 
-function ripristinaCampoTattico() {
-    if (!moduloSelezionato) return;
+function renderWelcomeScreen() {
+    document.getElementById("welcome-screen").style.display = "block";
+    document.getElementById("main-app").style.display = "none";
+    document.getElementById("recap-screen").style.display = "none";
 
-    const [D, C, A] = moduloSelezionato.split("-").map(n => parseInt(n));
-    const campo = document.getElementById("campo");
-    campo.innerHTML = "";
+    let gettoniRimasti = 3 - userSquadre.length;
+    document.getElementById("tokens-count-display").innerText = `${gettoniRimasti} / 3`;
 
-    let isMobile = window.innerWidth < 600;
-    let topPOR = isMobile ? 15 : 30;
-    let topDIF = isMobile ? 105 : 150;
-    let topCEN = isMobile ? 215 : 310;
-    let topATT = isMobile ? 325 : 470;
+    if (gettoniRimasti <= 0) {
+        document.getElementById("new-team-creation-area").style.display = "none";
+        document.getElementById("tokens-exhausted-msg").style.display = "block";
+    } else {
+        document.getElementById("new-team-creation-area").style.display = "block";
+        document.getElementById("tokens-exhausted-msg").style.display = "none";
+    }
 
-    createDropZone(campo, "Portiere", topPOR, 50);
-    distribuisciOrizzontalmente(D).forEach(left => createDropZone(campo, "Difensore", topDIF, left));
-    distribuisciOrizzontalmente(C).forEach(left => createDropZone(campo, "Centrocampista", topCEN, left));
-    distribuisciOrizzontalmente(A).forEach(left => createDropZone(campo, "Attaccante", topATT, left));
+    const container = document.getElementById("created-teams-container");
+    container.innerHTML = "";
 
-    const dropzones = campo.querySelectorAll(".dropzone");
-    schierati.forEach(p => {
-        const libera = Array.from(dropzones).find(z => z.dataset.ruolo === p.ruolo && z.dataset.player === "");
-        if (libera) {
-            libera.innerText = p.nome;
-            libera.dataset.player = p.nome;
-        }
+    if (userSquadre.length === 0) {
+        container.innerHTML = `<p style="color:var(--text-muted); font-size:12px;">Nessuna squadra ancora creata per questo turno.</p>`;
+        return;
+    }
+
+    userSquadre.forEach((sq, idx) => {
+        const item = document.createElement("div");
+        item.className = "team-card-item";
+        item.innerHTML = `
+            <div>
+                <strong style="color:var(--accent-neon-green); font-size:13px;">${sq.nomeSquadra}</strong>
+                <div style="font-size:10px; color:var(--text-muted);">Modulo: ${sq.moduloSelezionato}</div>
+            </div>
+            <button onclick="apriRecapSquadra(${idx})" class="btn-action-primary" style="padding:5px 10px; font-size:10px;">
+                <i class="fa-solid fa-eye"></i> Vedi Squadra
+            </button>
+        `;
+        container.appendChild(item);
     });
+}
+
+function preparaEAvviaDraft() {
+    if (new Date() >= MATCHDAY_DEADLINE) {
+        alert("⚠️ Tempo scaduto! L'iscrizione per questa giornata è chiusa.");
+        return;
+    }
+
+    if (userSquadre.length >= 3) {
+        alert("Hai già utilizzato tutti i 3 gettoni disponibili per questa giornata!");
+        return;
+    }
+
+    const inputName = document.getElementById("new-team-name-input").value.trim();
+    if (!inputName) {
+        alert("Inserisci un nome per la tua nuova squadra!");
+        return;
+    }
+
+    let giaEsistente = userSquadre.some(s => s.nomeSquadra.toLowerCase() === inputName.toLowerCase());
+    if (giaEsistente) {
+        alert("Hai già creato una squadra con questo nome! Scegli un nome differente.");
+        return;
+    }
+
+    if (customPlayersList.length < 24) {
+        alert("Caricamento giocatori in corso o file giocatori.xlsx non valido.");
+        return;
+    }
+
+    tempNomeSquadra = inputName;
+    resetDraftState();
+
+    document.getElementById("welcome-screen").style.display = "none";
+    document.getElementById("main-app").style.display = "flex";
+    document.getElementById("current-draft-team-title").innerText = `Rosa: ${tempNomeSquadra}`;
+
+    nextPick();
+}
+
+function resetDraftState() {
+    budget = 600;
+    turno = 0;
+    moduloSelezionato = "";
+    rosa = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
+    schierati = [];
+    riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
+    availablePlayers = [...customPlayersList];
+    document.getElementById("campo").innerHTML = "";
+    document.getElementById("panchina-grafica").innerHTML = "";
+    document.getElementById("conferma-container").style.display = "none";
+    updateDashboardCounters();
+}
+
+function annullaERicominciaDraft() {
+    if (confirm("Vuoi davvero ricominciare il draft? I giocatori selezionati verranno azzerati (nessun gettone verrà consumato).")) {
+        resetDraftState();
+        nextPick();
+    }
 }
 
 async function caricaGiocatoriDaExcel() {
@@ -1373,26 +1477,6 @@ function updateDashboardCounters() {
 function updateProgressBar() {
     let percentage = (turno / 24) * 100;
     document.getElementById("progress-bar").style.width = percentage + "%";
-}
-
-function startDraft() {
-    if (new Date() >= MATCHDAY_DEADLINE) {
-        alert("⚠️ Impossibile avviare il draft: il tempo utile per iscriversi a questa giornata è scaduto!");
-        return;
-    }
-
-    if (customPlayersList.length < 24) {
-        alert("Caricamento giocatori in corso o file giocatori.xlsx non valido.");
-        return;
-    }
-
-    document.getElementById("header-panel").style.display = "none";
-    document.getElementById("draft-panel").style.display = "block";
-    
-    budget = 600;
-    updateDashboardCounters();
-    availablePlayers = [...customPlayersList];
-    nextPick();
 }
 
 function nextPick() {
@@ -1492,7 +1576,6 @@ function draft(nome) {
     availablePlayers = availablePlayers.filter(x => x.nome !== nome);
 
     renderSlots();
-    salvaSquadraCloud();
     nextPick();
 }
 
@@ -1526,7 +1609,7 @@ function renderSlots() {
 }
 
 function schieraGiocatore(playerObj, ruolo) {
-    if (formazioneBloccata || new Date() >= MATCHDAY_DEADLINE) return;
+    if (new Date() >= MATCHDAY_DEADLINE) return;
 
     if (!moduloSelezionato) {
         alert("Scegli prima il modulo per schierare la formazione");
@@ -1559,20 +1642,14 @@ function schieraGiocatore(playerObj, ruolo) {
 
     renderSlots();
     renderPanchinaGrafica();
-    salvaSquadraCloud();
 }
 
 function showModuloSelection() {
     document.getElementById("draft-panel").innerHTML = `
-        <h3 style="text-align:center;">Draft Completato!</h3>
-        <p style="text-align:center; font-size:12px; color: var(--accent-gold); font-weight: 700;">Assegna un nome alla tua squadra e seleziona il modulo tattico:</p>
+        <h3 style="text-align:center;">Draft Completato per ${tempNomeSquadra}!</h3>
+        <p style="text-align:center; font-size:12px; color: var(--accent-gold); font-weight: 700;">Seleziona il modulo tattico per schierare la tua formazione:</p>
         
-        <div class="input-group" style="max-width: 300px; margin: 0 auto 12px auto;">
-            <label>Nome Squadra</label>
-            <input type="text" id="nome-squadra-input" value="${nomeSquadra}" placeholder="es. FantaReal 2026" style="padding: 8px; border-radius: 8px; background: #1e293b; color: white; border:1px solid var(--card-border); width: 100%;">
-        </div>
-
-        <select id="modulo" onchange="setModulo()" style="display:block; margin: 0 auto; padding: 8px; border-radius: 8px; background: #1e293b; color: white; border:1px solid var(--card-border);">
+        <select id="modulo" onchange="setModulo()" style="display:block; margin: 0 auto 10px auto; padding: 8px; border-radius: 8px; background: #1e293b; color: white; border:1px solid var(--card-border);">
             <option value="">-- Scegli Modulo --</option>
             <option value="4-4-2">4-4-2</option>
             <option value="4-3-3">4-3-3</option>
@@ -1580,6 +1657,10 @@ function showModuloSelection() {
             <option value="4-5-1">4-5-1</option>
             <option value="3-5-2">3-5-2</option>
         </select>
+        
+        <div style="text-align:center; margin-top:12px;">
+            <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-trash-can"></i> Scarta Rosa e Ricomincia Draft</button>
+        </div>
     `;
 }
 
@@ -1594,16 +1675,6 @@ function setModulo() {
         return;
     }
 
-    const inputNome = document.getElementById("nome-squadra-input");
-    if (inputNome) {
-        nomeSquadra = inputNome.value.trim();
-        if (!nomeSquadra) {
-            alert("Inserisci un nome valido per la squadra!");
-            document.getElementById("modulo").value = "";
-            return;
-        }
-    }
-
     moduloSelezionato = document.getElementById("modulo").value;
     if (!moduloSelezionato) return;
 
@@ -1615,7 +1686,25 @@ function setModulo() {
     renderSlots();
     renderPanchinaGrafica();
     document.getElementById("conferma-container").style.display = "block";
-    salvaSquadraCloud();
+}
+
+function ripristinaCampoTattico() {
+    if (!moduloSelezionato) return;
+
+    const [D, C, A] = moduloSelezionato.split("-").map(n => parseInt(n));
+    const campo = document.getElementById("campo");
+    campo.innerHTML = "";
+
+    let isMobile = window.innerWidth < 600;
+    let topPOR = isMobile ? 15 : 30;
+    let topDIF = isMobile ? 105 : 150;
+    let topCEN = isMobile ? 215 : 310;
+    let topATT = isMobile ? 325 : 470;
+
+    createDropZone(campo, "Portiere", topPOR, 50);
+    distribuisciOrizzontalmente(D).forEach(left => createDropZone(campo, "Difensore", topDIF, left));
+    distribuisciOrizzontalmente(C).forEach(left => createDropZone(campo, "Centrocampista", topCEN, left));
+    distribuisciOrizzontalmente(A).forEach(left => createDropZone(campo, "Attaccante", topATT, left));
 }
 
 function createDropZone(campo, ruolo, top, left) {
@@ -1627,13 +1716,12 @@ function createDropZone(campo, ruolo, top, left) {
     dz.dataset.player = "";
 
     dz.onclick = () => {
-        if (formazioneBloccata || new Date() >= MATCHDAY_DEADLINE || !dz.dataset.player) return;
+        if (new Date() >= MATCHDAY_DEADLINE || !dz.dataset.player) return;
         schierati = schierati.filter(p => p.nome !== dz.dataset.player);
         dz.innerText = "";
         dz.dataset.player = "";
         renderSlots();
         renderPanchinaGrafica();
-        salvaSquadraCloud();
     };
     campo.appendChild(dz);
 }
@@ -1677,7 +1765,7 @@ function renderPanchinaGrafica() {
 }
 
 function togglePanchina(ruolo, nomePlayer) {
-    if (formazioneBloccata || new Date() >= MATCHDAY_DEADLINE) return;
+    if (new Date() >= MATCHDAY_DEADLINE) return;
 
     if (!moduloSelezionato) {
         alert("Scegli prima il modulo per schierare la formazione");
@@ -1700,10 +1788,9 @@ function togglePanchina(ruolo, nomePlayer) {
 
     renderSlots();
     renderPanchinaGrafica();
-    salvaSquadraCloud();
 }
 
-function confermaFormazione() {
+async function confermaFormazioneDefinitiva() {
     if (new Date() >= MATCHDAY_DEADLINE) {
         alert("⚠️ Tempo scaduto! Non è più possibile confermare la formazione.");
         return;
@@ -1711,23 +1798,50 @@ function confermaFormazione() {
 
     if (schierati.length < 11) return alert("Devi schierare tutti gli 11 titolari!");
 
-    if (confirm("Confermi la formazione? L'operazione è definitiva.")) {
-        formazioneBloccata = true;
-        showFinalRecap();
-        salvaSquadraCloud();
+    if (confirm(`Confermi la squadra "${tempNomeSquadra}"? Questa operazione scalerà 1 Gettone ed è definitiva.`)) {
+        const nuovaSquadra = {
+            nomeSquadra: tempNomeSquadra,
+            rosa: rosa,
+            schierati: schierati,
+            riserveSelezionate: riserveSelezionate,
+            budget: budget,
+            moduloSelezionato: moduloSelezionato,
+            formazioneBloccata: true,
+            votiGiornata: {},
+            creataIl: new Date()
+        };
+
+        userSquadre.push(nuovaSquadra);
+
+        try {
+            await db.collection("utenti").doc(currentUser.uid).update({
+                squadre: userSquadre
+            });
+
+            alert(`🎉 Squadra "${tempNomeSquadra}" convalidata e salvata con successo!`);
+            renderWelcomeScreen();
+
+        } catch (err) {
+            alert("❌ Errore durante il salvataggio: " + err.message);
+        }
     }
 }
 
-function showFinalRecap() {
+function apriRecapSquadra(index) {
+    activeTeamIndex = index;
+    const sq = userSquadre[index];
+
+    document.getElementById("welcome-screen").style.display = "none";
     document.getElementById("main-app").style.display = "none";
     document.getElementById("recap-screen").style.display = "block";
-    document.getElementById("recap-nome-squadra").innerText = nomeSquadra || 'N/D';
-    document.getElementById("recap-modulo-title").innerText = moduloSelezionato || 'N/D';
+
+    document.getElementById("recap-nome-squadra").innerText = sq.nomeSquadra;
+    document.getElementById("recap-modulo-title").innerText = sq.moduloSelezionato;
 
     const recapCampo = document.getElementById("recap-campo");
     recapCampo.innerHTML = "";
     
-    const [D, C, A] = (moduloSelezionato || "4-4-2").split("-").map(n => parseInt(n));
+    const [D, C, A] = sq.moduloSelezionato.split("-").map(n => parseInt(n));
     let isMobile = window.innerWidth < 600;
     let topPOR = isMobile ? 15 : 30;
     let topDIF = isMobile ? 105 : 150;
@@ -1740,7 +1854,7 @@ function showFinalRecap() {
     distribuisciOrizzontalmente(A).forEach(left => createStaticDropZone(recapCampo, "Attaccante", topATT, left));
 
     const dropzones = recapCampo.querySelectorAll(".dropzone");
-    schierati.forEach(p => {
+    sq.schierati.forEach(p => {
         const libera = Array.from(dropzones).find(z => z.dataset.ruolo === p.ruolo && z.dataset.player === "");
         if (libera) {
             libera.innerText = p.nome;
@@ -1752,7 +1866,7 @@ function showFinalRecap() {
     panchinaDiv.innerHTML = "";
 
     ["Portiere", "Difensore", "Centrocampista", "Attaccante"].forEach(ruolo => {
-        const riserve = riserveSelezionate[ruolo] || [];
+        const riserve = sq.riserveSelezionate[ruolo] || [];
         riserve.forEach((ris, i) => {
             const card = document.createElement("div");
             card.className = "recap-bench-card";
@@ -1767,9 +1881,15 @@ function showFinalRecap() {
         });
     });
 
-    if (votiGiornata && Object.keys(votiGiornata).length > 0) {
-        mostraTabellinoVoti();
+    if (sq.votiGiornata && Object.keys(sq.votiGiornata).length > 0) {
+        mostraTabellinoVoti(sq);
+    } else {
+        document.getElementById("tabellino-container").innerHTML = "";
     }
+}
+
+function tornaAllaHome() {
+    renderWelcomeScreen();
 }
 
 function createStaticDropZone(campo, ruolo, top, left) {
@@ -1795,13 +1915,16 @@ function parseColumnVal(row, colNames) {
 }
 
 async function calcolaVotiDaExcelOnline() {
+    if (activeTeamIndex === -1) return;
+    const sq = userSquadre[activeTeamIndex];
+
     const btn = document.getElementById("btn-fetch-voti");
     btn.innerText = "⏳ Lettura voti.xlsx...";
     btn.disabled = true;
 
-    votiGiornata = {};
-    const tutteLeRiserve = Object.values(riserveSelezionate).flat();
-    const tuttiGiocatori = [...schierati, ...tutteLeRiserve];
+    let votiObj = {};
+    const tutteLeRiserve = Object.values(sq.riserveSelezionate).flat();
+    const tuttiGiocatori = [...sq.schierati, ...tutteLeRiserve];
 
     try {
         const response = await fetch("voti.xlsx");
@@ -1830,7 +1953,7 @@ async function calcolaVotiDaExcelOnline() {
                 if (rawFanta === 0 && rawVotoPuro > 0) rawFanta = rawVotoPuro;
 
                 if (rawFanta > 0 || rawVotoPuro > 0) {
-                    votiGiornata[p.nome] = {
+                    votiObj[p.nome] = {
                         voto: rawVotoPuro,
                         fantavoto: rawFanta,
                         sv: false,
@@ -1848,22 +1971,24 @@ async function calcolaVotiDaExcelOnline() {
                 }
             }
 
-            votiGiornata[p.nome] = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
+            votiObj[p.nome] = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
         });
 
-        await salvaSquadraCloud();
+        sq.votiGiornata = votiObj;
+        await db.collection("utenti").doc(currentUser.uid).update({ squadre: userSquadre });
 
     } catch (err) {
         alert("Attenzione: Impossibile leggere voti.xlsx (" + err.message + ").");
         tuttiGiocatori.forEach(p => {
-            votiGiornata[p.nome] = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
+            votiObj[p.nome] = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
         });
+        sq.votiGiornata = votiObj;
     }
 
     btn.innerText = "📊 Carica i Fantavoti di giornata";
     btn.disabled = false;
 
-    mostraTabellinoVoti();
+    mostraTabellinoVoti(sq);
 }
 
 function generaIconeBonusMalus(vInfo) {
@@ -1872,51 +1997,22 @@ function generaIconeBonusMalus(vInfo) {
     let html = `<div class="bonus-icon-group">`;
     let count = 0;
 
-    if (vInfo.gf > 0) {
-        count++;
-        for(let i=0; i < vInfo.gf; i++) html += `<img src="icone/gol.png" class="fanta-icon-img" alt="Gol" title="Gol segnato">`;
-    }
-    if (vInfo.rf > 0) {
-        count++;
-        for(let i=0; i < vInfo.rf; i++) html += `<img src="icone/rigore_segnato.png" class="fanta-icon-img" alt="Rigore Segnato" title="Rigore segnato">`;
-    }
-    if (vInfo.gs > 0) {
-        count++;
-        for(let i=0; i < vInfo.gs; i++) html += `<img src="icone/gol_subito.png" class="fanta-icon-img" alt="Gol Subito" title="Gol subito">`;
-    }
-    if (vInfo.ass > 0) {
-        count++;
-        for(let i=0; i < vInfo.ass; i++) html += `<img src="icone/assist.png" class="fanta-icon-img" alt="Assist" title="Assist">`;
-    }
-    if (vInfo.au > 0) {
-        count++;
-        for(let i=0; i < vInfo.au; i++) html += `<img src="icone/autogol.png" class="fanta-icon-img" alt="Autogol" title="Autogol">`;
-    }
-    if (vInfo.rp > 0) {
-        count++;
-        for(let i=0; i < vInfo.rp; i++) html += `<img src="icone/rigore_parato.png" class="fanta-icon-img" alt="Rigore Parato" title="Rigore parato">`;
-    }
-    if (vInfo.rs > 0) {
-        count++;
-        for(let i=0; i < vInfo.rs; i++) html += `<img src="icone/rigore_sbagliato.png" class="fanta-icon-img" alt="Rigore Sbagliato" title="Rigore sbagliato">`;
-    }
-    if (vInfo.amm === 1) {
-        count++;
-        html += `<img src="icone/ammonizione.png" class="fanta-icon-img" alt="Ammonizione" title="Ammonizione">`;
-    } else if (vInfo.amm >= 2) {
-        count++;
-        html += `<img src="icone/doppia_ammonizione.png" class="fanta-icon-img" alt="Doppia Ammonizione" title="Doppia Ammonizione">`;
-    }
-    if (vInfo.esp > 0) {
-        count++;
-        for(let i=0; i < vInfo.esp; i++) html += `<img src="icone/espulsione.png" class="fanta-icon-img" alt="Espulsione" title="Espulsione">`;
-    }
+    if (vInfo.gf > 0) { count++; for(let i=0; i < vInfo.gf; i++) html += `<img src="icone/gol.png" class="fanta-icon-img" alt="Gol">`; }
+    if (vInfo.rf > 0) { count++; for(let i=0; i < vInfo.rf; i++) html += `<img src="icone/rigore_segnato.png" class="fanta-icon-img" alt="Rigore Segnato">`; }
+    if (vInfo.gs > 0) { count++; for(let i=0; i < vInfo.gs; i++) html += `<img src="icone/gol_subito.png" class="fanta-icon-img" alt="Gol Subito">`; }
+    if (vInfo.ass > 0) { count++; for(let i=0; i < vInfo.ass; i++) html += `<img src="icone/assist.png" class="fanta-icon-img" alt="Assist">`; }
+    if (vInfo.au > 0) { count++; for(let i=0; i < vInfo.au; i++) html += `<img src="icone/autogol.png" class="fanta-icon-img" alt="Autogol">`; }
+    if (vInfo.rp > 0) { count++; for(let i=0; i < vInfo.rp; i++) html += `<img src="icone/rigore_parato.png" class="fanta-icon-img" alt="Rigore Parato">`; }
+    if (vInfo.rs > 0) { count++; for(let i=0; i < vInfo.rs; i++) html += `<img src="icone/rigore_sbagliato.png" class="fanta-icon-img" alt="Rigore Sbagliato">`; }
+    if (vInfo.amm === 1) { count++; html += `<img src="icone/ammonizione.png" class="fanta-icon-img" alt="Ammonizione">`; }
+    else if (vInfo.amm >= 2) { count++; html += `<img src="icone/doppia_ammonizione.png" class="fanta-icon-img" alt="Doppia Ammonizione">`; }
+    if (vInfo.esp > 0) { count++; for(let i=0; i < vInfo.esp; i++) html += `<img src="icone/espulsione.png" class="fanta-icon-img" alt="Espulsione">`; }
 
     html += `</div>`;
     return count > 0 ? html : `<span style="color:var(--text-muted); font-size:10px;">-</span>`;
 }
 
-function mostraTabellinoVoti() {
+function mostraTabellinoVoti(sq) {
     const container = document.getElementById("tabellino-container");
     let html = `<table class="voti-table">
         <thead>
@@ -1931,21 +2027,20 @@ function mostraTabellinoVoti() {
         </thead>
         <tbody>`;
     let totale = 0;
-
     let riserveGiaSubentrate = new Set();
 
-    schierati.forEach(tit => {
-        let vInfo = votiGiornata[tit.nome];
+    sq.schierati.forEach(tit => {
+        let vInfo = sq.votiGiornata[tit.nome];
         let eff = vInfo;
         let note = "<span style='color:var(--accent-green)'>Titolare</span>";
 
         if (!vInfo || vInfo.sv) {
-            let riserveRuolo = riserveSelezionate[tit.ruolo] || [];
+            let riserveRuolo = sq.riserveSelezionate[tit.ruolo] || [];
             let riservaValida = null;
 
             for (let ris of riserveRuolo) {
                 if (!riserveGiaSubentrate.has(ris.nome)) {
-                    let risInfo = votiGiornata[ris.nome];
+                    let risInfo = sq.votiGiornata[ris.nome];
                     if (risInfo && !risInfo.sv) {
                         riservaValida = { obj: ris, info: risInfo };
                         riserveGiaSubentrate.add(ris.nome);
@@ -1981,40 +2076,6 @@ function mostraTabellinoVoti() {
     <div class="totale-punteggio">🏆 Totale Squadra: ${totale} Punti</div>`;
 
     container.innerHTML = html;
-}
-
-async function cancellaRosaFirebase() {
-    if (!currentUser) {
-        alert("Devi accedere per poter eliminare i dati!");
-        return;
-    }
-
-    if (new Date() >= MATCHDAY_DEADLINE) {
-        alert("⚠️ Impossibile cancellare o modificare la rosa: la giornata di campionato è già iniziata.");
-        return;
-    }
-
-    if (!confirm("⚠️ Sei sicuro di voler cancellare definitivamente la tua rosa salvata e ricominciare il draft? L'operazione non può essere annullata.")) return;
-
-    try {
-        await db.collection("utenti").doc(currentUser.uid).update({
-            nomeSquadra: firebase.firestore.FieldValue.delete(),
-            rosa: firebase.firestore.FieldValue.delete(),
-            schierati: firebase.firestore.FieldValue.delete(),
-            riserveSelezionate: firebase.firestore.FieldValue.delete(),
-            budget: firebase.firestore.FieldValue.delete(),
-            moduloSelezionato: firebase.firestore.FieldValue.delete(),
-            formazioneBloccata: firebase.firestore.FieldValue.delete(),
-            votiGiornata: firebase.firestore.FieldValue.delete(),
-            ultimoAggiornamento: new Date()
-        });
-
-        alert("🗑️ Rosa eliminata con successo! Puoi iniziare un nuovo draft.");
-        location.reload();
-
-    } catch (err) {
-        alert("❌ Errore durante l'eliminazione: " + err.message);
-    }
 }
 </script>
 </body>
