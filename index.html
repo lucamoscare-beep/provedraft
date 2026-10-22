@@ -55,6 +55,17 @@ body {
 
 h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 
+/* 2. ANIMAZIONI GLOBALI */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseGlow {
+    0% { box-shadow: 0 0 5px rgba(74, 222, 128, 0.4); }
+    100% { box-shadow: 0 0 18px rgba(74, 222, 128, 0.8); }
+}
+
 /* NAVBAR GLOBALE */
 .global-header {
     max-width: 1450px;
@@ -78,6 +89,11 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     font-size: 15px;
     color: #fff;
     cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.global-header .logo-area:hover {
+    transform: scale(1.03);
 }
 
 .global-header .user-area {
@@ -118,6 +134,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 .btn-logout:hover {
     background: var(--accent-red);
     box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+    transform: translateY(-1px);
 }
 
 /* COUNTDOWN BANNER SPECIALE E IMPATTANTE */
@@ -282,6 +299,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     max-width: 1100px;
     margin: 0 auto;
     display: block;
+    animation: fadeInUp 0.4s ease-out;
 }
 
 .welcome-card {
@@ -346,6 +364,12 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     display: flex;
     justify-content: space-between;
     align-items: center;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.team-card-item:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent-blue);
 }
 
 .home-nav-buttons {
@@ -420,6 +444,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     gap: 12px;
     max-width: 1450px;
     margin: 0 auto;
+    animation: fadeInUp 0.4s ease-out;
 }
 
 #left { display: flex; flex-direction: column; order: 2; }
@@ -514,49 +539,58 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     transition: width 0.3s ease;
 }
 
+/* 1. MIGLIORAMENTO CARD GIOCATORI DRAFT */
 .players-container {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 5px;
+    gap: 8px;
     justify-content: center;
 }
 
 @media (max-width: 768px) {
-    .players-container { gap: 4px; }
+    .players-container { gap: 6px; }
 }
 
 .player-card {
     background: linear-gradient(145deg, #1e293b, #0f172a);
     border: 1px solid var(--card-border);
-    padding: 6px 3px;
-    border-radius: 8px;
+    padding: 10px 6px;
+    border-radius: 10px;
     text-align: center;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    animation: fadeInUp 0.3s ease-out;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.player-card.Portiere { border-top: 3px solid var(--role-por); }
-.player-card.Difensore { border-top: 3px solid var(--role-dif); }
-.player-card.Centrocampista { border-top: 3px solid var(--role-cen); }
-.player-card.Attaccante { border-top: 3px solid var(--role-att); }
+.player-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+}
 
-.player-name { font-weight: 800; font-size: 10px; color: #fff; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.player-team { font-size: 8px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 2px; }
-.player-role { font-size: 8px; font-weight: 700; margin-bottom: 2px; display: inline-block; padding: 1px 4px; border-radius: 3px; background: rgba(255,255,255,0.06); }
+.player-card.Portiere { border-top: 4px solid var(--role-por); }
+.player-card.Difensore { border-top: 4px solid var(--role-dif); }
+.player-card.Centrocampista { border-top: 4px solid var(--role-cen); }
+.player-card.Attaccante { border-top: 4px solid var(--role-att); }
+
+.player-name { font-weight: 800; font-size: 11px; color: #fff; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.player-team { font-size: 9px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+.player-role { font-size: 8px; font-weight: 800; margin-bottom: 4px; display: inline-block; padding: 2px 5px; border-radius: 4px; background: rgba(255,255,255,0.08); }
 
 .valore-badge-draft {
     background: linear-gradient(135deg, #fbbf24, #f59e0b);
     color: #0f172a;
     font-weight: 900;
-    padding: 2px 4px;
-    border-radius: 4px;
-    font-size: 10px;
+    padding: 3px 6px;
+    border-radius: 6px;
+    font-size: 11px;
     display: inline-block;
-    margin: 2px 0;
+    margin: 3px 0;
+    box-shadow: 0 2px 6px rgba(245, 158, 11, 0.3);
 }
 
 .valore-badge-slot {
@@ -572,15 +606,23 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 .draft-btn {
     background: linear-gradient(135deg, #3b82f6, #2563eb);
     color: white;
-    padding: 4px 2px;
+    padding: 6px 4px;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
-    margin-top: 2px;
+    margin-top: 4px;
     font-weight: 800;
-    font-size: 9px;
+    font-size: 10px;
     text-transform: uppercase;
     width: 100%;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+.draft-btn:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.5);
 }
 
 .role-title {
@@ -633,7 +675,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 .slot-tag.campo { background: rgba(16, 185, 129, 0.25); color: var(--accent-neon-green); border: 1px solid var(--accent-green); }
 .slot-tag.panchina { background: rgba(251, 191, 36, 0.25); color: var(--accent-gold); border: 1px solid var(--accent-gold); }
 
-/* CAMPO DA GIOCO */
+/* 3. CAMPO DA GIOCO DINAMICO */
 .campo-style {
     width: 100%;
     height: 420px;
@@ -670,14 +712,14 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 
 .pos {
     position: absolute;
-    width: 84px;
+    width: 80px;
     height: 30px;
-    background: rgba(15, 23, 42, 0.92);
-    border: 1px solid var(--accent-blue);
+    background: rgba(15, 23, 42, 0.94);
+    border: 1.5px solid var(--accent-blue);
     border-radius: 6px;
     text-align: center;
-    line-height: 30px;
-    font-size: 9.5px;
+    line-height: 28px;
+    font-size: 9px;
     font-weight: 700;
     color: #fff;
     cursor: pointer;
@@ -687,11 +729,24 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     text-overflow: ellipsis;
     padding: 0 3px;
     box-shadow: 0 3px 8px rgba(0,0,0,0.6);
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pos:hover {
+    transform: translateX(-50%) scale(1.06);
+    border-color: var(--accent-neon-green);
+    box-shadow: 0 0 12px rgba(74, 222, 128, 0.5);
+}
+
+.pos.filled {
+    border-color: var(--accent-neon-green);
+    background: rgba(15, 23, 42, 0.96);
+    animation: pulseGlow 2s infinite alternate;
 }
 
 @media (min-width: 600px) {
     .campo-style { height: 550px; }
-    .pos { width: 110px; height: 36px; line-height: 36px; font-size: 11px; }
+    .pos { width: 110px; height: 36px; line-height: 34px; font-size: 11px; }
 }
 
 /* PANCHINA GRAFICA */
@@ -734,6 +789,11 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     justify-content: space-between;
     cursor: pointer;
     position: relative;
+    transition: all 0.2s ease;
+}
+
+.bench-card-slot:hover {
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .bench-card-slot.filled {
@@ -772,6 +832,12 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     align-items: center;
     gap: 8px;
     justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.btn-action-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
 }
 
 .btn-action-danger {
@@ -787,6 +853,12 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-action-danger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
 /* RECAP SCREEN (SOLA LETTURA) */
@@ -798,6 +870,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     border: 1px solid var(--card-border);
     padding: 12px;
     border-radius: 14px;
+    animation: fadeInUp 0.4s ease-out;
 }
 
 .recap-content { display: flex; flex-direction: column; gap: 15px; }
@@ -834,15 +907,19 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     -webkit-overflow-scrolling: touch;
 }
 
+/* 4. TABELLA E RIGHE A CONTRASTO */
 .voti-table {
     width: 100%;
     border-collapse: collapse;
     background: rgba(30, 41, 59, 0.9);
-    border-radius: 6px;
+    border-radius: 8px;
     margin-top: 8px;
+    overflow: hidden;
 }
-.voti-table th, .voti-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--card-border); font-size: 11px; }
-.voti-table th { background: #334155; color: var(--text-muted); text-transform: uppercase; font-size: 9px; }
+.voti-table th, .voti-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--card-border); font-size: 11px; }
+.voti-table th { background: #1e293b; color: var(--text-muted); text-transform: uppercase; font-size: 9px; font-weight: 800; letter-spacing: 0.5px; }
+.voti-table tbody tr:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
+.voti-table tbody tr:hover { background: rgba(255, 255, 255, 0.05); }
 
 .bonus-icon-group { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; }
 .fanta-icon-img { height: 18px; width: auto; vertical-align: middle; display: inline-block; }
@@ -868,6 +945,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     padding: 20px;
     border-radius: 16px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    animation: fadeInUp 0.4s ease-out;
 }
 
 .classifica-header {
@@ -993,8 +1071,15 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     letter-spacing: 0.5px;
 }
 
+.classifica-table tbody tr:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
+
 .classifica-table tr:hover {
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.classifica-table tr.current-user-row {
+    background: rgba(16, 185, 129, 0.15) !important;
+    border-left: 3px solid var(--accent-neon-green);
 }
 
 .rank-cell {
@@ -1036,7 +1121,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     box-shadow: 0 0 10px rgba(96, 165, 250, 0.4);
 }
 
-/* OVERLAY LOGIN/REGISTRAZIONE E RECUPERO PASSWORD */
+/* 5. INPUT & FORM MODERNI CON GLOW EFFECT */
 .auth-overlay {
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
@@ -1084,7 +1169,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 .input-group {
     display: flex;
     flex-direction: column;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
     text-align: left;
 }
 
@@ -1093,10 +1178,24 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     color: var(--text-muted);
     text-transform: uppercase;
     font-weight: 700;
-    margin-bottom: 4px;
+    margin-bottom: 5px;
 }
 
-.input-group input {
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-wrapper i.input-icon {
+    position: absolute;
+    left: 12px;
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.input-group input, .styled-input {
+    width: 100%;
     padding: 10px 12px;
     border-radius: 8px;
     background: rgba(15, 23, 42, 0.8);
@@ -1104,12 +1203,24 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     color: #fff;
     font-size: 13px;
     outline: none;
+    transition: all 0.2s ease;
+}
+
+.input-wrapper input {
+    padding-left: 36px;
+}
+
+.input-group input:focus, .styled-input:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
+    background: rgba(15, 23, 42, 0.95);
 }
 
 .password-input-container {
     position: relative;
     display: flex;
     align-items: center;
+    width: 100%;
 }
 
 .password-input-container input {
@@ -1146,6 +1257,12 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     cursor: pointer;
     margin-top: 10px;
     text-transform: uppercase;
+    transition: all 0.2s ease;
+}
+
+.btn-auth:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
 }
 </style>
 </head>
@@ -1181,12 +1298,18 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
       <h2>Accedi al Fantacalcio</h2>
       <div class="input-group">
         <label>Email</label>
-        <input type="email" id="login-email" required placeholder="La tua email">
+        <div class="input-wrapper">
+          <i class="fa-solid fa-envelope input-icon"></i>
+          <input type="email" id="login-email" required placeholder="La tua email">
+        </div>
       </div>
       <div class="input-group password-wrapper">
         <label>Password</label>
         <div class="password-input-container">
-          <input type="password" id="login-password" required placeholder="••••••••">
+          <div class="input-wrapper" style="width: 100%;">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" id="login-password" required placeholder="••••••••">
+          </div>
           <i class="fa-solid fa-eye toggle-password" onclick="togglePasswordVisibility('login-password', this)"></i>
         </div>
         <span class="forgot-password-link" onclick="switchAuthTab('forgot')">Password dimenticata?</span>
@@ -1199,24 +1322,39 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
       <h2>Crea il tuo Account</h2>
       <div class="input-group">
         <label>Nome Utente (Username)</label>
-        <input type="text" id="reg-username" required placeholder="es. Bomber99">
+        <div class="input-wrapper">
+          <i class="fa-solid fa-user-ninja input-icon"></i>
+          <input type="text" id="reg-username" required placeholder="es. Bomber99">
+        </div>
       </div>
       <div class="input-group">
         <label>Nome</label>
-        <input type="text" id="reg-nome" required placeholder="Mario">
+        <div class="input-wrapper">
+          <i class="fa-solid fa-id-card input-icon"></i>
+          <input type="text" id="reg-nome" required placeholder="Mario">
+        </div>
       </div>
       <div class="input-group">
         <label>Cognome</label>
-        <input type="text" id="reg-cognome" required placeholder="Rossi">
+        <div class="input-wrapper">
+          <i class="fa-solid fa-id-card input-icon"></i>
+          <input type="text" id="reg-cognome" required placeholder="Rossi">
+        </div>
       </div>
       <div class="input-group">
         <label>Email</label>
-        <input type="email" id="reg-email" required placeholder="mario.rossi@email.com">
+        <div class="input-wrapper">
+          <i class="fa-solid fa-envelope input-icon"></i>
+          <input type="email" id="reg-email" required placeholder="mario.rossi@email.com">
+        </div>
       </div>
       <div class="input-group password-wrapper">
         <label>Password</label>
         <div class="password-input-container">
-          <input type="password" id="reg-password" required minlength="6" placeholder="Minimo 6 caratteri">
+          <div class="input-wrapper" style="width: 100%;">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" id="reg-password" required minlength="6" placeholder="Minimo 6 caratteri">
+          </div>
           <i class="fa-solid fa-eye toggle-password" onclick="togglePasswordVisibility('reg-password', this)"></i>
         </div>
       </div>
@@ -1229,7 +1367,10 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
       <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">Inserisci la tua email registrata. Ti invieremo un link per impostare una nuova password.</p>
       <div class="input-group">
         <label>Email di registrazione</label>
-        <input type="email" id="forgot-email" required placeholder="es. mario.rossi@email.com">
+        <div class="input-wrapper">
+          <i class="fa-solid fa-envelope input-icon"></i>
+          <input type="email" id="forgot-email" required placeholder="es. mario.rossi@email.com">
+        </div>
       </div>
       <button type="submit" class="btn-auth" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">INVIA LINK DI RECUPERO</button>
       <div style="text-align: center; margin-top: 12px;">
@@ -1258,9 +1399,8 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
         </div>
     </div>
 
-    <!-- RIGA SUPERIORE: 2 BOX SEPARATI E DI DIVERSO COLORE SOTTO IL COUNTDOWN -->
+    <!-- RIGA SUPERIORE: 2 BOX SEPARATI -->
     <div class="top-info-row">
-        <!-- Box Squadre Iscritte Globali -->
         <div class="top-info-card global-teams-box">
             <div style="display:flex; align-items:center; gap:12px;">
                 <i class="fa-solid fa-shield-halved"></i>
@@ -1272,7 +1412,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             <div class="global-teams-badge-number" id="total-global-teams-count">...</div>
         </div>
 
-        <!-- Box Gettoni Rimasti -->
         <div class="top-info-card tokens-box-inline">
             <div style="display:flex; align-items:center; gap:12px;">
                 <i class="fa-solid fa-coins"></i>
@@ -1313,7 +1452,10 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             <div id="new-team-creation-area">
                 <p style="font-size:12px; color:#fff; font-weight:700; margin-bottom:10px;">Inserisci il nome della tua nuova squadra per iniziare un draft:</p>
                 <div style="display:flex; justify-content:center; gap:10px; max-width:450px; margin:0 auto; flex-wrap:wrap;">
-                    <input type="text" id="new-team-name-input" placeholder="es. Real Fanta 1" style="padding:10px; border-radius:8px; border:1px solid var(--card-border); background:#0f172a; color:#fff; font-size:13px; flex:1; min-width:200px;">
+                    <div class="input-wrapper" style="flex:1; min-width:200px;">
+                        <i class="fa-solid fa-shirt input-icon"></i>
+                        <input type="text" id="new-team-name-input" class="styled-input" placeholder="es. Real Fanta 1" style="padding-left: 36px;">
+                    </div>
                     <button onclick="preparaEAvviaDraft()" class="btn-action-primary"><i class="fa-solid fa-play"></i> INIZIA DRAFT</button>
                 </div>
             </div>
@@ -1336,7 +1478,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             </div>
         </div>
 
-        <!-- AREA PULSANTE CLASSIFICA SPOSTATO IN FONDO SOTTO LE SQUADRE SALVATE -->
         <div class="home-nav-buttons">
             <button onclick="apriSchermataClassifica(8)" class="btn-home-classifica">
                 <i class="fa-solid fa-ranking-star"></i> Vedi classifica di giornata
@@ -1388,7 +1529,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     </div>
 </div>
 
-<!-- PAGINA PRINCIPALE DEL DRAFT (CAMPO E PICK) -->
+<!-- PAGINA PRINCIPALE DEL DRAFT -->
 <div id="main-app">
     <div id="left">
         <div class="panel" id="draft-panel" style="display:block;">
@@ -1536,7 +1677,7 @@ const roleIcons = {
 let userSquadre = []; 
 let activeTeamIndex = -1; 
 let isVotiOkAvailable = false;
-let currentSelectedMatchday = 8; // Giornata di Serie A corrente
+let currentSelectedMatchday = 8; 
 
 let tempNomeSquadra = "";
 let rosa = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
@@ -1713,7 +1854,6 @@ async function caricaDatiUtenteCloud() {
     }
 }
 
-// CALCOLA IL NUMERO TOTALE DI SQUADRE ISCRITTE ALLA GIORNATA IN CORSO DA TUTTI GLI UTENTI
 async function calcolaEVisualizzaTotaleSquadreGlobali(giornataCorrente = 8) {
     try {
         const snapshot = await db.collection("utenti").get();
@@ -1742,7 +1882,6 @@ async function calcolaEVisualizzaTotaleSquadreGlobali(giornataCorrente = 8) {
     }
 }
 
-// RESTITUISCE TUTTI I NOMI DELLE SQUADRE GIÀ ISCRITTE ALLA GIORNATA SPECIFICATA DA QUALSIASI UTENTE
 async function ottieniNomiSquadreGlobaliGiornata(giornata) {
     try {
         const snapshot = await db.collection("utenti").get();
@@ -1848,7 +1987,7 @@ function renderWelcomeScreen() {
     });
 }
 
-/* GESTIONE SCHERMATA CLASSIFICA */
+/* GESTIONE SCHERMATA CLASSIFICA CON STRIPING ED EVIDENZIAZIONE UTENTE */
 async function apriSchermataClassifica(giornata = 8) {
     currentSelectedMatchday = giornata;
 
@@ -1923,6 +2062,10 @@ async function apriSchermataClassifica(giornata = 8) {
         tutteSquadreLega.forEach((item, idx) => {
             const tr = document.createElement("tr");
             
+            if (currentUser && item.userId === currentUser.uid) {
+                tr.className = "current-user-row";
+            }
+
             let rankDisplay = idx + 1;
             if (idx === 0) rankDisplay = `<img src="icone/coppa1.png" class="fanta-trophy-img" alt="1° Posto">`;
             else if (idx === 1) rankDisplay = `<img src="icone/coppa2.png" class="fanta-trophy-img" alt="2° Posto">`;
@@ -2020,6 +2163,7 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false) {
         if (libera) {
             libera.innerText = p.nome;
             libera.dataset.player = p.nome;
+            libera.classList.add("filled");
         }
     });
 
@@ -2053,7 +2197,6 @@ function tornaAllaHome() {
     renderWelcomeScreen();
 }
 
-/* DRAFT E PREPARAZIONE */
 async function preparaEAvviaDraft() {
     if (new Date() >= MATCHDAY_DEADLINE) {
         alert("⚠️ Tempo scaduto! L'iscrizione per questa giornata è chiusa.");
@@ -2071,7 +2214,6 @@ async function preparaEAvviaDraft() {
         return;
     }
 
-    // VERIFICA UNICITÀ NOME GLOBALE SU TUTTI GLI UTENTI PER LA STESSA GIORNATA
     const nomiEsistentiLega = await ottieniNomiSquadreGlobaliGiornata(currentSelectedMatchday);
     if (nomiEsistentiLega.includes(inputName.toLowerCase())) {
         alert(`❌ Il nome "${inputName}" è già stato scelto da un utente per la Giornata ${currentSelectedMatchday}! Scegli un nome differente.`);
@@ -2338,6 +2480,7 @@ function schieraGiocatore(playerObj, ruolo) {
     if (libera) {
         libera.innerText = playerObj.nome;
         libera.dataset.player = playerObj.nome;
+        libera.classList.add("filled");
         schierati.push(playerObj);
 
         riserveSelezionate[ruolo] = riserveSelezionate[ruolo].filter(p => p.nome !== playerObj.nome);
@@ -2361,7 +2504,7 @@ function showModuloSelection() {
         <h3 style="text-align:center;">Draft Completato per ${tempNomeSquadra}!</h3>
         <p style="text-align:center; font-size:12px; color: var(--accent-gold); font-weight: 700;">Seleziona il modulo tattico per schierare la tua formazione:</p>
         
-        <select id="modulo" onchange="setModulo()" style="display:block; margin: 0 auto 10px auto; padding: 8px; border-radius: 8px; background: #1e293b; color: white; border:1px solid var(--card-border);">
+        <select id="modulo" onchange="setModulo()" class="styled-input" style="display:block; margin: 0 auto 10px auto; max-width:250px;">
             <option value="">-- Scegli Modulo --</option>
             <option value="4-4-2">4-4-2</option>
             <option value="4-3-3">4-3-3</option>
@@ -2432,6 +2575,7 @@ function createDropZone(campo, ruolo, top, left) {
         schierati = schierati.filter(p => p.nome !== dz.dataset.player);
         dz.innerText = "";
         dz.dataset.player = "";
+        dz.classList.remove("filled");
         renderSlots();
         renderPanchinaGrafica();
     };
@@ -2502,7 +2646,6 @@ function togglePanchina(ruolo, nomePlayer) {
     renderPanchinaGrafica();
 }
 
-/* SALVATAGGIO CON VERIFICA UNICITÀ NOME GLOBALE SU TUTTI GLI UTENTI PER LA STESSA GIORNATA */
 async function confermaFormazioneDefinitiva() {
     if (new Date() >= MATCHDAY_DEADLINE) {
         alert("⚠️ Tempo scaduto! Non è più possibile confermare la formazione.");
@@ -2513,14 +2656,12 @@ async function confermaFormazioneDefinitiva() {
 
     if (confirm(`Confermi la squadra "${tempNomeSquadra}"? Questa operazione scalerà 1 Gettone ed è definitiva.`)) {
         try {
-            // 1. Controllo unicità nome globale tra TUTTI gli utenti per la stessa giornata
             const nomiEsistentiLega = await ottieniNomiSquadreGlobaliGiornata(currentSelectedMatchday);
             if (nomiEsistentiLega.includes(tempNomeSquadra.toLowerCase().trim())) {
                 alert(`❌ Un altro utente ha già registrato una squadra chiamata "${tempNomeSquadra}" per la Giornata ${currentSelectedMatchday}! Scegli un nome differente.`);
                 return;
             }
 
-            // 2. Leggi i dati correnti dell'utente per aggiornare l'array
             const userDocRef = db.collection("utenti").doc(currentUser.uid);
             const docSnapshot = await userDocRef.get();
             
@@ -2529,7 +2670,6 @@ async function confermaFormazioneDefinitiva() {
                 squadreEsistenti = docSnapshot.data().squadre;
             }
 
-            // 3. Controllo gettoni massimi personali (massimo 3 squadre per giornata)
             const squadreGiornataCorrente = squadreEsistenti.filter(s => (s.giornata !== undefined ? s.giornata : 8) === currentSelectedMatchday);
             if (squadreGiornataCorrente.length >= 3) {
                 alert("⚠️ Hai già utilizzato tutti i 3 gettoni disponibili per questa giornata!");
@@ -2550,7 +2690,6 @@ async function confermaFormazioneDefinitiva() {
                 creataIl: new Date()
             };
 
-            // 4. Aggiungi la nuova squadra e salva su Firestore
             squadreEsistenti.push(nuovaSquadra);
             userSquadre = squadreEsistenti;
 
@@ -2591,7 +2730,6 @@ function parseColumnVal(row, colNames) {
     return 0;
 }
 
-// CALCOLO VOTI DI TUTTE LE SQUADRE DA HOMEPAGE
 async function calcolaVotiTutteSquadre() {
     if (userSquadre.length === 0) return;
 
@@ -2787,4 +2925,4 @@ function mostraTabellinoVoti(sq) {
 }
 </script>
 </body>
-</html>ù
+</html>
