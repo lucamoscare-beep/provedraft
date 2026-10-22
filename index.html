@@ -225,7 +225,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
-/* Box 1: Squadre Iscritte Globali (Smeraldo/Verde) */
 .global-teams-box {
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(15, 23, 42, 0.85));
     border: 2px solid var(--accent-neon-green);
@@ -246,7 +245,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     box-shadow: 0 3px 10px rgba(16, 185, 129, 0.4);
 }
 
-/* Box 2: Gettoni Rimasti (Oro/Giallo) */
 .tokens-box-inline {
     background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(15, 23, 42, 0.85));
     border: 2px solid var(--accent-gold);
@@ -350,7 +348,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     align-items: center;
 }
 
-/* PULSANTE CLASSIFICA E VOTI HOMEPAGE */
 .home-nav-buttons {
     display: flex;
     gap: 12px;
@@ -894,7 +891,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     gap: 10px;
 }
 
-/* STILE IMMAGINI COPPE PODIO E TABELLA */
 .fanta-trophy-img {
     height: 24px;
     width: auto;
@@ -907,7 +903,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     height: 38px;
 }
 
-/* PODIO TOP 3 ENFATIZZATO */
 .podium-container {
     display: flex;
     justify-content: center;
@@ -969,7 +964,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 .podium-user-name { font-size: 12px; color: var(--accent-blue); font-weight: 700; margin-bottom: 8px; }
 .podium-score { font-size: 24px; font-weight: 900; color: var(--accent-neon-green); }
 
-/* TABELLA CLASSIFICA COMPLETA */
 .classifica-table-container {
     width: 100%;
     overflow-x: auto;
@@ -1010,7 +1004,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     text-align: center;
 }
 
-/* SEZIONE GIORNATE TRASCORSE */
 .matchday-selector-section {
     margin-top: 30px;
     padding-top: 20px;
@@ -1553,7 +1546,7 @@ let riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Atta
 let turno = 0;
 let moduloSelezionato = "";
 
-// DEFINIZIONE SCADENZA PROSSIMA GIORNATA (8ª Giornata Serie A 2026/2027)
+// DEFINIZIONE SCADENZA PROSSIMA GIORNATA
 const MATCHDAY_DEADLINE = new Date("2026-10-23T20:45:00"); 
 
 function initCountdown() {
@@ -1749,15 +1742,35 @@ async function calcolaEVisualizzaTotaleSquadreGlobali(giornataCorrente = 8) {
     }
 }
 
-// VERIFICA DISPONIBILITÀ FILE VOTI
-async function verificaDisponibilitaVotiOk() {
+// RESTITUISCE TUTTI I NOMI DELLE SQUADRE GIÀ ISCRITTE ALLA GIORNATA SPECIFICATA DA QUALSIASI UTENTE
+async function ottieniNomiSquadreGlobaliGiornata(giornata) {
     try {
-        const res = await fetch("voti_ok.xlsx", { method: "HEAD" });
-        isVotiOkAvailable = res.ok;
+        const snapshot = await db.collection("utenti").get();
+        let nomiSquadre = [];
+
+        snapshot.forEach(doc => {
+            const uData = doc.data();
+            const squadreArr = uData.squadre || [];
+
+            squadreArr.forEach(sq => {
+                let g = sq.giornata !== undefined ? sq.giornata : 8;
+                if (g === giornata && sq.nomeSquadra) {
+                    nomiSquadre.push(sq.nomeSquadra.toLowerCase().trim());
+                }
+            });
+        });
+
+        return nomiSquadre;
     } catch (err) {
-        isVotiOkAvailable = false;
+        console.error("Errore recupero nomi squadre globali:", err);
+        return [];
     }
-    updateHomeVotiButtonState();
+}
+
+function verificaDisponibilitaVotiOk() {
+    fetch("voti_ok.xlsx", { method: "HEAD" })
+        .then(res => { isVotiOkAvailable = res.ok; updateHomeVotiButtonState(); })
+        .catch(() => { isVotiOkAvailable = false; updateHomeVotiButtonState(); });
 }
 
 function updateHomeVotiButtonState() {
@@ -1835,9 +1848,7 @@ function renderWelcomeScreen() {
     });
 }
 
-/* ======================================================
-   GESTIONE SCHERMATA CLASSIFICA
-   ====================================================== */
+/* GESTIONE SCHERMATA CLASSIFICA */
 async function apriSchermataClassifica(giornata = 8) {
     currentSelectedMatchday = giornata;
 
@@ -1879,7 +1890,6 @@ async function apriSchermataClassifica(giornata = 8) {
             });
         });
 
-        // Ordina per punteggio decrescente
         tutteSquadreLega.sort((a, b) => b.punteggio - a.punteggio);
 
         if (tutteSquadreLega.length === 0) {
@@ -1887,7 +1897,6 @@ async function apriSchermataClassifica(giornata = 8) {
             return;
         }
 
-        // Render TOP 3 (Podio con coppa1.png, coppa2.png, coppa3.png)
         if (tutteSquadreLega.length >= 1) {
             const top3 = tutteSquadreLega.slice(0, 3);
             const classes = ["gold", "silver", "bronze"];
@@ -1910,7 +1919,6 @@ async function apriSchermataClassifica(giornata = 8) {
             });
         }
 
-        // Render Tabella Completa con coppa1, coppa2, coppa3
         tableBody.innerHTML = "";
         tutteSquadreLega.forEach((item, idx) => {
             const tr = document.createElement("tr");
@@ -1945,7 +1953,6 @@ function renderMatchdayPills(selectedDay) {
     const container = document.getElementById("matchdays-pills-container");
     container.innerHTML = "";
 
-    // Genera pulsanti per le giornate trascorse e correnti (da 1 a 8)
     for (let g = 1; g <= 8; g++) {
         const btn = document.createElement("button");
         btn.className = `btn-matchday-pill ${g === selectedDay ? 'active' : ''}`;
@@ -1955,7 +1962,6 @@ function renderMatchdayPills(selectedDay) {
     }
 }
 
-// VISUALIZZAZIONE SQUADRA IN SOLA LETTURA DA CLASSIFICA
 async function visualizzaSquadraGenerica(userId, nomeSquadra, giornata) {
     try {
         const doc = await db.collection("utenti").doc(userId).get();
@@ -2047,10 +2053,8 @@ function tornaAllaHome() {
     renderWelcomeScreen();
 }
 
-/* ======================================================
-   FUNZIONALITÀ DRAFT E SCHIERAMENTO
-   ====================================================== */
-function preparaEAvviaDraft() {
+/* DRAFT E PREPARAZIONE */
+async function preparaEAvviaDraft() {
     if (new Date() >= MATCHDAY_DEADLINE) {
         alert("⚠️ Tempo scaduto! L'iscrizione per questa giornata è chiusa.");
         return;
@@ -2067,13 +2071,10 @@ function preparaEAvviaDraft() {
         return;
     }
 
-    let giaEsistente = userSquadre.some(s => {
-        let gSquadra = s.giornata !== undefined ? s.giornata : 8;
-        return s.nomeSquadra.toLowerCase() === inputName.toLowerCase() && gSquadra === currentSelectedMatchday;
-    });
-
-    if (giaEsistente) {
-        alert(`❌ Hai già una squadra con il nome "${inputName}" per la Giornata ${currentSelectedMatchday}! Scegli un nome differente.`);
+    // VERIFICA UNICITÀ NOME GLOBALE SU TUTTI GLI UTENTI PER LA STESSA GIORNATA
+    const nomiEsistentiLega = await ottieniNomiSquadreGlobaliGiornata(currentSelectedMatchday);
+    if (nomiEsistentiLega.includes(inputName.toLowerCase())) {
+        alert(`❌ Il nome "${inputName}" è già stato scelto da un utente per la Giornata ${currentSelectedMatchday}! Scegli un nome differente.`);
         return;
     }
 
@@ -2501,7 +2502,7 @@ function togglePanchina(ruolo, nomePlayer) {
     renderPanchinaGrafica();
 }
 
-/* FUNZIONE DI SALVATAGGIO CON CONTROLLO UNICITÀ NOME PER GIORNATA E LETTURA DA FIRESTORE */
+/* SALVATAGGIO CON VERIFICA UNICITÀ NOME GLOBALE SU TUTTI GLI UTENTI PER LA STESSA GIORNATA */
 async function confermaFormazioneDefinitiva() {
     if (new Date() >= MATCHDAY_DEADLINE) {
         alert("⚠️ Tempo scaduto! Non è più possibile confermare la formazione.");
@@ -2512,7 +2513,14 @@ async function confermaFormazioneDefinitiva() {
 
     if (confirm(`Confermi la squadra "${tempNomeSquadra}"? Questa operazione scalerà 1 Gettone ed è definitiva.`)) {
         try {
-            // 1. Leggi SEMPRE i dati aggiornati direttamente da Firestore per evitare sovrascritture
+            // 1. Controllo unicità nome globale tra TUTTI gli utenti per la stessa giornata
+            const nomiEsistentiLega = await ottieniNomiSquadreGlobaliGiornata(currentSelectedMatchday);
+            if (nomiEsistentiLega.includes(tempNomeSquadra.toLowerCase().trim())) {
+                alert(`❌ Un altro utente ha già registrato una squadra chiamata "${tempNomeSquadra}" per la Giornata ${currentSelectedMatchday}! Scegli un nome differente.`);
+                return;
+            }
+
+            // 2. Leggi i dati correnti dell'utente per aggiornare l'array
             const userDocRef = db.collection("utenti").doc(currentUser.uid);
             const docSnapshot = await userDocRef.get();
             
@@ -2521,21 +2529,10 @@ async function confermaFormazioneDefinitiva() {
                 squadreEsistenti = docSnapshot.data().squadre;
             }
 
-            // 2. Controllo gettoni massimi (massimo 3 squadre per la giornata corrente)
+            // 3. Controllo gettoni massimi personali (massimo 3 squadre per giornata)
             const squadreGiornataCorrente = squadreEsistenti.filter(s => (s.giornata !== undefined ? s.giornata : 8) === currentSelectedMatchday);
             if (squadreGiornataCorrente.length >= 3) {
                 alert("⚠️ Hai già utilizzato tutti i 3 gettoni disponibili per questa giornata!");
-                return;
-            }
-
-            // 3. Controllo unicità nome per la STESSA GIORNATA
-            const nomeGiaUsatoStessaGiornata = squadreEsistenti.some(s => {
-                let gSquadra = s.giornata !== undefined ? s.giornata : 8;
-                return s.nomeSquadra.toLowerCase() === tempNomeSquadra.toLowerCase() && gSquadra === currentSelectedMatchday;
-            });
-
-            if (nomeGiaUsatoStessaGiornata) {
-                alert(`❌ Hai già salvato una squadra chiamata "${tempNomeSquadra}" per la Giornata ${currentSelectedMatchday}! Scegli un nome differente per questa giornata.`);
                 return;
             }
 
@@ -2790,4 +2787,4 @@ function mostraTabellinoVoti(sq) {
 }
 </script>
 </body>
-</html>
+</html>ù
