@@ -2067,9 +2067,13 @@ function preparaEAvviaDraft() {
         return;
     }
 
-    let giaEsistente = userSquadre.some(s => s.nomeSquadra.toLowerCase() === inputName.toLowerCase());
+    let giaEsistente = userSquadre.some(s => {
+        let gSquadra = s.giornata !== undefined ? s.giornata : 8;
+        return s.nomeSquadra.toLowerCase() === inputName.toLowerCase() && gSquadra === currentSelectedMatchday;
+    });
+
     if (giaEsistente) {
-        alert("Hai già creato una squadra con questo nome! Scegli un nome differente.");
+        alert(`❌ Hai già una squadra con il nome "${inputName}" per la Giornata ${currentSelectedMatchday}! Scegli un nome differente.`);
         return;
     }
 
@@ -2497,6 +2501,7 @@ function togglePanchina(ruolo, nomePlayer) {
     renderPanchinaGrafica();
 }
 
+/* FUNZIONE DI SALVATAGGIO CON CONTROLLO UNICITÀ NOME PER GIORNATA E LETTURA DA FIRESTORE */
 async function confermaFormazioneDefinitiva() {
     if (new Date() >= MATCHDAY_DEADLINE) {
         alert("⚠️ Tempo scaduto! Non è più possibile confermare la formazione.");
@@ -2506,30 +2511,59 @@ async function confermaFormazioneDefinitiva() {
     if (schierati.length < 11) return alert("Devi schierare tutti gli 11 titolari!");
 
     if (confirm(`Confermi la squadra "${tempNomeSquadra}"? Questa operazione scalerà 1 Gettone ed è definitiva.`)) {
-        const nuovaSquadra = {
-            giornata: 8,
-            nomeSquadra: tempNomeSquadra,
-            rosa: JSON.parse(JSON.stringify(rosa)),
-            schierati: JSON.parse(JSON.stringify(schierati)),
-            riserveSelezionate: JSON.parse(JSON.stringify(riserveSelezionate)),
-            budget: budget,
-            moduloSelezionato: moduloSelezionato,
-            formazioneBloccata: true,
-            votiGiornata: {},
-            punteggioTotale: null,
-            creataIl: new Date()
-        };
-
-        userSquadre.push(nuovaSquadra);
-
         try {
-            await db.collection("utenti").doc(currentUser.uid).set({
+            // 1. Leggi SEMPRE i dati aggiornati direttamente da Firestore per evitare sovrascritture
+            const userDocRef = db.collection("utenti").doc(currentUser.uid);
+            const docSnapshot = await userDocRef.get();
+            
+            let squadreEsistenti = [];
+            if (docSnapshot.exists && docSnapshot.data().squadre) {
+                squadreEsistenti = docSnapshot.data().squadre;
+            }
+
+            // 2. Controllo gettoni massimi (massimo 3 squadre per la giornata corrente)
+            const squadreGiornataCorrente = squadreEsistenti.filter(s => (s.giornata !== undefined ? s.giornata : 8) === currentSelectedMatchday);
+            if (squadreGiornataCorrente.length >= 3) {
+                alert("⚠️ Hai già utilizzato tutti i 3 gettoni disponibili per questa giornata!");
+                return;
+            }
+
+            // 3. Controllo unicità nome per la STESSA GIORNATA
+            const nomeGiaUsatoStessaGiornata = squadreEsistenti.some(s => {
+                let gSquadra = s.giornata !== undefined ? s.giornata : 8;
+                return s.nomeSquadra.toLowerCase() === tempNomeSquadra.toLowerCase() && gSquadra === currentSelectedMatchday;
+            });
+
+            if (nomeGiaUsatoStessaGiornata) {
+                alert(`❌ Hai già salvato una squadra chiamata "${tempNomeSquadra}" per la Giornata ${currentSelectedMatchday}! Scegli un nome differente per questa giornata.`);
+                return;
+            }
+
+            const nuovaSquadra = {
+                giornata: currentSelectedMatchday,
+                nomeSquadra: tempNomeSquadra,
+                rosa: JSON.parse(JSON.stringify(rosa)),
+                schierati: JSON.parse(JSON.stringify(schierati)),
+                riserveSelezionate: JSON.parse(JSON.stringify(riserveSelezionate)),
+                budget: budget,
+                moduloSelezionato: moduloSelezionato,
+                formazioneBloccata: true,
+                votiGiornata: {},
+                punteggioTotale: null,
+                creataIl: new Date()
+            };
+
+            // 4. Aggiungi la nuova squadra e salva su Firestore
+            squadreEsistenti.push(nuovaSquadra);
+            userSquadre = squadreEsistenti;
+
+            await userDocRef.set({
                 squadre: userSquadre
             }, { merge: true });
 
-            alert(`🎉 Squadra "${tempNomeSquadra}" convalidata e salvata con successo!`);
+            alert(`🎉 Squadra "${tempNomeSquadra}" convalidata e salvata con successo per la Giornata ${currentSelectedMatchday}!`);
             document.getElementById("new-team-name-input").value = "";
-            await calcolaEVisualizzaTotaleSquadreGlobali();
+            await calcolaEVisualizzaTotaleSquadreGlobali(currentSelectedMatchday);
             renderWelcomeScreen();
 
         } catch (err) {
