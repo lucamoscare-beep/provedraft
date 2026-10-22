@@ -356,7 +356,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     gap: 12px;
     justify-content: center;
     flex-wrap: wrap;
-    margin-top: 20px;
+    margin-top: 25px;
 }
 
 .btn-home-classifica {
@@ -1298,13 +1298,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             Sfida gli altri fantallenatori nella prossima giornata di campionato! Costruisci le tue rose tramite il sistema di Draft live, seleziona il modulo tattico e schiera i tuoi titolari prima del fischio d'inizio.
         </p>
 
-        <!-- AREA PULSANTI NAVIGAZIONE HOMEPAGE -->
-        <div class="home-nav-buttons">
-            <button onclick="apriSchermataClassifica(8)" class="btn-home-classifica">
-                <i class="fa-solid fa-ranking-star"></i> Vedi Classifica di Lega
-            </button>
-        </div>
-
         <div class="rules-grid">
             <div class="rule-box">
                 <i class="fa-solid fa-ticket"></i>
@@ -1348,6 +1341,13 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             <div id="created-teams-container" class="created-teams-list">
                 <p style="color:var(--text-muted); font-size:12px;">Nessuna squadra ancora creata per questo turno.</p>
             </div>
+        </div>
+
+        <!-- AREA PULSANTE CLASSIFICA SPOSTATO IN FONDO SOTTO LE SQUADRE SALVATE -->
+        <div class="home-nav-buttons">
+            <button onclick="apriSchermataClassifica(8)" class="btn-home-classifica">
+                <i class="fa-solid fa-ranking-star"></i> Vedi classifica di giornata
+            </button>
         </div>
     </div>
 </div>
@@ -1482,7 +1482,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             <div id="recap-utente-owner" style="font-size:11px; color:var(--accent-blue); font-weight:700;">-</div>
         </div>
         <div style="display:flex; gap:8px;">
-            <button id="btn-recap-back-classifica" onclick="apriSchermataClassifica(currentSelectedMatchday)" class="btn-action-primary" style="background:linear-gradient(135deg, #f59e0b, #d97706); padding:8px 14px; font-size:12px; display:none;"><i class="fa-solid fa-ranking-star"></i> Torna alla Classifica</button>
+            <button id="btn-recap-back-classifica" onclick="apriSchermataClassifica(currentSelectedMatchday)" class="btn-action-primary" style="background:linear-gradient(135deg, #f59e0b, #d97706); padding:8px 14px; font-size:12px; display:none;"><i class="fa-solid fa-ranking-star"></i> Vedi classifica di giornata</button>
             <button onclick="tornaAllaHome()" class="btn-action-primary" style="padding:8px 14px; font-size:12px;"><i class="fa-solid fa-house"></i> Home Page</button>
         </div>
     </div>
