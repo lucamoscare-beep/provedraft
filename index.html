@@ -126,7 +126,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     border: 2px solid var(--accent-gold);
     border-radius: 16px;
     padding: 14px 20px;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -206,6 +206,79 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     margin-bottom: 12px;
 }
 
+/* RIGA SUPERIORE CONDIVISA (SQUADRE ISCRITTE & GETTONI RIMASTI) */
+.top-info-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.top-info-card {
+    flex: 1;
+    min-width: 250px;
+    border-radius: 14px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+/* Box 1: Squadre Iscritte Globali (Smeraldo/Verde) */
+.global-teams-box {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(15, 23, 42, 0.85));
+    border: 2px solid var(--accent-neon-green);
+}
+
+.global-teams-box i {
+    font-size: 24px;
+    color: var(--accent-neon-green);
+}
+
+.global-teams-badge-number {
+    background: linear-gradient(135deg, var(--accent-neon-green), var(--accent-green));
+    color: #0f172a;
+    font-weight: 900;
+    font-size: 20px;
+    padding: 4px 14px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(16, 185, 129, 0.4);
+}
+
+/* Box 2: Gettoni Rimasti (Oro/Giallo) */
+.tokens-box-inline {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(15, 23, 42, 0.85));
+    border: 2px solid var(--accent-gold);
+}
+
+.tokens-box-inline i {
+    font-size: 24px;
+    color: var(--accent-gold);
+}
+
+.tokens-badge-number {
+    background: linear-gradient(135deg, var(--accent-gold), #d97706);
+    color: #0f172a;
+    font-weight: 900;
+    font-size: 20px;
+    padding: 4px 14px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(251, 191, 36, 0.4);
+}
+
+.top-info-text .title-text {
+    font-size: 12px;
+    font-weight: 800;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+.top-info-text .sub-text {
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
 /* WELCOME / LANDING PAGE */
 #welcome-screen {
     max-width: 1100px;
@@ -228,55 +301,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     font-weight: 800;
     color: var(--accent-neon-green);
     margin-bottom: 8px;
-}
-
-/* BOX STATISTICA SQUADRE ISCRITTE IN TOTALE */
-.global-teams-counter-box {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(15, 23, 42, 0.8));
-    border: 2px solid var(--accent-neon-green);
-    border-radius: 14px;
-    padding: 16px 20px;
-    margin: 20px 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 0 20px rgba(74, 222, 128, 0.15);
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.global-teams-counter-box .info-side {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.global-teams-counter-box i {
-    font-size: 28px;
-    color: var(--accent-neon-green);
-}
-
-.global-teams-counter-box .title-text {
-    font-size: 13px;
-    font-weight: 800;
-    color: #fff;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.global-teams-counter-box .sub-text {
-    font-size: 11px;
-    color: var(--text-muted);
-}
-
-.global-teams-badge-number {
-    background: linear-gradient(135deg, var(--accent-neon-green), var(--accent-green));
-    color: #0f172a;
-    font-weight: 900;
-    font-size: 24px;
-    padding: 6px 18px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
 
 .rules-grid {
@@ -307,19 +331,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     padding: 18px;
     text-align: center;
     margin-top: 20px;
-}
-
-.token-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--accent-gold);
-    color: #000;
-    font-weight: 900;
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 14px;
-    margin-bottom: 12px;
 }
 
 .created-teams-list {
@@ -1254,23 +1265,38 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
         </div>
     </div>
 
+    <!-- RIGA SUPERIORE: 2 BOX SEPARATI E DI DIVERSO COLORE SOTTO IL COUNTDOWN -->
+    <div class="top-info-row">
+        <!-- Box Squadre Iscritte Globali -->
+        <div class="top-info-card global-teams-box">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <i class="fa-solid fa-shield-halved"></i>
+                <div class="top-info-text">
+                    <div class="title-text">Squadre Iscritte (Giornata 8)</div>
+                    <div class="sub-text">Totale di tutta la lega</div>
+                </div>
+            </div>
+            <div class="global-teams-badge-number" id="total-global-teams-count">...</div>
+        </div>
+
+        <!-- Box Gettoni Rimasti -->
+        <div class="top-info-card tokens-box-inline">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <i class="fa-solid fa-coins"></i>
+                <div class="top-info-text">
+                    <div class="title-text">Gettoni Rimasti</div>
+                    <div class="sub-text">Disponibili per te</div>
+                </div>
+            </div>
+            <div class="tokens-badge-number" id="tokens-count-display-inline">3 / 3</div>
+        </div>
+    </div>
+
     <div class="welcome-card">
         <div class="welcome-title" id="welcome-greeting">Benvenuto nel Fantacalcio Draft!</div>
         <p style="color:var(--text-muted); font-size:13px; line-height:1.6;">
             Sfida gli altri fantallenatori nella prossima giornata di campionato! Costruisci le tue rose tramite il sistema di Draft live, seleziona il modulo tattico e schiera i tuoi titolari prima del fischio d'inizio.
         </p>
-
-        <!-- BOX EVIDENZIATO: TOTALE SQUADRE ISCRITTE IN TUTTA LA LEGA -->
-        <div class="global-teams-counter-box">
-            <div class="info-side">
-                <i class="fa-solid fa-shield-halved"></i>
-                <div>
-                    <div class="title-text">Squadre Iscritte alla Giornata n°8</div>
-                    <div class="sub-text">Numero totale di squadre create da tutti gli utenti per questo turno</div>
-                </div>
-            </div>
-            <div class="global-teams-badge-number" id="total-global-teams-count">...</div>
-        </div>
 
         <!-- AREA PULSANTI NAVIGAZIONE HOMEPAGE -->
         <div class="home-nav-buttons">
@@ -1298,7 +1324,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
         </div>
 
         <div class="tokens-status-box">
-            <div class="token-badge"><i class="fa-solid fa-coins"></i> GETTONI RIMASTI: <span id="tokens-count-display">3 / 3</span></div>
             <div id="new-team-creation-area">
                 <p style="font-size:12px; color:#fff; font-weight:700; margin-bottom:10px;">Inserisci il nome della tua nuova squadra per iniziare un draft:</p>
                 <div style="display:flex; justify-content:center; gap:10px; max-width:450px; margin:0 auto; flex-wrap:wrap;">
@@ -1767,7 +1792,7 @@ function renderWelcomeScreen() {
     document.getElementById("classifica-screen").style.display = "none";
 
     let gettoniRimasti = 3 - userSquadre.length;
-    document.getElementById("tokens-count-display").innerText = `${gettoniRimasti} / 3`;
+    document.getElementById("tokens-count-display-inline").innerText = `${gettoniRimasti} / 3`;
 
     if (gettoniRimasti <= 0) {
         document.getElementById("new-team-creation-area").style.display = "none";
