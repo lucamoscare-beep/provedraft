@@ -1145,8 +1145,8 @@ const roleIcons = {
     Attaccante: "fa-solid fa-futbol"
 };
 
-let userSquadre = []; // Lista delle squadre confermate dall'utente per la giornata
-let activeTeamIndex = -1; // Indice della squadra aperta in recap
+let userSquadre = []; 
+let activeTeamIndex = -1; 
 
 let tempNomeSquadra = "";
 let rosa = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
@@ -1190,7 +1190,6 @@ document.addEventListener("DOMContentLoaded", () => {
     caricaGiocatoriDaExcel();
 });
 
-// TOGGLE MOSTRA/NASCONDI PASSWORD
 function togglePasswordVisibility(inputId, iconElement) {
     const input = document.getElementById(inputId);
     if (input.type === "password") {
@@ -1391,6 +1390,15 @@ function preparaEAvviaDraft() {
     }
 
     tempNomeSquadra = inputName;
+    
+    document.getElementById("draft-panel").innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <h2>Giocatori Disponibili</h2>
+            <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-arrow-rotate-left"></i> Ricomincia Draft</button>
+        </div>
+        <div id="players" class="players-container"></div>
+    `;
+
     resetDraftState();
 
     document.getElementById("welcome-screen").style.display = "none";
@@ -1408,14 +1416,24 @@ function resetDraftState() {
     schierati = [];
     riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
     availablePlayers = [...customPlayersList];
+    
     document.getElementById("campo").innerHTML = "";
     document.getElementById("panchina-grafica").innerHTML = "";
     document.getElementById("conferma-container").style.display = "none";
+    
+    renderSlots();
     updateDashboardCounters();
 }
 
 function annullaERicominciaDraft() {
-    if (confirm("Vuoi davvero ricominciare il draft? I giocatori selezionati verranno azzerati (nessun gettone verrà consumato).")) {
+    if (confirm("Vuoi davvero ricominciare il draft per questa squadra? I giocatori selezionati verranno azzerati (nessun gettone verrà consumato).")) {
+        document.getElementById("draft-panel").innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h2>Giocatori Disponibili</h2>
+                <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-arrow-rotate-left"></i> Ricomincia Draft</button>
+            </div>
+            <div id="players" class="players-container"></div>
+        `;
         resetDraftState();
         nextPick();
     }
@@ -1801,9 +1819,9 @@ async function confermaFormazioneDefinitiva() {
     if (confirm(`Confermi la squadra "${tempNomeSquadra}"? Questa operazione scalerà 1 Gettone ed è definitiva.`)) {
         const nuovaSquadra = {
             nomeSquadra: tempNomeSquadra,
-            rosa: rosa,
-            schierati: schierati,
-            riserveSelezionate: riserveSelezionate,
+            rosa: JSON.parse(JSON.stringify(rosa)),
+            schierati: JSON.parse(JSON.stringify(schierati)),
+            riserveSelezionate: JSON.parse(JSON.stringify(riserveSelezionate)),
             budget: budget,
             moduloSelezionato: moduloSelezionato,
             formazioneBloccata: true,
@@ -1819,6 +1837,7 @@ async function confermaFormazioneDefinitiva() {
             });
 
             alert(`🎉 Squadra "${tempNomeSquadra}" convalidata e salvata con successo!`);
+            document.getElementById("new-team-name-input").value = "";
             renderWelcomeScreen();
 
         } catch (err) {
