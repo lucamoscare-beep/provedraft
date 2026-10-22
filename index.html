@@ -55,7 +55,6 @@ body {
 
 h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 
-/* 2. ANIMAZIONI GLOBALI */
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: translateY(0); }
@@ -92,9 +91,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     transition: transform 0.2s ease;
 }
 
-.global-header .logo-area:hover {
-    transform: scale(1.03);
-}
+.global-header .logo-area:hover { transform: scale(1.03); }
 
 .global-header .user-area {
     display: flex;
@@ -137,7 +134,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     transform: translateY(-1px);
 }
 
-/* COUNTDOWN BANNER SPECIALE E IMPATTANTE */
+/* COUNTDOWN BANNER */
 .deadline-banner {
     background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
     border: 2px solid var(--accent-gold);
@@ -223,7 +220,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     margin-bottom: 12px;
 }
 
-/* RIGA SUPERIORE CONDIVISA (SQUADRE ISCRITTE & GETTONI RIMASTI) */
+/* TOP INFO ROW */
 .top-info-row {
     display: flex;
     gap: 12px;
@@ -247,10 +244,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     border: 2px solid var(--accent-neon-green);
 }
 
-.global-teams-box i {
-    font-size: 24px;
-    color: var(--accent-neon-green);
-}
+.global-teams-box i { font-size: 24px; color: var(--accent-neon-green); }
 
 .global-teams-badge-number {
     background: linear-gradient(135deg, var(--accent-neon-green), var(--accent-green));
@@ -267,10 +261,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     border: 2px solid var(--accent-gold);
 }
 
-.tokens-box-inline i {
-    font-size: 24px;
-    color: var(--accent-gold);
-}
+.tokens-box-inline i { font-size: 24px; color: var(--accent-gold); }
 
 .tokens-badge-number {
     background: linear-gradient(135deg, var(--accent-gold), #d97706);
@@ -289,10 +280,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     text-transform: uppercase;
 }
 
-.top-info-text .sub-text {
-    font-size: 10px;
-    color: var(--text-muted);
-}
+.top-info-text .sub-text { font-size: 10px; color: var(--text-muted); }
 
 /* WELCOME / LANDING PAGE */
 #welcome-screen {
@@ -334,11 +322,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     text-align: left;
 }
 
-.rule-box i {
-    font-size: 24px;
-    color: var(--accent-gold);
-    margin-bottom: 10px;
-}
+.rule-box i { font-size: 24px; color: var(--accent-gold); margin-bottom: 10px; }
 
 .tokens-status-box {
     background: linear-gradient(135deg, rgba(30, 58, 138, 0.4), rgba(15, 23, 42, 0.8));
@@ -367,10 +351,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
-.team-card-item:hover {
-    transform: translateY(-2px);
-    border-color: var(--accent-blue);
-}
+.team-card-item:hover { transform: translateY(-2px); border-color: var(--accent-blue); }
 
 .home-nav-buttons {
     display: flex;
@@ -397,10 +378,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     gap: 10px;
 }
 
-.btn-home-classifica:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
-}
+.btn-home-classifica:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6); }
 
 .home-voti-area {
     background: rgba(15, 23, 42, 0.9);
@@ -539,23 +517,23 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     transition: width 0.3s ease;
 }
 
-/* 1. MIGLIORAMENTO CARD GIOCATORI DRAFT */
+/* CARD GIOCATORI DRAFT (NOMI RUOLI ESTESI E PULSANTI COMPATTI) */
 .players-container {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 8px;
+    gap: 6px;
     justify-content: center;
 }
 
 @media (max-width: 768px) {
-    .players-container { gap: 6px; }
+    .players-container { gap: 4px; }
 }
 
 .player-card {
     background: linear-gradient(145deg, #1e293b, #0f172a);
     border: 1px solid var(--card-border);
-    padding: 10px 6px;
-    border-radius: 10px;
+    padding: 8px 4px;
+    border-radius: 8px;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -565,6 +543,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     animation: fadeInUp 0.3s ease-out;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    min-height: 115px;
 }
 
 .player-card:hover {
@@ -577,20 +556,53 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 .player-card.Centrocampista { border-top: 4px solid var(--role-cen); }
 .player-card.Attaccante { border-top: 4px solid var(--role-att); }
 
-.player-name { font-weight: 800; font-size: 11px; color: #fff; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.player-team { font-size: 9px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
-.player-role { font-size: 8px; font-weight: 800; margin-bottom: 4px; display: inline-block; padding: 2px 5px; border-radius: 4px; background: rgba(255,255,255,0.08); }
+.player-name { 
+    font-weight: 800; 
+    font-size: 10px; 
+    color: #fff; 
+    margin-bottom: 2px; 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+}
+.player-team { 
+    font-size: 8px; 
+    color: var(--text-muted); 
+    text-transform: uppercase; 
+    font-weight: 700; 
+    margin-bottom: 3px; 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis;
+}
+
+.player-role-label {
+    font-size: 8px;
+    font-weight: 800;
+    margin-bottom: 2px;
+    display: block;
+    padding: 1px 3px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.06);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.player-card.Portiere .player-role-label { color: var(--role-por); }
+.player-card.Difensore .player-role-label { color: var(--role-dif); }
+.player-card.Centrocampista .player-role-label { color: var(--role-cen); }
+.player-card.Attaccante .player-role-label { color: var(--role-att); }
 
 .valore-badge-draft {
     background: linear-gradient(135deg, #fbbf24, #f59e0b);
     color: #0f172a;
     font-weight: 900;
-    padding: 3px 6px;
-    border-radius: 6px;
-    font-size: 11px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-size: 10px;
     display: inline-block;
-    margin: 3px 0;
-    box-shadow: 0 2px 6px rgba(245, 158, 11, 0.3);
+    margin: 2px 0;
+    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
 }
 
 .valore-badge-slot {
@@ -606,23 +618,23 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 .draft-btn {
     background: linear-gradient(135deg, #3b82f6, #2563eb);
     color: white;
-    padding: 6px 4px;
+    padding: 4px 2px;
     border: none;
-    border-radius: 6px;
+    border-radius: 4px;
     cursor: pointer;
-    margin-top: 4px;
+    margin-top: 3px;
     font-weight: 800;
-    font-size: 10px;
+    font-size: 9px;
     text-transform: uppercase;
     width: 100%;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+    white-space: nowrap;
 }
 
 .draft-btn:hover {
     background: linear-gradient(135deg, #2563eb, #1d4ed8);
     transform: scale(1.02);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.5);
 }
 
 .role-title {
@@ -675,10 +687,10 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 .slot-tag.campo { background: rgba(16, 185, 129, 0.25); color: var(--accent-neon-green); border: 1px solid var(--accent-green); }
 .slot-tag.panchina { background: rgba(251, 191, 36, 0.25); color: var(--accent-gold); border: 1px solid var(--accent-gold); }
 
-/* 3. CAMPO DA GIOCO DINAMICO */
+/* CAMPO DA GIOCO DINAMICO E RESPONSIVE ANTISOVRAPPOSIZIONE */
 .campo-style {
     width: 100%;
-    height: 420px;
+    min-height: 440px;
     background-color: var(--grass-dark);
     background-image: repeating-linear-gradient(
         0deg,
@@ -692,6 +704,11 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     position: relative;
     box-shadow: inset 0 0 25px rgba(0,0,0,0.6), 0 8px 20px rgba(0,0,0,0.4);
     overflow: hidden;
+    padding: 15px 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .campo-style::before {
@@ -699,41 +716,53 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     position: absolute;
     top: 50%; left: 0; right: 0;
     height: 2px; background: rgba(255,255,255,0.85);
+    pointer-events: none;
 }
 .campo-style::after {
     content: '';
     position: absolute;
     top: 50%; left: 50%;
-    width: 80px; height: 80px;
+    width: 70px; height: 70px;
     border: 2px solid rgba(255,255,255,0.85);
     border-radius: 50%;
     transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.reparto-campo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    z-index: 2;
+    flex-wrap: wrap;
 }
 
 .pos {
-    position: absolute;
-    width: 80px;
-    height: 30px;
+    width: 22%;
+    min-width: 65px;
+    max-width: 95px;
+    height: 32px;
     background: rgba(15, 23, 42, 0.94);
     border: 1.5px solid var(--accent-blue);
     border-radius: 6px;
     text-align: center;
-    line-height: 28px;
+    line-height: 30px;
     font-size: 9px;
     font-weight: 700;
     color: #fff;
     cursor: pointer;
-    transform: translateX(-50%);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding: 0 3px;
+    padding: 0 2px;
     box-shadow: 0 3px 8px rgba(0,0,0,0.6);
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .pos:hover {
-    transform: translateX(-50%) scale(1.06);
+    transform: scale(1.06);
     border-color: var(--accent-neon-green);
     box-shadow: 0 0 12px rgba(74, 222, 128, 0.5);
 }
@@ -745,8 +774,9 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 }
 
 @media (min-width: 600px) {
-    .campo-style { height: 550px; }
-    .pos { width: 110px; height: 36px; line-height: 34px; font-size: 11px; }
+    .campo-style { min-height: 550px; padding: 20px; }
+    .pos { width: 105px; height: 36px; line-height: 34px; font-size: 11px; }
+    .reparto-campo { gap: 10px; }
 }
 
 /* PANCHINA GRAFICA */
@@ -792,9 +822,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     transition: all 0.2s ease;
 }
 
-.bench-card-slot:hover {
-    background: rgba(255, 255, 255, 0.08);
-}
+.bench-card-slot:hover { background: rgba(255, 255, 255, 0.08); }
 
 .bench-card-slot.filled {
     background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
@@ -861,7 +889,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
-/* RECAP SCREEN (SOLA LETTURA) */
+/* RECAP SCREEN */
 #recap-screen {
     display: none;
     max-width: 1200px;
@@ -907,7 +935,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     -webkit-overflow-scrolling: touch;
 }
 
-/* 4. TABELLA E RIGHE A CONTRASTO */
 .voti-table {
     width: 100%;
     border-collapse: collapse;
@@ -935,7 +962,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     margin-top: 12px;
 }
 
-/* STILI NUOVA PAGINA CLASSIFICA E COPPE */
+/* CLASSIFICA SCREEN */
 #classifica-screen {
     display: none;
     max-width: 1200px;
@@ -969,17 +996,8 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     gap: 10px;
 }
 
-.fanta-trophy-img {
-    height: 24px;
-    width: auto;
-    vertical-align: middle;
-    display: inline-block;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-}
-
-.podium-card .fanta-trophy-img {
-    height: 38px;
-}
+.fanta-trophy-img { height: 24px; width: auto; vertical-align: middle; display: inline-block; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+.podium-card .fanta-trophy-img { height: 38px; }
 
 .podium-container {
     display: flex;
@@ -1004,23 +1022,9 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 
 .podium-card:hover { transform: translateY(-5px); }
 
-.podium-card.gold {
-    border: 2px solid #fbbf24;
-    box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
-    order: 1;
-}
-
-.podium-card.silver {
-    border: 2px solid #94a3b8;
-    box-shadow: 0 0 15px rgba(148, 163, 184, 0.2);
-    order: 2;
-}
-
-.podium-card.bronze {
-    border: 2px solid #d97706;
-    box-shadow: 0 0 15px rgba(217, 119, 6, 0.2);
-    order: 3;
-}
+.podium-card.gold { border: 2px solid #fbbf24; box-shadow: 0 0 20px rgba(251, 191, 36, 0.3); order: 1; }
+.podium-card.silver { border: 2px solid #94a3b8; box-shadow: 0 0 15px rgba(148, 163, 184, 0.2); order: 2; }
+.podium-card.bronze { border: 2px solid #d97706; box-shadow: 0 0 15px rgba(217, 119, 6, 0.2); order: 3; }
 
 @media (min-width: 768px) {
     .podium-card.gold { order: 2; transform: scale(1.08); }
@@ -1072,22 +1076,14 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 }
 
 .classifica-table tbody tr:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
-
-.classifica-table tr:hover {
-    background: rgba(255, 255, 255, 0.05);
-}
+.classifica-table tr:hover { background: rgba(255, 255, 255, 0.05); }
 
 .classifica-table tr.current-user-row {
     background: rgba(16, 185, 129, 0.15) !important;
     border-left: 3px solid var(--accent-neon-green);
 }
 
-.rank-cell {
-    font-weight: 900;
-    font-size: 14px;
-    width: 50px;
-    text-align: center;
-}
+.rank-cell { font-weight: 900; font-size: 14px; width: 50px; text-align: center; }
 
 .matchday-selector-section {
     margin-top: 30px;
@@ -1121,7 +1117,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     box-shadow: 0 0 10px rgba(96, 165, 250, 0.4);
 }
 
-/* 5. INPUT & FORM MODERNI CON GLOW EFFECT */
+/* AUTH & INPUTS */
 .auth-overlay {
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
@@ -1206,9 +1202,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     transition: all 0.2s ease;
 }
 
-.input-wrapper input {
-    padding-left: 36px;
-}
+.input-wrapper input { padding-left: 36px; }
 
 .input-group input:focus, .styled-input:focus {
     border-color: var(--accent-blue);
@@ -1285,7 +1279,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     </div>
 </header>
 
-<!-- MODALE AUTENTICAZIONE E RECUPERO PASSWORD -->
+<!-- MODALE AUTENTICAZIONE -->
 <div id="auth-modal" class="auth-overlay">
   <div class="auth-card">
     <div class="auth-tabs" id="auth-tabs-header">
@@ -1361,7 +1355,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
       <button type="submit" class="btn-auth">REGISTRATI</button>
     </form>
 
-    <!-- FORM RECUPERO PASSWORD VIA MAIL -->
+    <!-- FORM RECUPERO PASSWORD -->
     <form id="forgot-form" style="display: none;" onsubmit="handleForgotPassword(event)">
       <h2>Recupera Password</h2>
       <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">Inserisci la tua email registrata. Ti invieremo un link per impostare una nuova password.</p>
@@ -1380,9 +1374,8 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
   </div>
 </div>
 
-<!-- LANDING PAGE / SCHERMATA DI BENVENUTO -->
+<!-- LANDING PAGE -->
 <div id="welcome-screen">
-    <!-- BANNER COUNTDOWN SPECIALE -->
     <div class="deadline-banner">
         <div class="deadline-info">
             <i class="fa-solid fa-stopwatch"></i>
@@ -1399,7 +1392,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
         </div>
     </div>
 
-    <!-- RIGA SUPERIORE: 2 BOX SEPARATI -->
     <div class="top-info-row">
         <div class="top-info-card global-teams-box">
             <div style="display:flex; align-items:center; gap:12px;">
@@ -1464,7 +1456,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             </div>
         </div>
 
-        <!-- SEZIONE TASTO VOTI IN HOMEPAGE -->
         <div id="home-voti-section" class="home-voti-area" style="display:none;">
             <button id="btn-calc-home-voti" class="btn-home-voti" disabled onclick="calcolaVotiTutteSquadre()">
                 <i class="fa-solid fa-hourglass-half"></i> <span id="btn-home-voti-text">Torna quando i voti saranno disponibili</span>
@@ -1498,10 +1489,8 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
         </button>
     </div>
 
-    <!-- ENFATIZZAZIONE TOP 3 (PODIO) -->
     <div id="podium-area" class="podium-container"></div>
 
-    <!-- TABELLA GENERALE COMPLETA -->
     <h3>Tutti i Partecipanti</h3>
     <div class="classifica-table-container">
         <table class="classifica-table">
@@ -1521,7 +1510,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
         </table>
     </div>
 
-    <!-- SEZIONE GIORNATE TRASCORSE -->
     <div class="matchday-selector-section">
         <h4 style="color:#fff; font-size:14px; margin-bottom:6px;"><i class="fa-solid fa-calendar-days"></i> Giornate di Campionato</h4>
         <p style="color:var(--text-muted); font-size:12px; margin-bottom:10px;">Seleziona una giornata per visualizzare la relativa classifica e i punteggi:</p>
@@ -1533,7 +1521,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 <div id="main-app">
     <div id="left">
         <div class="panel" id="draft-panel" style="display:block;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                 <h2>Giocatori Disponibili</h2>
                 <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-arrow-rotate-left"></i> Ricomincia Draft</button>
             </div>
@@ -1607,7 +1595,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     </div>
 </div>
 
-<!-- SCHERMATA RECAP IN SOLA LETTURA -->
+<!-- SCHERMATA RECAP -->
 <div id="recap-screen">
     <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(15,23,42,0.6); padding:12px; border-radius:12px; border:1px solid var(--card-border); margin-bottom:15px; flex-wrap:wrap; gap:10px;">
         <div>
@@ -1687,7 +1675,6 @@ let riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Atta
 let turno = 0;
 let moduloSelezionato = "";
 
-// DEFINIZIONE SCADENZA PROSSIMA GIORNATA
 const MATCHDAY_DEADLINE = new Date("2026-10-23T20:45:00"); 
 
 function initCountdown() {
@@ -1765,7 +1752,6 @@ function switchAuthTab(tab) {
 async function handleForgotPassword(e) {
     e.preventDefault();
     const email = document.getElementById('forgot-email').value.trim();
-
     try {
         await auth.sendPasswordResetEmail(email);
         alert("✉️ Email di ripristino inviata! Controlla la tua casella di posta.");
@@ -1862,19 +1848,14 @@ async function calcolaEVisualizzaTotaleSquadreGlobali(giornataCorrente = 8) {
         snapshot.forEach(doc => {
             const uData = doc.data();
             const squadreArr = uData.squadre || [];
-
             squadreArr.forEach(sq => {
                 let g = sq.giornata !== undefined ? sq.giornata : 8;
-                if (g === giornataCorrente) {
-                    conteggioTotale++;
-                }
+                if (g === giornataCorrente) conteggioTotale++;
             });
         });
 
         const badgeEl = document.getElementById("total-global-teams-count");
-        if (badgeEl) {
-            badgeEl.innerText = conteggioTotale;
-        }
+        if (badgeEl) badgeEl.innerText = conteggioTotale;
     } catch (err) {
         console.error("Errore calcolo squadre globali:", err);
         const badgeEl = document.getElementById("total-global-teams-count");
@@ -1890,7 +1871,6 @@ async function ottieniNomiSquadreGlobaliGiornata(giornata) {
         snapshot.forEach(doc => {
             const uData = doc.data();
             const squadreArr = uData.squadre || [];
-
             squadreArr.forEach(sq => {
                 let g = sq.giornata !== undefined ? sq.giornata : 8;
                 if (g === giornata && sq.nomeSquadra) {
@@ -1898,7 +1878,6 @@ async function ottieniNomiSquadreGlobaliGiornata(giornata) {
                 }
             });
         });
-
         return nomiSquadre;
     } catch (err) {
         console.error("Errore recupero nomi squadre globali:", err);
@@ -1987,7 +1966,6 @@ function renderWelcomeScreen() {
     });
 }
 
-/* GESTIONE SCHERMATA CLASSIFICA CON STRIPING ED EVIDENZIAZIONE UTENTE */
 async function apriSchermataClassifica(giornata = 8) {
     currentSelectedMatchday = giornata;
 
@@ -2118,7 +2096,6 @@ async function visualizzaSquadraGenerica(userId, nomeSquadra, giornata) {
         if (!sq) return alert("Squadra non trovata.");
 
         renderRecapScreenReadOnly(sq, username, true);
-
     } catch (err) {
         alert("Errore nel caricamento della squadra: " + err.message);
     }
@@ -2146,26 +2123,11 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false) {
     recapCampo.innerHTML = "";
     
     const [D, C, A] = sq.moduloSelezionato.split("-").map(n => parseInt(n));
-    let isMobile = window.innerWidth < 600;
-    let topPOR = isMobile ? 15 : 30;
-    let topDIF = isMobile ? 105 : 150;
-    let topCEN = isMobile ? 215 : 310;
-    let topATT = isMobile ? 325 : 470;
-
-    createStaticDropZone(recapCampo, "Portiere", topPOR, 50);
-    distribuisciOrizzontalmente(D).forEach(left => createStaticDropZone(recapCampo, "Difensore", topDIF, left));
-    distribuisciOrizzontalmente(C).forEach(left => createStaticDropZone(recapCampo, "Centrocampista", topCEN, left));
-    distribuisciOrizzontalmente(A).forEach(left => createStaticDropZone(recapCampo, "Attaccante", topATT, left));
-
-    const dropzones = recapCampo.querySelectorAll(".dropzone");
-    sq.schierati.forEach(p => {
-        const libera = Array.from(dropzones).find(z => z.dataset.ruolo === p.ruolo && z.dataset.player === "");
-        if (libera) {
-            libera.innerText = p.nome;
-            libera.dataset.player = p.nome;
-            libera.classList.add("filled");
-        }
-    });
+    
+    creaRepartoCampo(recapCampo, "Portiere", [sq.schierati.find(p => p.ruolo === "Portiere")]);
+    creaRepartoCampo(recapCampo, "Difensore", sq.schierati.filter(p => p.ruolo === "Difensore"));
+    creaRepartoCampo(recapCampo, "Centrocampista", sq.schierati.filter(p => p.ruolo === "Centrocampista"));
+    creaRepartoCampo(recapCampo, "Attaccante", sq.schierati.filter(p => p.ruolo === "Attaccante"));
 
     const panchinaDiv = document.getElementById("recap-panchina");
     panchinaDiv.innerHTML = "";
@@ -2228,7 +2190,7 @@ async function preparaEAvviaDraft() {
     tempNomeSquadra = inputName;
     
     document.getElementById("draft-panel").innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
             <h2>Giocatori Disponibili</h2>
             <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-arrow-rotate-left"></i> Ricomincia Draft</button>
         </div>
@@ -2264,7 +2226,7 @@ function resetDraftState() {
 function annullaERicominciaDraft() {
     if (confirm("Vuoi davvero ricominciare il draft per questa squadra? I giocatori selezionati verranno azzerati.")) {
         document.getElementById("draft-panel").innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                 <h2>Giocatori Disponibili</h2>
                 <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-arrow-rotate-left"></i> Ricomincia Draft</button>
             </div>
@@ -2289,7 +2251,6 @@ async function caricaGiocatoriDaExcel() {
         if (jsonData.length === 0) throw new Error("Il file giocatori.xlsx è vuoto!");
 
         parseAndSetPlayers(jsonData);
-
     } catch (error) {
         console.error("Errore caricamento giocatori.xlsx:", error);
     }
@@ -2407,7 +2368,7 @@ function renderPlayers() {
             <div>
                 <div class="player-name">${p.nome}</div>
                 <div class="player-team">${p.squadra}</div>
-                <span class="player-role"><i class="${roleIcons[p.ruolo]}"></i> ${p.ruolo}</span><br>
+                <span class="player-role-label">${p.ruolo}</span>
                 <div class="valore-badge-draft">💰 ${p.valore}</div>
             </div>
             <button class="draft-btn" onclick="draft('${p.nome.replace(/'/g, "\\'")}')">Acquista</button>
@@ -2519,11 +2480,6 @@ function showModuloSelection() {
     `;
 }
 
-function distribuisciOrizzontalmente(n) {
-    const step = 100 / (n + 1);
-    return Array.from({length: n}, (_, i) => step * (i + 1));
-}
-
 function setModulo() {
     if (new Date() >= MATCHDAY_DEADLINE) {
         alert("⚠️ Tempo scaduto! Impossibile impostare la formazione.");
@@ -2543,6 +2499,7 @@ function setModulo() {
     document.getElementById("conferma-container").style.display = "block";
 }
 
+/* SISTEMA FLESSIBILE A REPARTI FLEX PER IL CAMPO SU MOBILE (ANTISOVRAPPOSIZIONE) */
 function ripristinaCampoTattico() {
     if (!moduloSelezionato) return;
 
@@ -2550,36 +2507,46 @@ function ripristinaCampoTattico() {
     const campo = document.getElementById("campo");
     campo.innerHTML = "";
 
-    let isMobile = window.innerWidth < 600;
-    let topPOR = isMobile ? 15 : 30;
-    let topDIF = isMobile ? 105 : 150;
-    let topCEN = isMobile ? 215 : 310;
-    let topATT = isMobile ? 325 : 470;
-
-    createDropZone(campo, "Portiere", topPOR, 50);
-    distribuisciOrizzontalmente(D).forEach(left => createDropZone(campo, "Difensore", topDIF, left));
-    distribuisciOrizzontalmente(C).forEach(left => createDropZone(campo, "Centrocampista", topCEN, left));
-    distribuisciOrizzontalmente(A).forEach(left => createDropZone(campo, "Attaccante", topATT, left));
+    creaRepartoCampo(campo, "Portiere", 1);
+    creaRepartoCampo(campo, "Difensore", D);
+    creaRepartoCampo(campo, "Centrocampista", C);
+    creaRepartoCampo(campo, "Attaccante", A);
 }
 
-function createDropZone(campo, ruolo, top, left) {
-    const dz = document.createElement("div");
-    dz.className = "pos dropzone";
-    dz.style.top = top + "px";
-    dz.style.left = left + "%";
-    dz.dataset.ruolo = ruolo;
-    dz.dataset.player = "";
+function creaRepartoCampo(campoContainer, ruolo, countOrPlayers) {
+    const reparto = document.createElement("div");
+    reparto.className = "reparto-campo";
 
-    dz.onclick = () => {
-        if (new Date() >= MATCHDAY_DEADLINE || !dz.dataset.player) return;
-        schierati = schierati.filter(p => p.nome !== dz.dataset.player);
-        dz.innerText = "";
+    let quantita = typeof countOrPlayers === 'number' ? countOrPlayers : countOrPlayers.length;
+
+    for (let i = 0; i < quantita; i++) {
+        const dz = document.createElement("div");
+        dz.className = "pos dropzone";
+        dz.dataset.ruolo = ruolo;
         dz.dataset.player = "";
-        dz.classList.remove("filled");
-        renderSlots();
-        renderPanchinaGrafica();
-    };
-    campo.appendChild(dz);
+
+        if (Array.isArray(countOrPlayers)) {
+            const p = countOrPlayers[i];
+            if (p) {
+                dz.innerText = p.nome;
+                dz.dataset.player = p.nome;
+                dz.classList.add("filled");
+            }
+        }
+
+        dz.onclick = () => {
+            if (new Date() >= MATCHDAY_DEADLINE || !dz.dataset.player) return;
+            schierati = schierati.filter(p => p.nome !== dz.dataset.player);
+            dz.innerText = "";
+            dz.dataset.player = "";
+            dz.classList.remove("filled");
+            renderSlots();
+            renderPanchinaGrafica();
+        };
+
+        reparto.appendChild(dz);
+    }
+    campoContainer.appendChild(reparto);
 }
 
 function renderPanchinaGrafica() {
@@ -2706,16 +2673,6 @@ async function confermaFormazioneDefinitiva() {
             alert("❌ Errore durante il salvataggio: " + err.message);
         }
     }
-}
-
-function createStaticDropZone(campo, ruolo, top, left) {
-    const dz = document.createElement("div");
-    dz.className = "pos dropzone";
-    dz.style.top = top + "px";
-    dz.style.left = left + "%";
-    dz.dataset.ruolo = ruolo;
-    dz.dataset.player = "";
-    campo.appendChild(dz);
 }
 
 function parseColumnVal(row, colNames) {
