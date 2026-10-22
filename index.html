@@ -850,7 +850,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     margin-top: 12px;
 }
 
-/* STILI NUOVA PAGINA CLASSIFICA */
+/* STILI NUOVA PAGINA CLASSIFICA E COPPE */
 #classifica-screen {
     display: none;
     max-width: 1200px;
@@ -881,6 +881,19 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+/* STILE IMMAGINI COPPE PODIO E TABELLA */
+.fanta-trophy-img {
+    height: 24px;
+    width: auto;
+    vertical-align: middle;
+    display: inline-block;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.podium-card .fanta-trophy-img {
+    height: 38px;
 }
 
 /* PODIO TOP 3 ENFATIZZATO */
@@ -933,23 +946,13 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 
 .podium-rank-badge {
     position: absolute;
-    top: -15px;
+    top: -20px;
     left: 50%;
     transform: translateX(-50%);
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 900;
-    font-size: 16px;
-    color: #000;
 }
-
-.podium-card.gold .podium-rank-badge { background: #fbbf24; }
-.podium-card.silver .podium-rank-badge { background: #94a3b8; }
-.podium-card.bronze .podium-rank-badge { background: #d97706; }
 
 .podium-team-name { font-size: 16px; font-weight: 800; color: #fff; margin-top: 10px; }
 .podium-user-name { font-size: 12px; color: var(--accent-blue); font-weight: 700; margin-bottom: 8px; }
@@ -1859,17 +1862,17 @@ async function apriSchermataClassifica(giornata = 8) {
             return;
         }
 
-        // Render TOP 3 (Podio)
+        // Render TOP 3 (Podio con coppa1.png, coppa2.png, coppa3.png)
         if (tutteSquadreLega.length >= 1) {
             const top3 = tutteSquadreLega.slice(0, 3);
             const classes = ["gold", "silver", "bronze"];
-            const badges = ["🥇 1°", "🥈 2°", "🥉 3°"];
+            const trophyImages = ["icone/coppa1.png", "icone/coppa2.png", "icone/coppa3.png"];
 
             top3.forEach((item, i) => {
                 const card = document.createElement("div");
                 card.className = `podium-card ${classes[i]}`;
                 card.innerHTML = `
-                    <div class="podium-rank-badge">${badges[i]}</div>
+                    <div class="podium-rank-badge"><img src="${trophyImages[i]}" class="fanta-trophy-img" alt="Podio ${i+1}°"></div>
                     <div class="podium-team-name">${item.nomeSquadra}</div>
                     <div class="podium-user-name"><i class="fa-solid fa-user"></i> ${item.username}</div>
                     <div style="font-size:10px; color:var(--text-muted); margin-bottom:5px;">Modulo: ${item.modulo}</div>
@@ -1882,15 +1885,15 @@ async function apriSchermataClassifica(giornata = 8) {
             });
         }
 
-        // Render Tabella Completa
+        // Render Tabella Completa con coppa1, coppa2, coppa3
         tableBody.innerHTML = "";
         tutteSquadreLega.forEach((item, idx) => {
             const tr = document.createElement("tr");
             
             let rankDisplay = idx + 1;
-            if (idx === 0) rankDisplay = "🥇 1";
-            else if (idx === 1) rankDisplay = "🥈 2";
-            else if (idx === 2) rankDisplay = "🥉 3";
+            if (idx === 0) rankDisplay = `<img src="icone/coppa1.png" class="fanta-trophy-img" alt="1° Posto">`;
+            else if (idx === 1) rankDisplay = `<img src="icone/coppa2.png" class="fanta-trophy-img" alt="2° Posto">`;
+            else if (idx === 2) rankDisplay = `<img src="icone/coppa3.png" class="fanta-trophy-img" alt="3° Posto">`;
 
             tr.innerHTML = `
                 <td class="rank-cell">${rankDisplay}</td>
