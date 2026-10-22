@@ -289,6 +289,42 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     align-items: center;
 }
 
+/* PULSANTE VOTI HOMEPAGE */
+.home-voti-area {
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid var(--accent-blue);
+    border-radius: 14px;
+    padding: 18px;
+    text-align: center;
+    margin-top: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.btn-home-voti {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+    border: 1px solid var(--accent-blue);
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-home-voti:disabled {
+    background: rgba(51, 65, 85, 0.6);
+    border-color: rgba(255,255,255,0.1);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
 /* MAIN DRAFT APP LAYOUT */
 #main-app {
     display: none;
@@ -994,6 +1030,13 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             </div>
         </div>
 
+        <!-- SEZIONE TASTO VOTI IN HOMEPAGE -->
+        <div id="home-voti-section" class="home-voti-area" style="display:none;">
+            <button id="btn-calc-home-voti" class="btn-home-voti" disabled onclick="calcolaVotiTutteSquadre()">
+                <i class="fa-solid fa-hourglass-half"></i> <span id="btn-home-voti-text">Torna quando i voti saranno disponibili</span>
+            </button>
+        </div>
+
         <div style="margin-top:25px;">
             <h3 style="font-size:15px; color:#fff; border-bottom:1px solid var(--card-border); padding-bottom:6px;">Le Tue Squadre Create per Questa Giornata</h3>
             <div id="created-teams-container" class="created-teams-list">
@@ -1108,11 +1151,10 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     </div>
 
     <div class="voti-box">
-        <h2 style="text-align: center; font-size:16px;">📊 Calcola il tuo punteggio di giornata</h2>
-        <div style="text-align:center; margin-bottom:12px;">
-            <button class="btn-voti" id="btn-fetch-voti" onclick="calcolaVotiDaExcelOnline()" style="background:var(--accent-blue); color:#fff; border:none; padding:8px 16px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">📊 Carica i Fantavoti di giornata</button>
+        <h2 style="text-align: center; font-size:16px; color:var(--accent-gold);">📊 Tabellino Voti di Giornata</h2>
+        <div id="tabellino-container">
+            <p style="text-align:center; color:var(--text-muted); font-size:12px;">I voti per questa squadra non sono ancora stati calcolati. Torna nella Home Page appena i voti saranno disponibili!</p>
         </div>
-        <div id="tabellino-container"></div>
     </div>
 </div>
 
@@ -1147,6 +1189,7 @@ const roleIcons = {
 
 let userSquadre = []; 
 let activeTeamIndex = -1; 
+let isVotiOkAvailable = false;
 
 let tempNomeSquadra = "";
 let rosa = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
@@ -1188,6 +1231,7 @@ function initCountdown() {
 document.addEventListener("DOMContentLoaded", () => {
     initCountdown();
     caricaGiocatoriDaExcel();
+    verificaDisponibilitaVotiOk();
 });
 
 function togglePasswordVisibility(inputId, iconElement) {
@@ -1321,6 +1365,51 @@ async function caricaDatiUtenteCloud() {
     }
 }
 
+// VERIFICA SE IL FILE voti_ok.xlsx È PRESENTE SUL SERVER
+async function verificaDisponibilitaVotiOk() {
+    try {
+        const res = await fetch("voti_ok.xlsx", { method: "HEAD" });
+        if (res.ok) {
+            isVotiOkAvailable = true;
+        } else {
+            isVotiOkAvailable = false;
+        }
+    } catch (err) {
+        isVotiOkAvailable = false;
+    }
+    updateHomeVotiButtonState();
+}
+
+function updateHomeVotiButtonState() {
+    const section = document.getElementById("home-voti-section");
+    const btn = document.getElementById("btn-calc-home-voti");
+    const txt = document.getElementById("btn-home-voti-text");
+
+    if (userSquadre.length === 0) {
+        section.style.display = "none";
+        return;
+    }
+
+    section.style.display = "block";
+
+    if (!isVotiOkAvailable) {
+        btn.disabled = true;
+        btn.style.cursor = "not-allowed";
+        btn.style.background = "rgba(51, 65, 85, 0.6)";
+        txt.innerText = "Torna quando i voti saranno disponibili";
+    } else {
+        btn.disabled = false;
+        btn.style.cursor = "pointer";
+        btn.style.background = "linear-gradient(135deg, #2563eb, #1d4ed8)";
+
+        if (userSquadre.length > 1) {
+            txt.innerText = "Voti disponibili! Calcola il punteggio delle tue squadre";
+        } else {
+            txt.innerText = "Calcola il voto della tua squadra";
+        }
+    }
+}
+
 function renderWelcomeScreen() {
     document.getElementById("welcome-screen").style.display = "block";
     document.getElementById("main-app").style.display = "none";
@@ -1337,6 +1426,8 @@ function renderWelcomeScreen() {
         document.getElementById("tokens-exhausted-msg").style.display = "none";
     }
 
+    updateHomeVotiButtonState();
+
     const container = document.getElementById("created-teams-container");
     container.innerHTML = "";
 
@@ -1348,10 +1439,17 @@ function renderWelcomeScreen() {
     userSquadre.forEach((sq, idx) => {
         const item = document.createElement("div");
         item.className = "team-card-item";
+        
+        let punteggioHtml = "";
+        if (sq.punteggioTotale !== undefined && sq.punteggioTotale !== null) {
+            punteggioHtml = `<div style="font-size:12px; font-weight:900; color:var(--accent-gold); margin-top:2px;">🏆 Punteggio: ${sq.punteggioTotale} pt</div>`;
+        }
+
         item.innerHTML = `
             <div>
                 <strong style="color:var(--accent-neon-green); font-size:13px;">${sq.nomeSquadra}</strong>
                 <div style="font-size:10px; color:var(--text-muted);">Modulo: ${sq.moduloSelezionato}</div>
+                ${punteggioHtml}
             </div>
             <button onclick="apriRecapSquadra(${idx})" class="btn-action-primary" style="padding:5px 10px; font-size:10px;">
                 <i class="fa-solid fa-eye"></i> Vedi Squadra
@@ -1826,6 +1924,7 @@ async function confermaFormazioneDefinitiva() {
             moduloSelezionato: moduloSelezionato,
             formazioneBloccata: true,
             votiGiornata: {},
+            punteggioTotale: null,
             creataIl: new Date()
         };
 
@@ -1903,7 +2002,7 @@ function apriRecapSquadra(index) {
     if (sq.votiGiornata && Object.keys(sq.votiGiornata).length > 0) {
         mostraTabellinoVoti(sq);
     } else {
-        document.getElementById("tabellino-container").innerHTML = "";
+        document.getElementById("tabellino-container").innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:12px;">I voti per questa squadra non sono ancora stati calcolati. Torna nella Home Page appena i voti saranno disponibili!</p>`;
     }
 }
 
@@ -1933,21 +2032,18 @@ function parseColumnVal(row, colNames) {
     return 0;
 }
 
-async function calcolaVotiDaExcelOnline() {
-    if (activeTeamIndex === -1) return;
-    const sq = userSquadre[activeTeamIndex];
+// CALCOLO VOTI DI TUTTE LE SQUADRE DA HOMEPAGE VIA voti_ok.xlsx
+async function calcolaVotiTutteSquadre() {
+    if (userSquadre.length === 0) return;
 
-    const btn = document.getElementById("btn-fetch-voti");
-    btn.innerText = "⏳ Lettura voti.xlsx...";
+    const btn = document.getElementById("btn-calc-home-voti");
+    const txt = document.getElementById("btn-home-voti-text");
     btn.disabled = true;
-
-    let votiObj = {};
-    const tutteLeRiserve = Object.values(sq.riserveSelezionate).flat();
-    const tuttiGiocatori = [...sq.schierati, ...tutteLeRiserve];
+    txt.innerText = "⏳ Calcolo voti in corso...";
 
     try {
-        const response = await fetch("voti.xlsx");
-        if (!response.ok) throw new Error("File voti.xlsx non trovato!");
+        const response = await fetch("voti_ok.xlsx");
+        if (!response.ok) throw new Error("File voti_ok.xlsx non trovato!");
 
         const arrayBuffer = await response.arrayBuffer();
         const data = new Uint8Array(arrayBuffer);
@@ -1957,57 +2053,91 @@ async function calcolaVotiDaExcelOnline() {
         const worksheet = workbook.Sheets[nomeFoglioVoti];
         const rows = XLSX.utils.sheet_to_json(worksheet);
 
-        tuttiGiocatori.forEach(p => {
-            let nomePulito = p.nome.trim().toLowerCase();
+        userSquadre.forEach(sq => {
+            let votiObj = {};
+            let totaleSquadra = 0;
+            let riserveGiaSubentrate = new Set();
 
-            let matchRow = rows.find(row => {
-                let nomeInRow = String(row.nome || row.Nome || row.NOME || row.calciatore || row.Calciatore || row.Giocatore || "").trim().toLowerCase();
-                return nomeInRow === nomePulito || nomeInRow.includes(nomePulito) || nomePulito.includes(nomeInRow);
+            const tutteLeRiserve = Object.values(sq.riserveSelezionate).flat();
+            const tuttiGiocatori = [...sq.schierati, ...tutteLeRiserve];
+
+            tuttiGiocatori.forEach(p => {
+                let nomePulito = p.nome.trim().toLowerCase();
+
+                let matchRow = rows.find(row => {
+                    let nomeInRow = String(row.nome || row.Nome || row.NOME || row.calciatore || row.Calciatore || row.Giocatore || "").trim().toLowerCase();
+                    return nomeInRow === nomePulito || nomeInRow.includes(nomePulito) || nomePulito.includes(nomeInRow);
+                });
+
+                if (matchRow) {
+                    let rawVotoPuro = parseColumnVal(matchRow, ["voto", "Voto", "VOTO"]);
+                    let rawFanta = parseColumnVal(matchRow, ["fantavoto", "Fantavoto", "FANTAVOTO"]);
+
+                    if (rawFanta === 0 && rawVotoPuro > 0) rawFanta = rawVotoPuro;
+
+                    if (rawFanta > 0 || rawVotoPuro > 0) {
+                        votiObj[p.nome] = {
+                            voto: rawVotoPuro,
+                            fantavoto: rawFanta,
+                            sv: false,
+                            gf: parseColumnVal(matchRow, ["gf"]),
+                            gs: parseColumnVal(matchRow, ["gs"]),
+                            ass: parseColumnVal(matchRow, ["ass"]),
+                            au: parseColumnVal(matchRow, ["au"]),
+                            esp: parseColumnVal(matchRow, ["Esp", "esp"]),
+                            amm: parseColumnVal(matchRow, ["amm", "Amm"]),
+                            rp: parseColumnVal(matchRow, ["rp"]),
+                            rs: parseColumnVal(matchRow, ["rs"]),
+                            rf: parseColumnVal(matchRow, ["rf"])
+                        };
+                        return;
+                    }
+                }
+
+                votiObj[p.nome] = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
             });
 
-            if (matchRow) {
-                let rawVotoPuro = parseColumnVal(matchRow, ["voto", "Voto", "VOTO"]);
-                let rawFanta = parseColumnVal(matchRow, ["fantavoto", "Fantavoto", "FANTAVOTO"]);
+            sq.schierati.forEach(tit => {
+                let vInfo = votiObj[tit.nome];
+                let eff = vInfo;
 
-                if (rawFanta === 0 && rawVotoPuro > 0) rawFanta = rawVotoPuro;
+                if (!vInfo || vInfo.sv) {
+                    let riserveRuolo = sq.riserveSelezionate[tit.ruolo] || [];
+                    let riservaValida = null;
 
-                if (rawFanta > 0 || rawVotoPuro > 0) {
-                    votiObj[p.nome] = {
-                        voto: rawVotoPuro,
-                        fantavoto: rawFanta,
-                        sv: false,
-                        gf: parseColumnVal(matchRow, ["gf"]),
-                        gs: parseColumnVal(matchRow, ["gs"]),
-                        ass: parseColumnVal(matchRow, ["ass"]),
-                        au: parseColumnVal(matchRow, ["au"]),
-                        esp: parseColumnVal(matchRow, ["Esp", "esp"]),
-                        amm: parseColumnVal(matchRow, ["amm", "Amm"]),
-                        rp: parseColumnVal(matchRow, ["rp"]),
-                        rs: parseColumnVal(matchRow, ["rs"]),
-                        rf: parseColumnVal(matchRow, ["rf"])
-                    };
-                    return;
+                    for (let ris of riserveRuolo) {
+                        if (!riserveGiaSubentrate.has(ris.nome)) {
+                            let risInfo = votiObj[ris.nome];
+                            if (risInfo && !risInfo.sv) {
+                                riservaValida = { obj: ris, info: risInfo };
+                                riserveGiaSubentrate.add(ris.nome);
+                                break;
+                            }
+                        }
+                    }
+
+                    if (riservaValida) {
+                        eff = riservaValida.info;
+                    } else {
+                        eff = { voto: 0, fantavoto: 0, sv: true };
+                    }
                 }
-            }
 
-            votiObj[p.nome] = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
+                totaleSquadra += (eff.fantavoto > 0 ? eff.fantavoto : 0);
+            });
+
+            sq.votiGiornata = votiObj;
+            sq.punteggioTotale = totaleSquadra;
         });
 
-        sq.votiGiornata = votiObj;
         await db.collection("utenti").doc(currentUser.uid).update({ squadre: userSquadre });
+        alert("🎉 Punteggi calcolati con successo per tutte le tue squadre!");
+        renderWelcomeScreen();
 
     } catch (err) {
-        alert("Attenzione: Impossibile leggere voti.xlsx (" + err.message + ").");
-        tuttiGiocatori.forEach(p => {
-            votiObj[p.nome] = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
-        });
-        sq.votiGiornata = votiObj;
+        alert("⚠️ Errore nel calcolo dei voti: " + err.message);
+        updateHomeVotiButtonState();
     }
-
-    btn.innerText = "📊 Carica i Fantavoti di giornata";
-    btn.disabled = false;
-
-    mostraTabellinoVoti(sq);
 }
 
 function generaIconeBonusMalus(vInfo) {
@@ -2077,7 +2207,7 @@ function mostraTabellinoVoti(sq) {
             }
         }
 
-        totale += eff.fantavoto;
+        totale += (eff.fantavoto > 0 ? eff.fantavoto : 0);
         let iconeHtml = generaIconeBonusMalus(eff);
         let votoPuroTxt = eff.sv ? "-" : (eff.voto > 0 ? eff.voto : "-");
 
@@ -2092,7 +2222,7 @@ function mostraTabellinoVoti(sq) {
     });
 
     html += `</tbody></table>
-    <div class="totale-punteggio">🏆 Totale Squadra: ${totale} Punti</div>`;
+    <div class="totale-punteggio">🏆 Totale Squadra: ${sq.punteggioTotale !== null ? sq.punteggioTotale : totale} Punti</div>`;
 
     container.innerHTML = html;
 }
