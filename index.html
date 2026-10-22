@@ -77,6 +77,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     font-weight: 800;
     font-size: 15px;
     color: #fff;
+    cursor: pointer;
 }
 
 .global-header .user-area {
@@ -289,7 +290,37 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     align-items: center;
 }
 
-/* PULSANTE VOTI HOMEPAGE */
+/* PULSANTE CLASSIFICA E VOTI HOMEPAGE */
+.home-nav-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.btn-home-classifica {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #000;
+    border: 1px solid var(--accent-gold);
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-home-classifica:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
+}
+
 .home-voti-area {
     background: rgba(15, 23, 42, 0.9);
     border: 1px solid var(--accent-blue);
@@ -770,6 +801,185 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     margin-top: 12px;
 }
 
+/* STILI NUOVA PAGINA CLASSIFICA */
+#classifica-screen {
+    display: none;
+    max-width: 1200px;
+    margin: 0 auto;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.classifica-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--card-border);
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.classifica-title-main {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--accent-gold);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* PODIO TOP 3 ENFATIZZATO */
+.podium-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 15px;
+    margin: 25px 0;
+    flex-wrap: wrap;
+}
+
+.podium-card {
+    background: rgba(15, 23, 42, 0.9);
+    border-radius: 14px;
+    padding: 15px;
+    text-align: center;
+    width: 100%;
+    max-width: 280px;
+    position: relative;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+    transition: transform 0.3s ease;
+}
+
+.podium-card:hover { transform: translateY(-50px); }
+
+.podium-card.gold {
+    border: 2px solid #fbbf24;
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+    order: 1;
+}
+
+.podium-card.silver {
+    border: 2px solid #94a3b8;
+    box-shadow: 0 0 15px rgba(148, 163, 184, 0.2);
+    order: 2;
+}
+
+.podium-card.bronze {
+    border: 2px solid #d97706;
+    box-shadow: 0 0 15px rgba(217, 119, 6, 0.2);
+    order: 3;
+}
+
+@media (min-width: 768px) {
+    .podium-card.gold { order: 2; transform: scale(1.08); }
+    .podium-card.silver { order: 1; }
+    .podium-card.bronze { order: 3; }
+}
+
+.podium-rank-badge {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 16px;
+    color: #000;
+}
+
+.podium-card.gold .podium-rank-badge { background: #fbbf24; }
+.podium-card.silver .podium-rank-badge { background: #94a3b8; }
+.podium-card.bronze .podium-rank-badge { background: #d97706; }
+
+.podium-team-name { font-size: 16px; font-weight: 800; color: #fff; margin-top: 10px; }
+.podium-user-name { font-size: 12px; color: var(--accent-blue); font-weight: 700; margin-bottom: 8px; }
+.podium-score { font-size: 24px; font-weight: 900; color: var(--accent-neon-green); }
+
+/* TABELLA CLASSIFICA COMPLETA */
+.classifica-table-container {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid var(--card-border);
+    background: rgba(15, 23, 42, 0.8);
+}
+
+.classifica-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.classifica-table th, .classifica-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--card-border);
+    font-size: 12px;
+}
+
+.classifica-table th {
+    background: rgba(30, 41, 59, 0.95);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.classifica-table tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.rank-cell {
+    font-weight: 900;
+    font-size: 14px;
+    width: 50px;
+    text-align: center;
+}
+
+/* SEZIONE GIORNATE TRASCORSE */
+.matchday-selector-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--card-border);
+}
+
+.matchday-grid {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.btn-matchday-pill {
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid var(--card-border);
+    color: var(--text-main);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-matchday-pill:hover, .btn-matchday-pill.active {
+    background: var(--accent-blue);
+    color: #000;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 10px rgba(96, 165, 250, 0.4);
+}
+
 /* OVERLAY LOGIN/REGISTRAZIONE E RECUPERO PASSWORD */
 .auth-overlay {
     position: fixed;
@@ -887,7 +1097,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 
 <!-- HEADER GLOBALE -->
 <header id="global-header-bar" class="global-header" style="display: none;">
-    <div class="logo-area">
+    <div class="logo-area" onclick="tornaAllaHome()">
         <i class="fa-solid fa-trophy" style="color: var(--accent-gold);"></i>
         <span>Draft Serie A</span>
     </div>
@@ -998,6 +1208,13 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             Sfida gli altri fantallenatori nella prossima giornata di campionato! Costruisci le tue rose tramite il sistema di Draft live, seleziona il modulo tattico e schiera i tuoi titolari prima del fischio d'inizio.
         </p>
 
+        <!-- AREA PULSANTI NAVIGAZIONE HOMEPAGE -->
+        <div class="home-nav-buttons">
+            <button onclick="apriSchermataClassifica(8)" class="btn-home-classifica">
+                <i class="fa-solid fa-ranking-star"></i> Vedi Classifica di Lega
+            </button>
+        </div>
+
         <div class="rules-grid">
             <div class="rule-box">
                 <i class="fa-solid fa-ticket"></i>
@@ -1038,11 +1255,54 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
         </div>
 
         <div style="margin-top:25px;">
-            <h3 style="font-size:15px; color:#fff; border-bottom:1px solid var(--card-border); padding-bottom:6px;">Le Tue Squadre Create per Questa Giornata</h3>
+            <h3 style="font-size:15px; color:#fff; border-bottom:1px solid var(--card-border); padding-bottom:6px;">Le tue Squadre create per la giornata di campionato n°8</h3>
             <div id="created-teams-container" class="created-teams-list">
                 <p style="color:var(--text-muted); font-size:12px;">Nessuna squadra ancora creata per questo turno.</p>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- PAGINA CLASSIFICA -->
+<div id="classifica-screen">
+    <div class="classifica-header">
+        <div class="classifica-title-main">
+            <i class="fa-solid fa-trophy"></i>
+            <span id="classifica-heading-text">Classifica della giornata n°8</span>
+        </div>
+        <button onclick="tornaAllaHome()" class="btn-action-primary" style="padding:8px 16px; font-size:12px;">
+            <i class="fa-solid fa-house"></i> Torna alla Home
+        </button>
+    </div>
+
+    <!-- ENFATIZZAZIONE TOP 3 (PODIO) -->
+    <div id="podium-area" class="podium-container"></div>
+
+    <!-- TABELLA GENERALE COMPLETA -->
+    <h3>Tutti i Partecipanti</h3>
+    <div class="classifica-table-container">
+        <table class="classifica-table">
+            <thead>
+                <tr>
+                    <th style="text-align:center;">Pos</th>
+                    <th>Utente</th>
+                    <th>Nome Squadra</th>
+                    <th>Modulo</th>
+                    <th>Punti Totali</th>
+                    <th style="text-align:right;">Azione</th>
+                </tr>
+            </thead>
+            <tbody id="classifica-table-body">
+                <tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Caricamento classifica...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- SEZIONE GIORNATE TRASCORSE -->
+    <div class="matchday-selector-section">
+        <h4 style="color:#fff; font-size:14px; margin-bottom:6px;"><i class="fa-solid fa-calendar-days"></i> Giornate di Campionato</h4>
+        <p style="color:var(--text-muted); font-size:12px; margin-bottom:10px;">Seleziona una giornata per visualizzare la relativa classifica e i punteggi:</p>
+        <div id="matchdays-pills-container" class="matchday-grid"></div>
     </div>
 </div>
 
@@ -1130,8 +1390,12 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
         <div>
             <span style="background:rgba(16, 185, 129, 0.2); border:1px solid var(--accent-neon-green); color:var(--accent-neon-green); padding:3px 10px; border-radius:16px; font-size:10px; font-weight:800;">🔒 SQUADRA SALVATA</span>
             <h2 id="recap-nome-squadra" style="margin:4px 0 0 0; color:#fff;">-</h2>
+            <div id="recap-utente-owner" style="font-size:11px; color:var(--accent-blue); font-weight:700;">-</div>
         </div>
-        <button onclick="tornaAllaHome()" class="btn-action-primary" style="padding:8px 14px; font-size:12px;"><i class="fa-solid fa-house"></i> Torna alla Home</button>
+        <div style="display:flex; gap:8px;">
+            <button id="btn-recap-back-classifica" onclick="apriSchermataClassifica(currentSelectedMatchday)" class="btn-action-primary" style="background:linear-gradient(135deg, #f59e0b, #d97706); padding:8px 14px; font-size:12px; display:none;"><i class="fa-solid fa-ranking-star"></i> Torna alla Classifica</button>
+            <button onclick="tornaAllaHome()" class="btn-action-primary" style="padding:8px 14px; font-size:12px;"><i class="fa-solid fa-house"></i> Home Page</button>
+        </div>
     </div>
 
     <div style="text-align: center; margin-bottom: 15px;">
@@ -1153,7 +1417,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     <div class="voti-box">
         <h2 style="text-align: center; font-size:16px; color:var(--accent-gold);">📊 Tabellino Voti di Giornata</h2>
         <div id="tabellino-container">
-            <p style="text-align:center; color:var(--text-muted); font-size:12px;">I voti per questa squadra non sono ancora stati calcolati. Torna nella Home Page appena i voti saranno disponibili!</p>
+            <p style="text-align:center; color:var(--text-muted); font-size:12px;">I voti per questa squadra non sono ancora stati calcolati.</p>
         </div>
     </div>
 </div>
@@ -1190,6 +1454,7 @@ const roleIcons = {
 let userSquadre = []; 
 let activeTeamIndex = -1; 
 let isVotiOkAvailable = false;
+let currentSelectedMatchday = 8; // Giornata di Serie A corrente
 
 let tempNomeSquadra = "";
 let rosa = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
@@ -1199,7 +1464,7 @@ let riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Atta
 let turno = 0;
 let moduloSelezionato = "";
 
-// DEFINIZIONE SCADENZA PROSSIMA GIORNATA
+// DEFINIZIONE SCADENZA PROSSIMA GIORNATA (8ª Giornata Serie A 2026/2027)
 const MATCHDAY_DEADLINE = new Date("2026-10-23T20:45:00"); 
 
 function initCountdown() {
@@ -1365,15 +1630,11 @@ async function caricaDatiUtenteCloud() {
     }
 }
 
-// VERIFICA SE IL FILE voti_ok.xlsx È PRESENTE SUL SERVER
+// VERIFICA DISPONIBILITÀ FILE VOTI
 async function verificaDisponibilitaVotiOk() {
     try {
         const res = await fetch("voti_ok.xlsx", { method: "HEAD" });
-        if (res.ok) {
-            isVotiOkAvailable = true;
-        } else {
-            isVotiOkAvailable = false;
-        }
+        isVotiOkAvailable = res.ok;
     } catch (err) {
         isVotiOkAvailable = false;
     }
@@ -1401,12 +1662,7 @@ function updateHomeVotiButtonState() {
         btn.disabled = false;
         btn.style.cursor = "pointer";
         btn.style.background = "linear-gradient(135deg, #2563eb, #1d4ed8)";
-
-        if (userSquadre.length > 1) {
-            txt.innerText = "Voti disponibili! Calcola il punteggio delle tue squadre";
-        } else {
-            txt.innerText = "Calcola il voto della tua squadra";
-        }
+        txt.innerText = userSquadre.length > 1 ? "Voti disponibili! Calcola il punteggio delle tue squadre" : "Calcola il voto della tua squadra";
     }
 }
 
@@ -1414,6 +1670,7 @@ function renderWelcomeScreen() {
     document.getElementById("welcome-screen").style.display = "block";
     document.getElementById("main-app").style.display = "none";
     document.getElementById("recap-screen").style.display = "none";
+    document.getElementById("classifica-screen").style.display = "none";
 
     let gettoniRimasti = 3 - userSquadre.length;
     document.getElementById("tokens-count-display").innerText = `${gettoniRimasti} / 3`;
@@ -1451,7 +1708,7 @@ function renderWelcomeScreen() {
                 <div style="font-size:10px; color:var(--text-muted);">Modulo: ${sq.moduloSelezionato}</div>
                 ${punteggioHtml}
             </div>
-            <button onclick="apriRecapSquadra(${idx})" class="btn-action-primary" style="padding:5px 10px; font-size:10px;">
+            <button onclick="apriRecapSquadraUtenteCorrente(${idx})" class="btn-action-primary" style="padding:5px 10px; font-size:10px;">
                 <i class="fa-solid fa-eye"></i> Vedi Squadra
             </button>
         `;
@@ -1459,6 +1716,221 @@ function renderWelcomeScreen() {
     });
 }
 
+/* ======================================================
+   GESTIONE NUOVA SCHERMATA CLASSIFICA
+   ====================================================== */
+async function apriSchermataClassifica(giornata = 8) {
+    currentSelectedMatchday = giornata;
+
+    document.getElementById("welcome-screen").style.display = "none";
+    document.getElementById("main-app").style.display = "none";
+    document.getElementById("recap-screen").style.display = "none";
+    document.getElementById("classifica-screen").style.display = "block";
+
+    document.getElementById("classifica-heading-text").innerText = `Classifica della giornata n°${giornata}`;
+
+    renderMatchdayPills(giornata);
+
+    const podiumArea = document.getElementById("podium-area");
+    const tableBody = document.getElementById("classifica-table-body");
+    podiumArea.innerHTML = "";
+    tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Caricamento dati classifica in corso...</td></tr>`;
+
+    try {
+        const snapshot = await db.collection("utenti").get();
+        let tutteSquadreLega = [];
+
+        snapshot.forEach(doc => {
+            const uData = doc.data();
+            const username = uData.username || uData.email || "Utente";
+            const squadreArr = uData.squadre || [];
+
+            squadreArr.forEach(sq => {
+                let g = sq.giornata || 8; 
+                if (g === giornata) {
+                    tutteSquadreLega.push({
+                        username: username,
+                        userId: doc.id,
+                        nomeSquadra: sq.nomeSquadra,
+                        modulo: sq.moduloSelezionato,
+                        punteggio: sq.punteggioTotale !== null && sq.punteggioTotale !== undefined ? sq.punteggioTotale : 0,
+                        squadraObj: sq
+                    });
+                }
+            });
+        });
+
+        // Ordina per punteggio decrescente
+        tutteSquadreLega.sort((a, b) => b.punteggio - a.punteggio);
+
+        if (tutteSquadreLega.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Nessuna squadra iscritta per la giornata n°${giornata}.</td></tr>`;
+            return;
+        }
+
+        // Render TOP 3 (Podio)
+        if (tutteSquadreLega.length >= 1) {
+            const top3 = tutteSquadreLega.slice(0, 3);
+            const classes = ["gold", "silver", "bronze"];
+            const badges = ["🥇 1°", "🥈 2°", "🥉 3°"];
+
+            top3.forEach((item, i) => {
+                const card = document.createElement("div");
+                card.className = `podium-card ${classes[i]}`;
+                card.innerHTML = `
+                    <div class="podium-rank-badge">${badges[i]}</div>
+                    <div class="podium-team-name">${item.nomeSquadra}</div>
+                    <div class="podium-user-name"><i class="fa-solid fa-user"></i> ${item.username}</div>
+                    <div style="font-size:10px; color:var(--text-muted); margin-bottom:5px;">Modulo: ${item.modulo}</div>
+                    <div class="podium-score">${item.punteggio} pt</div>
+                    <button onclick="visualizzaSquadraGenerica('${item.userId}', '${item.nomeSquadra.replace(/'/g, "\\'")}', ${giornata})" class="btn-action-primary" style="padding:4px 10px; font-size:10px; margin-top:8px;">
+                        <i class="fa-solid fa-eye"></i> Vedi Formazione
+                    </button>
+                `;
+                podiumArea.appendChild(card);
+            });
+        }
+
+        // Render Tabella Completa
+        tableBody.innerHTML = "";
+        tutteSquadreLega.forEach((item, idx) => {
+            const tr = document.createElement("tr");
+            
+            let rankDisplay = idx + 1;
+            if (idx === 0) rankDisplay = "🥇 1";
+            else if (idx === 1) rankDisplay = "🥈 2";
+            else if (idx === 2) rankDisplay = "🥉 3";
+
+            tr.innerHTML = `
+                <td class="rank-cell">${rankDisplay}</td>
+                <td style="font-weight:700; color:var(--accent-blue);"><i class="fa-solid fa-user"></i> ${item.username}</td>
+                <td style="font-weight:800; color:#fff;">${item.nomeSquadra}</td>
+                <td style="color:var(--text-muted);">${item.modulo}</td>
+                <td style="font-weight:900; color:var(--accent-neon-green); font-size:13px;">${item.punteggio} pt</td>
+                <td style="text-align:right;">
+                    <button onclick="visualizzaSquadraGenerica('${item.userId}', '${item.nomeSquadra.replace(/'/g, "\\'")}', ${giornata})" class="btn-action-primary" style="padding:4px 8px; font-size:10px;">
+                        <i class="fa-solid fa-eye"></i> Voti & Schieramento
+                    </button>
+                </td>
+            `;
+            tableBody.appendChild(tr);
+        });
+
+    } catch (err) {
+        console.error("Errore recupero classifica:", err);
+        tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--accent-red);">Errore durante il caricamento della classifica.</td></tr>`;
+    }
+}
+
+function renderMatchdayPills(selectedDay) {
+    const container = document.getElementById("matchdays-pills-container");
+    container.innerHTML = "";
+
+    // Genera pulsanti per le giornate trascorse e correnti (da 1 a 8)
+    for (let g = 1; g <= 8; g++) {
+        const btn = document.createElement("button");
+        btn.className = `btn-matchday-pill ${g === selectedDay ? 'active' : ''}`;
+        btn.innerText = `Giornata ${g}`;
+        btn.onclick = () => apriSchermataClassifica(g);
+        container.appendChild(btn);
+    }
+}
+
+// VISUALIZZAZIONE SQUADRA IN SOLA LETTURA DA CLASSIFICA
+async function visualizzaSquadraGenerica(userId, nomeSquadra, giornata) {
+    try {
+        const doc = await db.collection("utenti").doc(userId).get();
+        if (!doc.exists) return alert("Utente non trovato.");
+
+        const uData = doc.data();
+        const username = uData.username || "Utente";
+        const squadreArr = uData.squadre || [];
+
+        const sq = squadreArr.find(s => s.nomeSquadra.toLowerCase() === nomeSquadra.toLowerCase());
+        if (!sq) return alert("Squadra non trovata.");
+
+        renderRecapScreenReadOnly(sq, username, true);
+
+    } catch (err) {
+        alert("Errore nel caricamento della squadra: " + err.message);
+    }
+}
+
+function apriRecapSquadraUtenteCorrente(index) {
+    const sq = userSquadre[index];
+    renderRecapScreenReadOnly(sq, currentUser ? currentUser.displayName : "Tu", false);
+}
+
+function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false) {
+    document.getElementById("welcome-screen").style.display = "none";
+    document.getElementById("main-app").style.display = "none";
+    document.getElementById("classifica-screen").style.display = "none";
+    document.getElementById("recap-screen").style.display = "block";
+
+    document.getElementById("recap-nome-squadra").innerText = sq.nomeSquadra;
+    document.getElementById("recap-utente-owner").innerText = `Fantallenatore: ${usernameOwner}`;
+    document.getElementById("recap-modulo-title").innerText = sq.moduloSelezionato;
+
+    const btnBackClassifica = document.getElementById("btn-recap-back-classifica");
+    btnBackClassifica.style.display = fromClassifica ? "inline-flex" : "none";
+
+    const recapCampo = document.getElementById("recap-campo");
+    recapCampo.innerHTML = "";
+    
+    const [D, C, A] = sq.moduloSelezionato.split("-").map(n => parseInt(n));
+    let isMobile = window.innerWidth < 600;
+    let topPOR = isMobile ? 15 : 30;
+    let topDIF = isMobile ? 105 : 150;
+    let topCEN = isMobile ? 215 : 310;
+    let topATT = isMobile ? 325 : 470;
+
+    createStaticDropZone(recapCampo, "Portiere", topPOR, 50);
+    distribuisciOrizzontalmente(D).forEach(left => createStaticDropZone(recapCampo, "Difensore", topDIF, left));
+    distribuisciOrizzontalmente(C).forEach(left => createStaticDropZone(recapCampo, "Centrocampista", topCEN, left));
+    distribuisciOrizzontalmente(A).forEach(left => createStaticDropZone(recapCampo, "Attaccante", topATT, left));
+
+    const dropzones = recapCampo.querySelectorAll(".dropzone");
+    sq.schierati.forEach(p => {
+        const libera = Array.from(dropzones).find(z => z.dataset.ruolo === p.ruolo && z.dataset.player === "");
+        if (libera) {
+            libera.innerText = p.nome;
+            libera.dataset.player = p.nome;
+        }
+    });
+
+    const panchinaDiv = document.getElementById("recap-panchina");
+    panchinaDiv.innerHTML = "";
+
+    ["Portiere", "Difensore", "Centrocampista", "Attaccante"].forEach(ruolo => {
+        const riserve = sq.riserveSelezionate[ruolo] || [];
+        riserve.forEach((ris, i) => {
+            const card = document.createElement("div");
+            card.className = "recap-bench-card";
+            card.innerHTML = `
+                <div>
+                    <span class="player-role"><i class="${roleIcons[ruolo]}"></i> ${ruolo} (R${i+1})</span>
+                    <div style="font-weight:700; color:#fff; margin-top:2px; font-size:12px;">${ris.nome}</div>
+                </div>
+                <span class="valore-badge-slot">💰 ${ris.valore} cr</span>
+            `;
+            panchinaDiv.appendChild(card);
+        });
+    });
+
+    if (sq.votiGiornata && Object.keys(sq.votiGiornata).length > 0) {
+        mostraTabellinoVoti(sq);
+    } else {
+        document.getElementById("tabellino-container").innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:12px;">I voti per questa squadra non sono ancora stati calcolati.</p>`;
+    }
+}
+
+function tornaAllaHome() {
+    renderWelcomeScreen();
+}
+
+/* ======================================================
+   FUNZIONALITÀ DRAFT E SCHIERAMENTO
+   ====================================================== */
 function preparaEAvviaDraft() {
     if (new Date() >= MATCHDAY_DEADLINE) {
         alert("⚠️ Tempo scaduto! L'iscrizione per questa giornata è chiusa.");
@@ -1524,7 +1996,7 @@ function resetDraftState() {
 }
 
 function annullaERicominciaDraft() {
-    if (confirm("Vuoi davvero ricominciare il draft per questa squadra? I giocatori selezionati verranno azzerati (nessun gettone verrà consumato).")) {
+    if (confirm("Vuoi davvero ricominciare il draft per questa squadra? I giocatori selezionati verranno azzerati.")) {
         document.getElementById("draft-panel").innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                 <h2>Giocatori Disponibili</h2>
@@ -1916,6 +2388,7 @@ async function confermaFormazioneDefinitiva() {
 
     if (confirm(`Confermi la squadra "${tempNomeSquadra}"? Questa operazione scalerà 1 Gettone ed è definitiva.`)) {
         const nuovaSquadra = {
+            giornata: 8,
             nomeSquadra: tempNomeSquadra,
             rosa: JSON.parse(JSON.stringify(rosa)),
             schierati: JSON.parse(JSON.stringify(schierati)),
@@ -1945,71 +2418,6 @@ async function confermaFormazioneDefinitiva() {
     }
 }
 
-function apriRecapSquadra(index) {
-    activeTeamIndex = index;
-    const sq = userSquadre[index];
-
-    document.getElementById("welcome-screen").style.display = "none";
-    document.getElementById("main-app").style.display = "none";
-    document.getElementById("recap-screen").style.display = "block";
-
-    document.getElementById("recap-nome-squadra").innerText = sq.nomeSquadra;
-    document.getElementById("recap-modulo-title").innerText = sq.moduloSelezionato;
-
-    const recapCampo = document.getElementById("recap-campo");
-    recapCampo.innerHTML = "";
-    
-    const [D, C, A] = sq.moduloSelezionato.split("-").map(n => parseInt(n));
-    let isMobile = window.innerWidth < 600;
-    let topPOR = isMobile ? 15 : 30;
-    let topDIF = isMobile ? 105 : 150;
-    let topCEN = isMobile ? 215 : 310;
-    let topATT = isMobile ? 325 : 470;
-
-    createStaticDropZone(recapCampo, "Portiere", topPOR, 50);
-    distribuisciOrizzontalmente(D).forEach(left => createStaticDropZone(recapCampo, "Difensore", topDIF, left));
-    distribuisciOrizzontalmente(C).forEach(left => createStaticDropZone(recapCampo, "Centrocampista", topCEN, left));
-    distribuisciOrizzontalmente(A).forEach(left => createStaticDropZone(recapCampo, "Attaccante", topATT, left));
-
-    const dropzones = recapCampo.querySelectorAll(".dropzone");
-    sq.schierati.forEach(p => {
-        const libera = Array.from(dropzones).find(z => z.dataset.ruolo === p.ruolo && z.dataset.player === "");
-        if (libera) {
-            libera.innerText = p.nome;
-            libera.dataset.player = p.nome;
-        }
-    });
-
-    const panchinaDiv = document.getElementById("recap-panchina");
-    panchinaDiv.innerHTML = "";
-
-    ["Portiere", "Difensore", "Centrocampista", "Attaccante"].forEach(ruolo => {
-        const riserve = sq.riserveSelezionate[ruolo] || [];
-        riserve.forEach((ris, i) => {
-            const card = document.createElement("div");
-            card.className = "recap-bench-card";
-            card.innerHTML = `
-                <div>
-                    <span class="player-role"><i class="${roleIcons[ruolo]}"></i> ${ruolo} (R${i+1})</span>
-                    <div style="font-weight:700; color:#fff; margin-top:2px; font-size:12px;">${ris.nome}</div>
-                </div>
-                <span class="valore-badge-slot">💰 ${ris.valore} cr</span>
-            `;
-            panchinaDiv.appendChild(card);
-        });
-    });
-
-    if (sq.votiGiornata && Object.keys(sq.votiGiornata).length > 0) {
-        mostraTabellinoVoti(sq);
-    } else {
-        document.getElementById("tabellino-container").innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:12px;">I voti per questa squadra non sono ancora stati calcolati. Torna nella Home Page appena i voti saranno disponibili!</p>`;
-    }
-}
-
-function tornaAllaHome() {
-    renderWelcomeScreen();
-}
-
 function createStaticDropZone(campo, ruolo, top, left) {
     const dz = document.createElement("div");
     dz.className = "pos dropzone";
@@ -2032,7 +2440,7 @@ function parseColumnVal(row, colNames) {
     return 0;
 }
 
-// CALCOLO VOTI DI TUTTE LE SQUADRE DA HOMEPAGE VIA voti_ok.xlsx
+// CALCOLO VOTI DI TUTTE LE SQUADRE DA HOMEPAGE
 async function calcolaVotiTutteSquadre() {
     if (userSquadre.length === 0) return;
 
