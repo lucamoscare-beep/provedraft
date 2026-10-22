@@ -230,6 +230,55 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     margin-bottom: 8px;
 }
 
+/* BOX STATISTICA SQUADRE ISCRITTE IN TOTALE */
+.global-teams-counter-box {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(15, 23, 42, 0.8));
+    border: 2px solid var(--accent-neon-green);
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 0 20px rgba(74, 222, 128, 0.15);
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.global-teams-counter-box .info-side {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.global-teams-counter-box i {
+    font-size: 28px;
+    color: var(--accent-neon-green);
+}
+
+.global-teams-counter-box .title-text {
+    font-size: 13px;
+    font-weight: 800;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.global-teams-counter-box .sub-text {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.global-teams-badge-number {
+    background: linear-gradient(135deg, var(--accent-neon-green), var(--accent-green));
+    color: #0f172a;
+    font-weight: 900;
+    font-size: 24px;
+    padding: 6px 18px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
 .rules-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -1208,6 +1257,18 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             Sfida gli altri fantallenatori nella prossima giornata di campionato! Costruisci le tue rose tramite il sistema di Draft live, seleziona il modulo tattico e schiera i tuoi titolari prima del fischio d'inizio.
         </p>
 
+        <!-- BOX EVIDENZIATO: TOTALE SQUADRE ISCRITTE IN TUTTA LA LEGA -->
+        <div class="global-teams-counter-box">
+            <div class="info-side">
+                <i class="fa-solid fa-shield-halved"></i>
+                <div>
+                    <div class="title-text">Squadre Iscritte alla Giornata n°8</div>
+                    <div class="sub-text">Numero totale di squadre create da tutti gli utenti per questo turno</div>
+                </div>
+            </div>
+            <div class="global-teams-badge-number" id="total-global-teams-count">...</div>
+        </div>
+
         <!-- AREA PULSANTI NAVIGAZIONE HOMEPAGE -->
         <div class="home-nav-buttons">
             <button onclick="apriSchermataClassifica(8)" class="btn-home-classifica">
@@ -1624,9 +1685,39 @@ async function caricaDatiUtenteCloud() {
         } else {
             userSquadre = [];
         }
+        await calcolaEVisualizzaTotaleSquadreGlobali();
         renderWelcomeScreen();
     } catch (err) {
         console.error("Errore caricamento dati utente:", err);
+    }
+}
+
+// CALCOLA IL NUMERO TOTALE DI SQUADRE ISCRITTE ALLA GIORNATA IN CORSO DA TUTTI GLI UTENTI
+async function calcolaEVisualizzaTotaleSquadreGlobali(giornataCorrente = 8) {
+    try {
+        const snapshot = await db.collection("utenti").get();
+        let conteggioTotale = 0;
+
+        snapshot.forEach(doc => {
+            const uData = doc.data();
+            const squadreArr = uData.squadre || [];
+
+            squadreArr.forEach(sq => {
+                let g = sq.giornata !== undefined ? sq.giornata : 8;
+                if (g === giornataCorrente) {
+                    conteggioTotale++;
+                }
+            });
+        });
+
+        const badgeEl = document.getElementById("total-global-teams-count");
+        if (badgeEl) {
+            badgeEl.innerText = conteggioTotale;
+        }
+    } catch (err) {
+        console.error("Errore calcolo squadre globali:", err);
+        const badgeEl = document.getElementById("total-global-teams-count");
+        if (badgeEl) badgeEl.innerText = "0";
     }
 }
 
@@ -2404,13 +2495,13 @@ async function confermaFormazioneDefinitiva() {
         userSquadre.push(nuovaSquadra);
 
         try {
-            // Sostituito .update con .set(..., { merge: true }) per evitare errori se il documento utente non esiste
             await db.collection("utenti").doc(currentUser.uid).set({
                 squadre: userSquadre
             }, { merge: true });
 
             alert(`🎉 Squadra "${tempNomeSquadra}" convalidata e salvata con successo!`);
             document.getElementById("new-team-name-input").value = "";
+            await calcolaEVisualizzaTotaleSquadreGlobali();
             renderWelcomeScreen();
 
         } catch (err) {
