@@ -856,7 +856,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     transition: transform 0.3s ease;
 }
 
-.podium-card:hover { transform: translateY(-50px); }
+.podium-card:hover { transform: translateY(-5px); }
 
 .podium-card.gold {
     border: 2px solid #fbbf24;
@@ -1717,7 +1717,7 @@ function renderWelcomeScreen() {
 }
 
 /* ======================================================
-   GESTIONE NUOVA SCHERMATA CLASSIFICA
+   GESTIONE SCHERMATA CLASSIFICA
    ====================================================== */
 async function apriSchermataClassifica(giornata = 8) {
     currentSelectedMatchday = giornata;
@@ -1746,7 +1746,7 @@ async function apriSchermataClassifica(giornata = 8) {
             const squadreArr = uData.squadre || [];
 
             squadreArr.forEach(sq => {
-                let g = sq.giornata || 8; 
+                let g = sq.giornata !== undefined ? sq.giornata : 8; 
                 if (g === giornata) {
                     tutteSquadreLega.push({
                         username: username,
@@ -2404,9 +2404,10 @@ async function confermaFormazioneDefinitiva() {
         userSquadre.push(nuovaSquadra);
 
         try {
-            await db.collection("utenti").doc(currentUser.uid).update({
+            // Sostituito .update con .set(..., { merge: true }) per evitare errori se il documento utente non esiste
+            await db.collection("utenti").doc(currentUser.uid).set({
                 squadre: userSquadre
-            });
+            }, { merge: true });
 
             alert(`🎉 Squadra "${tempNomeSquadra}" convalidata e salvata con successo!`);
             document.getElementById("new-team-name-input").value = "";
@@ -2538,7 +2539,7 @@ async function calcolaVotiTutteSquadre() {
             sq.punteggioTotale = totaleSquadra;
         });
 
-        await db.collection("utenti").doc(currentUser.uid).update({ squadre: userSquadre });
+        await db.collection("utenti").doc(currentUser.uid).set({ squadre: userSquadre }, { merge: true });
         alert("🎉 Punteggi calcolati con successo per tutte le tue squadre!");
         renderWelcomeScreen();
 
