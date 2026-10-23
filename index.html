@@ -97,7 +97,42 @@
   </div>
 </div>
 
-<div id="main-app">
+<!-- HOME / SEZIONE DI BENVENUTO E REGOLE -->
+<div id="home-screen" class="panel" style="max-width: 900px; margin: 0 auto; display: none;">
+    <div style="text-align: center; padding: 20px 0;">
+        <i class="fa-solid fa-shield-halved" style="font-size: 48px; color: var(--accent-green); margin-bottom: 15px;"></i>
+        <h1>Benvenuto al Draft Serie A</h1>
+        <p style="color: var-text-muted; font-size: 13px; max-width: 600px; margin: 0 auto 20px auto;">
+            Costruisci la tua rosa di 24 giocatori con un budget di 600 crediti, schiera la formazione titolare e le riserve, e sfida gli avversari a suon di fantavoti!
+        </p>
+        
+        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 25px;">
+            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid var(--accent-green); padding: 10px 15px; border-radius: 10px; font-size: 12px; font-weight: 700;">
+                <i class="fa-solid fa-coins" style="color: var(--accent-neon-green);"></i> 600 Crediti Iniziali
+            </div>
+            <div style="background: rgba(251, 191, 36, 0.1); border: 1px solid var(--accent-gold); padding: 10px 15px; border-radius: 10px; font-size: 12px; font-weight: 700;">
+                <i class="fa-solid fa-users" style="color: var(--accent-gold);"></i> 24 Slot da Completare
+            </div>
+        </div>
+
+        <button onclick="entraNelDraft()" class="btn-auth" style="max-width: 280px; margin: 0 auto; font-size: 14px; padding: 14px;">
+            <i class="fa-solid fa-play">></i> ACCEDI AL DRAFT
+        </button>
+    </div>
+
+    <div style="border-top: 1px solid var(--card-border); padding-top: 15px; margin-top: 15px;">
+        <h3><i class="fa-solid fa-circle-info" style="color: var(--accent-blue);"></i> Istruzioni di Gioco</h3>
+        <ul style="font-size: 12px; color: var(--text-muted); line-height: 1.6; padding-left: 20px;">
+            <li><strong>Composizione Rosa:</strong> Devi acquistare 3 Portieri, 7 Difensori, 8 Centrocampisti e 6 Attaccanti.</li>
+            <li><strong>Gestione Budget:</strong> Fai attenzione a non terminare i crediti prima di completare tutti i 24 slot.</li>
+            <li><strong>Formazione e Riserve:</strong> Scegli il modulo tattico, posiziona i titolari in campo e seleziona manualmente le riserve.</li>
+            <li><strong>Scadenza:</strong> Ricordati di completare e confermare la formazione prima dell'inizio della prima partita di campionato indicata dal countdown.</li>
+        </ul>
+    </div>
+</div>
+
+<!-- APP PRINCIPALE (DRAFT & FORMAZIONE) -->
+<div id="main-app" style="display: none;">
     <div id="left">
         <!-- BANNER COUNTDOWN SCADENZA GIORNATA -->
         <div id="deadline-banner" class="deadline-banner">
@@ -114,7 +149,7 @@
         </div>
 
         <div class="panel" id="header-panel">
-            <h1><i class="fa-solid fa-gamepad" style="color: var(--accent-green);"></i> Benvenuto al Draft</h1>
+            <h1><i class="fa-solid fa-gamepad" style="color: var(--accent-green);"></i> Avvia il Draft</h1>
             <div class="start-container">
                 <button id="start-btn" onclick="startDraft()">AVVIA IL TUO DRAFT</button>
             </div>
@@ -125,17 +160,21 @@
             <div id="players" class="players-container"></div>
         </div>
 
-        <div class="panel">
-            <h2>Schieramento Titolari</h2>
+        <div class="panel" id="formation-panel" style="display:none;">
+            <h2>Schieramento Titolari e Riserve</h2>
             <div id="campo" class="campo-style"></div>
-        </div>
 
-        <div class="panel section-panchina">
-            <h2><i class="fa-solid fa-couch" style="color: var(--accent-gold);"></i> Panchina Ufficiale</h2>
-            <div id="panchina-grafica" class="panchina-container"></div>
+            <!-- SEZIONE RISERVE MANUALI SOTTO IL CAMPO -->
+            <div class="riserve-display-section" style="margin-top: 15px; background: rgba(251, 191, 36, 0.05); border: 1px solid var(--accent-gold); border-radius: 10px; padding: 10px;">
+                <div style="font-size: 11px; font-weight: 800; color: var(--accent-gold); text-transform: uppercase; margin-bottom: 6px;">
+                    <i class="fa-solid fa-users-rectangle"></i> Riserve Selezionate
+                </div>
+                <div id="riserve-inline-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;"></div>
+            </div>
 
-            <div id="conferma-container" style="display: none; margin-top: 12px;">
-                <button class="btn-conferma" onclick="confermaFormazione()">🔒 CONFERMA E BLOCCA FORMAZIONE</button>
+            <div id="conferma-container" style="display: none; margin-top: 12px; gap: 8px; display: flex;">
+                <button class="btn-conferma" style="flex: 2;" onclick="confermaFormazione()">🔒 CONFERMA E BLOCCA FORMAZIONE</button>
+                <button class="btn-action delete" style="flex: 1; margin: 0; padding: 12px;" onclick="cancellaRosaFirebase()">Ricomincia</button>
             </div>
         </div>
     </div>
@@ -163,7 +202,7 @@
         </div>
 
         <div class="panel section-rosa">
-            <h2>La Tua Rosa</h2>
+            <h2 id="rosa-panel-title">La Tua Rosa</h2>
 
             <div class="role-title">
                 <span><i class="fa-solid fa-hand" style="color: var(--role-por);"></i> Portieri</span>
@@ -192,6 +231,7 @@
     </div>
 </div>
 
+<!-- SCHERMATA RECAP / CLASSIFICA GIORNATA -->
 <div id="recap-screen">
     <div style="text-align: center; margin-bottom: 15px;">
         <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:6px; flex-wrap:wrap;">
@@ -211,7 +251,7 @@
         </div>
 
         <div class="recap-right">
-            <h3>Panchina Ordinata</h3>
+            <h3>Riserve Selezionate</h3>
             <div id="recap-panchina"></div>
         </div>
     </div>
