@@ -467,22 +467,22 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     box-shadow: 0 8px 20px rgba(0,0,0,0.3);
 }
 
-/* DASHBOARD HEADER SENZA PICK E CON NUOVI BOX RUOLI */
+/* DASHBOARD HEADER: CREDITI IN PRIMO PIANO (BOX DORATO) E RUOLI SOTTOSTANTI */
 .dashboard-header {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
     background: linear-gradient(135deg, #1e293b, #0f172a);
-    border: 1.5px solid rgba(16, 185, 129, 0.4);
+    border: 1.5px solid rgba(251, 191, 36, 0.4);
     border-radius: 14px;
     padding: 10px;
     margin-bottom: 10px;
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.15);
 }
 
 @media (min-width: 600px) {
     .dashboard-header {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
         padding: 14px;
         gap: 10px;
     }
@@ -517,12 +517,24 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 }
 
 @media (min-width: 600px) {
-    .dash-box strong { font-size: 28px; }
+    .dash-box strong { font-size: 26px; }
     .dash-box span { font-size: 11px; }
 }
 
-.dash-box.budget { border-color: rgba(74, 222, 128, 0.4); background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(15, 23, 42, 0.9)); }
-.dash-box.budget strong { color: var(--accent-neon-green); }
+/* BOX CREDITI IN ALTO (PRIMO PIANO - DORATO COME GETTONI HOMEPAGE) */
+.dash-box.budget {
+    grid-column: 1 / -1;
+    border: 2px solid var(--accent-gold);
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(15, 23, 42, 0.85));
+    box-shadow: 0 4px 15px rgba(251, 191, 36, 0.25);
+    padding: 10px;
+}
+.dash-box.budget span { color: #fff; font-size: 11px; }
+.dash-box.budget strong { color: var(--accent-gold); font-size: 28px; }
+
+@media (min-width: 600px) {
+    .dash-box.budget strong { font-size: 32px; }
+}
 
 /* BOX RUOLI SPECIFICI COLORE */
 .dash-box.role-por { border-color: rgba(251, 191, 36, 0.4); background: linear-gradient(135deg, rgba(251, 191, 36, 0.12), rgba(15, 23, 42, 0.9)); }
@@ -1620,10 +1632,10 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     </div>
 
     <div id="right">
-        <!-- DASHBOARD CON CREDITI E BOX RUOLI COLORATI (SENZA PICK) -->
+        <!-- DASHBOARD: CREDITI IN ALTO (DORATO) E RUOLI SOTTOSTANTI COLORATI -->
         <div class="dashboard-header">
             <div class="dash-box budget">
-                <span><i class="fa-solid fa-coins"></i> Crediti</span>
+                <span><i class="fa-solid fa-coins"></i> Crediti Residui</span>
                 <strong><span id="budget-display">600</span></strong>
             </div>
 
@@ -1657,25 +1669,21 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 
             <div class="role-title">
                 <span><i class="fa-solid fa-hand" style="color: var(--role-por);"></i> Portieri</span>
-                <span class="role-count" id="count-Portiere">0 / 3</span>
             </div>
             <div id="slot-Portiere"></div>
 
             <div class="role-title">
                 <span><i class="fa-solid fa-shield-halved" style="color: var(--role-dif);"></i> Difensori</span>
-                <span class="role-count" id="count-Difensore">0 / 7</span>
             </div>
             <div id="slot-Difensore"></div>
 
             <div class="role-title">
                 <span><i class="fa-solid fa-person-running" style="color: var(--role-cen);"></i> Centrocampisti</span>
-                <span class="role-count" id="count-Centrocampista">0 / 8</span>
             </div>
             <div id="slot-Centrocampista"></div>
 
             <div class="role-title">
                 <span><i class="fa-solid fa-futbol" style="color: var(--role-att);"></i> Attaccanti</span>
-                <span class="role-count" id="count-Attaccante">0 / 6</span>
             </div>
             <div id="slot-Attaccante"></div>
         </div>
@@ -2466,10 +2474,8 @@ function updateDashboardCounters() {
     ["Portiere", "Difensore", "Centrocampista", "Attaccante"].forEach(r => {
         let count = rosa[r].length;
         let max = limits[r];
-        document.getElementById(`count-box-${r}`).innerText = `${count}/${max}`;
-        
         let mancano = max - count;
-        document.getElementById(`count-${r}`).innerText = `${count} / ${max} (${mancano} mancanti)`;
+        document.getElementById(`count-box-${r}`).innerText = `${count}/${max} (${mancano} mancanti)`;
     });
 }
 
