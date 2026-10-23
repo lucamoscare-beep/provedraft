@@ -380,6 +380,25 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 
 .btn-home-classifica:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6); }
 
+.btn-home-test {
+    background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+    color: #fff;
+    border: 1px solid #a78bfa;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-home-test:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6); }
+
 .home-voti-area {
     background: rgba(15, 23, 42, 0.9);
     border: 1px solid var(--accent-blue);
@@ -1473,6 +1492,9 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             <button onclick="apriSchermataClassifica(8)" class="btn-home-classifica">
                 <i class="fa-solid fa-ranking-star"></i> Vedi classifica di giornata
             </button>
+            <button onclick="avviaTestDraft()" class="btn-home-test">
+                <i class="fa-solid fa-vials"></i> Test Draft (No Firebase)
+            </button>
         </div>
     </div>
 </div>
@@ -1522,7 +1544,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     <div id="left">
         <div class="panel" id="draft-panel" style="display:block;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                <h2>Giocatori Disponibili</h2>
+                <h2 id="draft-main-heading">Giocatori Disponibili</h2>
                 <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-arrow-rotate-left"></i> Ricomincia Draft</button>
             </div>
             <div id="players" class="players-container"></div>
@@ -1538,7 +1560,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             <div id="panchina-grafica" class="panchina-container"></div>
 
             <div id="conferma-container" style="display: none; margin-top: 12px; text-align:center;">
-                <button class="btn-action-primary" style="width:100%;" onclick="confermaFormazioneDefinitiva()">🔒 CONFERMA E SALVA FORMAZIONE (Consuma 1 Gettone)</button>
+                <button id="btn-conferma-formazione" class="btn-action-primary" style="width:100%;" onclick="confermaFormazioneDefinitiva()">🔒 CONFERMA E SALVA FORMAZIONE (Consuma 1 Gettone)</button>
             </div>
         </div>
     </div>
@@ -1599,7 +1621,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 <div id="recap-screen">
     <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(15,23,42,0.6); padding:12px; border-radius:12px; border:1px solid var(--card-border); margin-bottom:15px; flex-wrap:wrap; gap:10px;">
         <div>
-            <span style="background:rgba(16, 185, 129, 0.2); border:1px solid var(--accent-neon-green); color:var(--accent-neon-green); padding:3px 10px; border-radius:16px; font-size:10px; font-weight:800;">🔒 SQUADRA SALVATA</span>
+            <span id="recap-badge-status" style="background:rgba(16, 185, 129, 0.2); border:1px solid var(--accent-neon-green); color:var(--accent-neon-green); padding:3px 10px; border-radius:16px; font-size:10px; font-weight:800;">🔒 SQUADRA SALVATA</span>
             <h2 id="recap-nome-squadra" style="margin:4px 0 0 0; color:#fff;">-</h2>
             <div id="recap-utente-owner" style="font-size:11px; color:var(--accent-blue); font-weight:700;">-</div>
         </div>
@@ -1668,6 +1690,7 @@ let isVotiOkAvailable = false;
 let currentSelectedMatchday = 8; 
 
 let tempNomeSquadra = "";
+let isTestMode = false; // Flag per la modalità test (nessun salvataggio Firebase)
 let rosa = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
 let schierati = [];
 let riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
@@ -2119,6 +2142,19 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false) {
     const btnBackClassifica = document.getElementById("btn-recap-back-classifica");
     btnBackClassifica.style.display = fromClassifica ? "inline-flex" : "none";
 
+    const recapBadge = document.getElementById("recap-badge-status");
+    if (sq.isTest) {
+        recapBadge.style.background = "rgba(139, 92, 246, 0.2)";
+        recapBadge.style.borderColor = "#a78bfa";
+        recapBadge.style.color = "#c4b5fd";
+        recapBadge.innerText = "🧪 TEST DRAFT (NON SALVATO)";
+    } else {
+        recapBadge.style.background = "rgba(16, 185, 129, 0.2)";
+        recapBadge.style.borderColor = "var(--accent-neon-green)";
+        recapBadge.style.color = "var(--accent-neon-green)";
+        recapBadge.innerText = "🔒 SQUADRA SALVATA";
+    }
+
     const recapCampo = document.getElementById("recap-campo");
     recapCampo.innerHTML = "";
     
@@ -2159,6 +2195,34 @@ function tornaAllaHome() {
     renderWelcomeScreen();
 }
 
+function avviaTestDraft() {
+    if (customPlayersList.length < 24) {
+        alert("Caricamento giocatori in corso o file giocatori.xlsx non valido.");
+        return;
+    }
+
+    isTestMode = true;
+    tempNomeSquadra = "🧪 Squadra Test Draft";
+
+    document.getElementById("draft-panel").innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <h2>Giocatori Disponibili (Modalità Test)</h2>
+            <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-arrow-rotate-left"></i> Ricomincia Test</button>
+        </div>
+        <div id="players" class="players-container"></div>
+    `;
+
+    document.getElementById("btn-conferma-formazione").innerText = "🧪 TERMINA TEST E VISUALIZZA RECAP";
+
+    resetDraftState();
+
+    document.getElementById("welcome-screen").style.display = "none";
+    document.getElementById("main-app").style.display = "flex";
+    document.getElementById("current-draft-team-title").innerText = `Rosa Test: ${tempNomeSquadra}`;
+
+    nextPick();
+}
+
 async function preparaEAvviaDraft() {
     if (new Date() >= MATCHDAY_DEADLINE) {
         alert("⚠️ Tempo scaduto! L'iscrizione per questa giornata è chiusa.");
@@ -2187,6 +2251,7 @@ async function preparaEAvviaDraft() {
         return;
     }
 
+    isTestMode = false;
     tempNomeSquadra = inputName;
     
     document.getElementById("draft-panel").innerHTML = `
@@ -2196,6 +2261,8 @@ async function preparaEAvviaDraft() {
         </div>
         <div id="players" class="players-container"></div>
     `;
+
+    document.getElementById("btn-conferma-formazione").innerText = "🔒 CONFERMA E SALVA FORMAZIONE (Consuma 1 Gettone)";
 
     resetDraftState();
 
@@ -2224,11 +2291,14 @@ function resetDraftState() {
 }
 
 function annullaERicominciaDraft() {
-    if (confirm("Vuoi davvero ricominciare il draft per questa squadra? I giocatori selezionati verranno azzerati.")) {
+    if (confirm("Vuoi davvero ricominciare il draft? I giocatori selezionati verranno azzerati.")) {
+        const titleHtml = isTestMode ? '<h2>Giocatori Disponibili (Modalità Test)</h2>' : '<h2>Giocatori Disponibili</h2>';
+        const btnText = isTestMode ? 'Ricomincia Test' : 'Ricomincia Draft';
+
         document.getElementById("draft-panel").innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                <h2>Giocatori Disponibili</h2>
-                <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-arrow-rotate-left"></i> Ricomincia Draft</button>
+                ${titleHtml}
+                <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-arrow-rotate-left"></i> ${btnText}</button>
             </div>
             <div id="players" class="players-container"></div>
         `;
@@ -2378,7 +2448,7 @@ function renderPlayers() {
 }
 
 function draft(nome) {
-    if (new Date() >= MATCHDAY_DEADLINE) {
+    if (!isTestMode && new Date() >= MATCHDAY_DEADLINE) {
         alert("⚠️ Tempo scaduto! Il mercato è chiuso per questa giornata.");
         return;
     }
@@ -2424,7 +2494,7 @@ function renderSlots() {
 }
 
 function schieraGiocatore(playerObj, ruolo) {
-    if (new Date() >= MATCHDAY_DEADLINE) return;
+    if (!isTestMode && new Date() >= MATCHDAY_DEADLINE) return;
 
     if (!moduloSelezionato) {
         alert("Scegli prima il modulo per schierare la formazione");
@@ -2461,8 +2531,9 @@ function schieraGiocatore(playerObj, ruolo) {
 }
 
 function showModuloSelection() {
+    const headerTitle = isTestMode ? `Test Draft Completato!` : `Draft Completato per ${tempNomeSquadra}!`;
     document.getElementById("draft-panel").innerHTML = `
-        <h3 style="text-align:center;">Draft Completato per ${tempNomeSquadra}!</h3>
+        <h3 style="text-align:center;">${headerTitle}</h3>
         <p style="text-align:center; font-size:12px; color: var(--accent-gold); font-weight: 700;">Seleziona il modulo tattico per schierare la tua formazione:</p>
         
         <select id="modulo" onchange="setModulo()" class="styled-input" style="display:block; margin: 0 auto 10px auto; max-width:250px;">
@@ -2475,13 +2546,13 @@ function showModuloSelection() {
         </select>
         
         <div style="text-align:center; margin-top:12px;">
-            <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-trash-can"></i> Scarta Rosa e Ricomincia Draft</button>
+            <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-trash-can"></i> Scarta Rosa e Ricomincia</button>
         </div>
     `;
 }
 
 function setModulo() {
-    if (new Date() >= MATCHDAY_DEADLINE) {
+    if (!isTestMode && new Date() >= MATCHDAY_DEADLINE) {
         alert("⚠️ Tempo scaduto! Impossibile impostare la formazione.");
         return;
     }
@@ -2535,7 +2606,7 @@ function creaRepartoCampo(campoContainer, ruolo, countOrPlayers) {
         }
 
         dz.onclick = () => {
-            if (new Date() >= MATCHDAY_DEADLINE || !dz.dataset.player) return;
+            if ((!isTestMode && new Date() >= MATCHDAY_DEADLINE) || !dz.dataset.player) return;
             schierati = schierati.filter(p => p.nome !== dz.dataset.player);
             dz.innerText = "";
             dz.dataset.player = "";
@@ -2588,7 +2659,7 @@ function renderPanchinaGrafica() {
 }
 
 function togglePanchina(ruolo, nomePlayer) {
-    if (new Date() >= MATCHDAY_DEADLINE) return;
+    if (!isTestMode && new Date() >= MATCHDAY_DEADLINE) return;
 
     if (!moduloSelezionato) {
         alert("Scegli prima il modulo per schierare la formazione");
@@ -2614,12 +2685,27 @@ function togglePanchina(ruolo, nomePlayer) {
 }
 
 async function confermaFormazioneDefinitiva() {
+    if (schierati.length < 11) return alert("Devi schierare tutti gli 11 titolari!");
+
+    // SE È MODALITÀ TEST: Salta Firebase e mostra direttamente il recap in sola visualizzazione test
+    if (isTestMode) {
+        const squadraTestObj = {
+            nomeSquadra: tempNomeSquadra,
+            moduloSelezionato: moduloSelezionato,
+            schierati: JSON.parse(JSON.stringify(schierati)),
+            riserveSelezionate: JSON.parse(JSON.stringify(riserveSelezionate)),
+            votiGiornata: {},
+            punteggioTotale: null,
+            isTest: true
+        };
+        renderRecapScreenReadOnly(squadraTestObj, currentUser ? currentUser.displayName : "Test User", false);
+        return;
+    }
+
     if (new Date() >= MATCHDAY_DEADLINE) {
         alert("⚠️ Tempo scaduto! Non è più possibile confermare la formazione.");
         return;
     }
-
-    if (schierati.length < 11) return alert("Devi schierare tutti gli 11 titolari!");
 
     if (confirm(`Confermi la squadra "${tempNomeSquadra}"? Questa operazione scalerà 1 Gettone ed è definitiva.`)) {
         try {
