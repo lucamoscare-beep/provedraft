@@ -467,22 +467,31 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     box-shadow: 0 8px 20px rgba(0,0,0,0.3);
 }
 
+/* DASHBOARD HEADER SENZA PICK E CON NUOVI BOX RUOLI */
 .dashboard-header {
-    display: flex;
-    gap: 6px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
     background: linear-gradient(135deg, #1e293b, #0f172a);
     border: 1.5px solid rgba(16, 185, 129, 0.4);
     border-radius: 14px;
-    padding: 8px;
+    padding: 10px;
     margin-bottom: 10px;
     box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
 }
 
+@media (min-width: 600px) {
+    .dashboard-header {
+        grid-template-columns: repeat(3, 1fr);
+        padding: 14px;
+        gap: 10px;
+    }
+}
+
 .dash-box {
-    flex: 1;
     background: rgba(15, 23, 42, 0.85);
     border: 1px solid var(--card-border);
-    padding: 6px 4px;
+    padding: 8px 6px;
     border-radius: 10px;
     text-align: center;
 }
@@ -491,31 +500,42 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 3px;
-    font-size: 9px;
+    gap: 4px;
+    font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: #cbd5e1;
-    margin-bottom: 2px;
+    margin-bottom: 3px;
     font-weight: 700;
 }
 
 .dash-box strong {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 900;
     line-height: 1;
     display: block;
 }
 
 @media (min-width: 600px) {
-    .dash-box strong { font-size: 36px; }
-    .dash-box span { font-size: 12px; }
-    .dashboard-header { padding: 16px; gap: 12px; }
+    .dash-box strong { font-size: 28px; }
+    .dash-box span { font-size: 11px; }
 }
 
+.dash-box.budget { border-color: rgba(74, 222, 128, 0.4); background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(15, 23, 42, 0.9)); }
 .dash-box.budget strong { color: var(--accent-neon-green); }
-.dash-box.slots strong { color: var(--accent-gold); }
-.dash-box.pick strong { color: var(--accent-blue); }
+
+/* BOX RUOLI SPECIFICI COLORE */
+.dash-box.role-por { border-color: rgba(251, 191, 36, 0.4); background: linear-gradient(135deg, rgba(251, 191, 36, 0.12), rgba(15, 23, 42, 0.9)); }
+.dash-box.role-por strong { color: var(--role-por); }
+
+.dash-box.role-dif { border-color: rgba(52, 211, 153, 0.4); background: linear-gradient(135deg, rgba(52, 211, 153, 0.12), rgba(15, 23, 42, 0.9)); }
+.dash-box.role-dif strong { color: var(--role-dif); }
+
+.dash-box.role-cen { border-color: rgba(56, 189, 248, 0.4); background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(15, 23, 42, 0.9)); }
+.dash-box.role-cen strong { color: var(--role-cen); }
+
+.dash-box.role-att { border-color: rgba(248, 113, 113, 0.4); background: linear-gradient(135deg, rgba(248, 113, 113, 0.12), rgba(15, 23, 42, 0.9)); }
+.dash-box.role-att strong { color: var(--role-att); }
 
 .progress-bar-container {
     width: 100%;
@@ -619,16 +639,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     display: inline-block;
     margin: 2px 0;
     box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
-}
-
-.valore-badge-slot {
-    background: rgba(251, 191, 36, 0.15);
-    border: 1px solid var(--accent-gold);
-    color: var(--accent-gold);
-    font-weight: 800;
-    padding: 2px 5px;
-    border-radius: 4px;
-    font-size: 10px;
 }
 
 .draft-btn {
@@ -1610,20 +1620,31 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     </div>
 
     <div id="right">
+        <!-- DASHBOARD CON CREDITI E BOX RUOLI COLORATI (SENZA PICK) -->
         <div class="dashboard-header">
             <div class="dash-box budget">
                 <span><i class="fa-solid fa-coins"></i> Crediti</span>
                 <strong><span id="budget-display">600</span></strong>
             </div>
 
-            <div class="dash-box slots">
-                <span><i class="fa-solid fa-user-plus"></i> Liberi</span>
-                <strong><span id="slots-left-display">24</span></strong>
+            <div class="dash-box role-por">
+                <span><i class="fa-solid fa-hand"></i> Portieri</span>
+                <strong><span id="count-box-Portiere">0/3</span></strong>
             </div>
-            
-            <div class="dash-box pick">
-                <span><i class="fa-solid fa-hashtag"></i> Pick</span>
-                <strong><span id="turno">0</span><small style="font-size:12px; color:var(--text-muted); font-weight:700;">/24</small></strong>
+
+            <div class="dash-box role-dif">
+                <span><i class="fa-solid fa-shield-halved"></i> Difensori</span>
+                <strong><span id="count-box-Difensore">0/7</span></strong>
+            </div>
+
+            <div class="dash-box role-cen">
+                <span><i class="fa-solid fa-person-running"></i> Centroc.</span>
+                <strong><span id="count-box-Centrocampista">0/8</span></strong>
+            </div>
+
+            <div class="dash-box role-att">
+                <span><i class="fa-solid fa-futbol"></i> Attaccanti</span>
+                <strong><span id="count-box-Attaccante">0/6</span></strong>
             </div>
         </div>
 
@@ -2268,7 +2289,6 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false) {
                     <span class="player-role"><i class="${roleIcons[ruolo]}"></i> ${ruolo} (R${i+1})</span>
                     <div style="font-weight:700; color:#fff; margin-top:2px; font-size:12px;">${ris.nome}</div>
                 </div>
-                <span class="valore-badge-slot">💰 ${ris.valore} cr</span>
             `;
             panchinaDiv.appendChild(card);
         });
@@ -2442,13 +2462,14 @@ function parseAndSetPlayers(data) {
 
 function updateDashboardCounters() {
     document.getElementById("budget-display").innerText = budget;
-    let totalAcquistati = Object.values(rosa).reduce((acc, curr) => acc + curr.length, 0);
-    let slotsRimanenti = 24 - totalAcquistati;
-    document.getElementById("slots-left-display").innerText = slotsRimanenti;
 
     ["Portiere", "Difensore", "Centrocampista", "Attaccante"].forEach(r => {
-        let mancano = limits[r] - rosa[r].length;
-        document.getElementById(`count-${r}`).innerText = `${rosa[r].length} / ${limits[r]} (${mancano} mancanti)`;
+        let count = rosa[r].length;
+        let max = limits[r];
+        document.getElementById(`count-box-${r}`).innerText = `${count}/${max}`;
+        
+        let mancano = max - count;
+        document.getElementById(`count-${r}`).innerText = `${count} / ${max} (${mancano} mancanti)`;
     });
 }
 
@@ -2463,12 +2484,10 @@ function nextPick() {
     updateDashboardCounters();
     
     if (turno > 24) {
-        document.getElementById("turno").innerText = 24;
         showModuloSelection();
         return;
     }
 
-    document.getElementById("turno").innerText = turno;
     renderPlayers();
 }
 
@@ -2577,17 +2596,14 @@ function renderSlots() {
                 <span><i class="${roleIcons[ruolo]}"></i> ${p.nome}</span>
                 <div>
                     ${tagStatus}
-                    <span class="valore-badge-slot">💰 ${p.valore} cr</span>
                 </div>
             `;
-            // MODALITÀ 1: Click sulla lista della rosa per schierare / gestire
             slot.onclick = () => schieraGiocatoreDaLista(p, ruolo);
             div.appendChild(slot);
         });
     });
 }
 
-// MODALITÀ 1: Click dalla Rosa sulla destra
 function schieraGiocatoreDaLista(playerObj, ruolo) {
     if (!isTestMode && new Date() >= MATCHDAY_DEADLINE) return;
     if (!moduloSelezionato) {
@@ -2599,14 +2615,11 @@ function schieraGiocatoreDaLista(playerObj, ruolo) {
     const isBench = riserveSelezionate[ruolo].some(r => r.nome === playerObj.nome);
 
     if (isTit) {
-        // Se è già titolare, rimuovilo dal campo
         schierati = schierati.filter(s => s.nome !== playerObj.nome);
     } else if (isBench) {
-        // Se è in panchina, rimuovilo dalla panchina e mettilo in campo (se c'è posto)
         riserveSelezionate[ruolo] = riserveSelezionate[ruolo].filter(r => r.nome !== playerObj.nome);
         aggiungiTitolareAutomatico(playerObj, ruolo);
     } else {
-        // Non è né in campo né in panchina: prova a metterlo in campo, altrimenti in panchina
         const [D, C, A] = moduloSelezionato.split("-").map(n => parseInt(n));
         const maxTitolariRuolo = ruolo === "Portiere" ? 1 : (ruolo === "Difensore" ? D : (ruolo === "Centrocampista" ? C : A));
         const titolariAttualiRuolo = schierati.filter(s => s.ruolo === ruolo).length;
@@ -2614,7 +2627,6 @@ function schieraGiocatoreDaLista(playerObj, ruolo) {
         if (titolariAttualiRuolo < maxTitolariRuolo) {
             schierati.push(playerObj);
         } else {
-            // Campo pieno per questo ruolo, mettilo in panchina se c'è posto (< 2)
             if (riserveSelezionate[ruolo].length < 2) {
                 riserveSelezionate[ruolo].push(playerObj);
             } else {
@@ -2638,7 +2650,6 @@ function aggiungiTitolareAutomatico(playerObj, ruolo) {
     }
 }
 
-// MODALITÀ 2: Click su una casella del campo (apre modale di scelta)
 function apriModaleSceltaCampo(ruolo, slotIndex) {
     if (!isTestMode && new Date() >= MATCHDAY_DEADLINE) return;
     if (!moduloSelezionato) {
@@ -2646,14 +2657,12 @@ function apriModaleSceltaCampo(ruolo, slotIndex) {
         return;
     }
 
-    // Trova tutti i giocatori in rosa di quel ruolo
     const giocatoriRuolo = rosa[ruolo];
     if (giocatoriRuolo.length === 0) {
         alert(`Non hai acquistato alcun giocatore nel ruolo: ${ruolo}`);
         return;
     }
 
-    // Crea la modale
     const overlay = document.createElement("div");
     overlay.className = "custom-modal-overlay";
     overlay.id = "campo-selection-modal";
@@ -2676,7 +2685,7 @@ function apriModaleSceltaCampo(ruolo, slotIndex) {
             <div class="modal-player-item" onclick="selezionaGiocatorePerCampo('${p.nome.replace(/'/g, "\\'")}', '${ruolo}')">
                 <div>
                     <strong style="color:#fff; font-size:12px; display:block;">${p.nome}</strong>
-                    <span style="font-size:10px; color:var(--text-muted);">${p.squadra} • 💰${p.valore}cr</span>
+                    <span style="font-size:10px; color:var(--text-muted);">${p.squadra}</span>
                 </div>
                 <div>${statoLabel}</div>
             </div>
@@ -2705,11 +2714,9 @@ function selezionaGiocatorePerCampo(nomeGiocatore, ruolo) {
     const playerObj = rosa[ruolo].find(p => p.nome === nomeGiocatore);
     if (!playerObj) return;
 
-    // Rimuovi eventuale presenza precedente di questo giocatore tra i titolari o panchina
     schierati = schierati.filter(s => s.nome !== playerObj.nome);
     riserveSelezionate[ruolo] = riserveSelezionate[ruolo].filter(r => r.nome !== playerObj.nome);
 
-    // Aggiungi come titolare
     schierati.push(playerObj);
 
     chiudiModaleCampo();
@@ -2719,7 +2726,6 @@ function selezionaGiocatorePerCampo(nomeGiocatore, ruolo) {
 }
 
 function rimuoviDaSlotCampo(ruolo) {
-    // Rimuove l'ultimo titolare inserito di quel ruolo
     const titolariRuolo = schierati.filter(s => s.ruolo === ruolo);
     if (titolariRuolo.length > 0) {
         const daRimuovere = titolariRuolo[titolariRuolo.length - 1];
@@ -2807,7 +2813,6 @@ function creaRepartoCampo(campoContainer, ruolo, countOrPlayers, isReadOnly = fa
                 dz.classList.add("filled");
             }
         } else {
-            // Controlla se c'è un titolare schierato per questo slot nel reparto
             const titolariRuolo = schierati.filter(s => s.ruolo === ruolo);
             if (titolariRuolo[i]) {
                 dz.innerText = titolariRuolo[i].nome;
@@ -2819,7 +2824,6 @@ function creaRepartoCampo(campoContainer, ruolo, countOrPlayers, isReadOnly = fa
         }
 
         if (!isReadOnly) {
-            // MODALITÀ 2: Cliccando sulla casella del campo si apre la modale di scelta giocatore
             dz.onclick = () => apriModaleSceltaCampo(ruolo, i);
         }
 
@@ -2854,8 +2858,7 @@ function renderPanchinaGrafica() {
             html += `
                 <div class="bench-card-slot ${isBench ? 'filled' : ''}" onclick="togglePanchina('${ruolo}', '${p.nome.replace(/'/g, "\\'")}')">
                     ${badgeOrder}
-                    <div style="font-size:10px; font-weight:700; color:#fff;">${p.nome}</div>
-                    <div style="font-size:8px; color:var(--text-muted);">💰${p.valore}cr</div>
+                    <div style="font-size:10px; font-weight:700; color:#fff; width:100%; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.nome}</div>
                 </div>
             `;
         });
