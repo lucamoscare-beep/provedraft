@@ -536,7 +536,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     transition: width 0.3s ease;
 }
 
-/* CARD GIOCATORI DRAFT (NOMI RUOLI ESTESI E PULSANTI COMPATTI) */
+/* CARD GIOCATORI DRAFT */
 .players-container {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -1062,7 +1062,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 }
 
 .podium-team-name { font-size: 16px; font-weight: 800; color: #fff; margin-top: 10px; }
-.podium-user-name { font-size: 12px; color: var(--accent-blue); font-weight: 700; margin-bottom: 8px; }
+.podium-user-name { font-size: 13px; color: var(--accent-blue); font-weight: 700; margin-bottom: 8px; }
 .podium-score { font-size: 24px; font-weight: 900; color: var(--accent-neon-green); }
 
 .classifica-table-container {
@@ -1519,7 +1519,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             <thead>
                 <tr>
                     <th style="text-align:center;">Pos</th>
-                    <th>Utente</th>
+                    <th>Username</th>
                     <th>Nome Squadra</th>
                     <th>Modulo</th>
                     <th>Punti Totali</th>
@@ -1690,7 +1690,7 @@ let isVotiOkAvailable = false;
 let currentSelectedMatchday = 8; 
 
 let tempNomeSquadra = "";
-let isTestMode = false; // Flag per la modalità test (nessun salvataggio Firebase)
+let isTestMode = false;
 let rosa = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
 let schierati = [];
 let riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
@@ -2126,7 +2126,7 @@ async function visualizzaSquadraGenerica(userId, nomeSquadra, giornata) {
 
 function apriRecapSquadraUtenteCorrente(index) {
     const sq = userSquadre[index];
-    renderRecapScreenReadOnly(sq, currentUser ? currentUser.displayName : "Tu", false);
+    renderRecapScreenReadOnly(sq, currentUser ? (currentUser.displayName || currentUser.email) : "Tu", false);
 }
 
 function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false) {
@@ -2136,7 +2136,7 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false) {
     document.getElementById("recap-screen").style.display = "block";
 
     document.getElementById("recap-nome-squadra").innerText = sq.nomeSquadra;
-    document.getElementById("recap-utente-owner").innerText = `Fantallenatore: ${usernameOwner}`;
+    document.getElementById("recap-utente-owner").innerText = `Username: ${usernameOwner}`;
     document.getElementById("recap-modulo-title").innerText = sq.moduloSelezionato;
 
     const btnBackClassifica = document.getElementById("btn-recap-back-classifica");
@@ -2570,7 +2570,6 @@ function setModulo() {
     document.getElementById("conferma-container").style.display = "block";
 }
 
-/* SISTEMA FLESSIBILE A REPARTI FLEX PER IL CAMPO SU MOBILE (ANTISOVRAPPOSIZIONE) */
 function ripristinaCampoTattico() {
     if (!moduloSelezionato) return;
 
@@ -2687,7 +2686,6 @@ function togglePanchina(ruolo, nomePlayer) {
 async function confermaFormazioneDefinitiva() {
     if (schierati.length < 11) return alert("Devi schierare tutti gli 11 titolari!");
 
-    // SE È MODALITÀ TEST: Salta Firebase e mostra direttamente il recap in sola visualizzazione test
     if (isTestMode) {
         const squadraTestObj = {
             nomeSquadra: tempNomeSquadra,
@@ -2698,7 +2696,7 @@ async function confermaFormazioneDefinitiva() {
             punteggioTotale: null,
             isTest: true
         };
-        renderRecapScreenReadOnly(squadraTestObj, currentUser ? currentUser.displayName : "Test User", false);
+        renderRecapScreenReadOnly(squadraTestObj, currentUser ? (currentUser.displayName || "Test User") : "Test User", false);
         return;
     }
 
