@@ -1831,8 +1831,18 @@ auth.onAuthStateChanged(async (user) => {
         currentUser = user;
         modal.style.display = 'none';
         globalHeader.style.display = 'flex';
-        document.getElementById('user-display-name').innerText = user.displayName || user.email;
-        document.getElementById('welcome-greeting').innerText = `Bentornato, ${user.displayName || 'Fantallenatore'}!`;
+        
+        // Recupera username dal DB Firestore o dal displayName dell'utente
+        let displayUsername = user.displayName;
+        try {
+            const userDoc = await db.collection("utenti").doc(user.uid).get();
+            if (userDoc.exists && userDoc.data().username) {
+                displayUsername = userDoc.data().username;
+            }
+        } catch(e) {}
+
+        document.getElementById('user-display-name').innerText = displayUsername || user.email;
+        document.getElementById('welcome-greeting').innerText = `Bentornato, ${displayUsername || 'Fantallenatore'}!`;
         await caricaDatiUtenteCloud();
     } else {
         currentUser = null;
@@ -2012,7 +2022,8 @@ async function apriSchermataClassifica(giornata = 8) {
 
         snapshot.forEach(doc => {
             const uData = doc.data();
-            const username = uData.username || uData.email || "Utente";
+            // Utilizziamo sempre l'username registrato dall'utente
+            const username = uData.username || uData.displayName || "Utente";
             const squadreArr = uData.squadre || [];
 
             squadreArr.forEach(sq => {
@@ -2112,7 +2123,7 @@ async function visualizzaSquadraGenerica(userId, nomeSquadra, giornata) {
         if (!doc.exists) return alert("Utente non trovato.");
 
         const uData = doc.data();
-        const username = uData.username || "Utente";
+        const username = uData.username || uData.displayName || "Utente";
         const squadreArr = uData.squadre || [];
 
         const sq = squadreArr.find(s => s.nomeSquadra.toLowerCase() === nomeSquadra.toLowerCase());
@@ -2124,9 +2135,22 @@ async function visualizzaSquadraGenerica(userId, nomeSquadra, giornata) {
     }
 }
 
-function apriRecapSquadraUtenteCorrente(index) {
+async function apriRecapSquadraUtenteCorrente(index) {
     const sq = userSquadre[index];
-    renderRecapScreenReadOnly(sq, currentUser ? (currentUser.displayName || currentUser.email) : "Tu", false);
+    let username = "Tu";
+    if (currentUser) {
+        try {
+            const uDoc = await db.collection("utenti").doc(currentUser.uid).get();
+            if (uDoc.exists && uDoc.data().username) {
+                username = uDoc.data().username;
+            } else {
+                username = currentUser.displayName || currentUser.email;
+            }
+        } catch(e) {
+            username = currentUser.displayName || currentUser.email;
+        }
+    }
+    renderRecapScreenReadOnly(sq, username, false);
 }
 
 function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false) {
@@ -2696,7 +2720,17 @@ async function confermaFormazioneDefinitiva() {
             punteggioTotale: null,
             isTest: true
         };
-        renderRecapScreenReadOnly(squadraTestObj, currentUser ? (currentUser.displayName || "Test User") : "Test User", false);
+
+        let currentUsername = "Test User";
+        if (currentUser) {
+            try {
+                const uDoc = await db.collection("utenti").doc(currentUser.uid).get();
+                if (uDoc.exists && uDoc.data().username) currentUsername = uDoc.data().username;
+                else currentUsername = currentUser.displayName || currentUser.email;
+            } catch(e) {}
+        }
+
+        renderRecapScreenReadOnly(squadraTestObj, currentUsername, false);
         return;
     }
 
