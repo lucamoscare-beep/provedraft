@@ -434,7 +434,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     box-shadow: none;
 }
 
-/* MAIN DRAFT APP LAYOUT (Ottimizzato per larghezza intera durante il draft) */
+/* MAIN DRAFT APP LAYOUT */
 #main-app {
     display: none;
     flex-direction: column;
@@ -533,7 +533,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     transition: width 0.3s ease;
 }
 
-/* CARD GIOCATORI DRAFT (Griglia 5 colonne espansa) */
+/* CARD GIOCATORI DRAFT */
 .players-container {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -680,17 +680,20 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     transition: all 0.2s ease;
 }
 
+.slot:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: var(--accent-blue);
+}
+
 .slot.Portiere { border-left: 3px solid var(--role-por); }
 .slot.Difensore { border-left: 3px solid var(--role-dif); }
 .slot.Centrocampista { border-left: 3px solid var(--role-cen); }
 .slot.Attaccante { border-left: 3px solid var(--role-att); }
 
 .slot.schierato {
-    opacity: 0.45;
+    opacity: 0.55;
     background: rgba(15, 23, 42, 0.9);
-    filter: grayscale(80%);
     border-style: dashed;
-    cursor: not-allowed;
 }
 
 .slot-tag {
@@ -703,7 +706,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 .slot-tag.campo { background: rgba(16, 185, 129, 0.25); color: var(--accent-neon-green); border: 1px solid var(--accent-green); }
 .slot-tag.panchina { background: rgba(251, 191, 36, 0.25); color: var(--accent-gold); border: 1px solid var(--accent-gold); }
 
-/* CAMPO DA GIOCO DINAMICO E RESPONSIVE ANTISOVRAPPOSIZIONE */
+/* CAMPO DA GIOCO DINAMICO */
 .campo-style {
     width: 100%;
     min-height: 440px;
@@ -903,6 +906,49 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 .btn-action-danger:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+/* MODALE SCELTA GIOCATORE CAMPO */
+.custom-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    animation: fadeInUp 0.2s ease-out;
+}
+
+.custom-modal-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 20px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    text-align: center;
+}
+
+.modal-player-item {
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin: 6px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.modal-player-item:hover {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: var(--accent-neon-green);
 }
 
 /* RECAP SCREEN */
@@ -1547,9 +1593,9 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             <div id="players" class="players-container"></div>
         </div>
 
-        <!-- CAMPO E PANCHINA (Inizialmente nascosti durante il Draft, compaiono a fine draft) -->
+        <!-- CAMPO E PANCHINA (Compaiono a fine draft) -->
         <div class="panel" id="campo-panel-container" style="display: none;">
-            <h2>Schieramento Titolari</h2>
+            <h2>Schieramento Titolari <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca sulle caselle per scegliere i giocatori)</span></h2>
             <div id="campo" class="campo-style"></div>
         </div>
 
@@ -1586,7 +1632,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
         </div>
 
         <div class="panel section-rosa">
-            <h2 id="current-draft-team-title">La Tua Rosa</h2>
+            <h2 id="current-draft-team-title">La Tua Rosa <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca per schierare)</span></h2>
 
             <div class="role-title">
                 <span><i class="fa-solid fa-hand" style="color: var(--role-por);"></i> Portieri</span>
@@ -1698,7 +1744,6 @@ let moduloSelezionato = "";
 
 const MATCHDAY_DEADLINE = new Date("2026-10-23T20:45:00"); 
 
-// Helper robusto per estrarre l'Username reale
 function getRealUsername(uData, defaultAuthUser) {
     if (uData && uData.username && uData.username.trim() !== "") {
         return uData.username.trim();
@@ -1818,9 +1863,7 @@ async function handleRegister(e) {
 
     try {
         const res = await auth.createUserWithEmailAndPassword(email, password);
-        
         await res.user.updateProfile({ displayName: username });
-        
         await db.collection("utenti").doc(res.user.uid).set({
             username: username,
             displayName: username,
@@ -1830,7 +1873,6 @@ async function handleRegister(e) {
             squadre: [],
             creatoIl: new Date()
         });
-
         alert(`Registrazione completata! Benvenuto, ${username}.`);
     } catch (err) {
         alert("Errore Registrazione: " + err.message);
@@ -2208,10 +2250,10 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false) {
     
     const [D, C, A] = sq.moduloSelezionato.split("-").map(n => parseInt(n));
     
-    creaRepartoCampo(recapCampo, "Portiere", [sq.schierati.find(p => p.ruolo === "Portiere")]);
-    creaRepartoCampo(recapCampo, "Difensore", sq.schierati.filter(p => p.ruolo === "Difensore"));
-    creaRepartoCampo(recapCampo, "Centrocampista", sq.schierati.filter(p => p.ruolo === "Centrocampista"));
-    creaRepartoCampo(recapCampo, "Attaccante", sq.schierati.filter(p => p.ruolo === "Attaccante"));
+    creaRepartoCampo(recapCampo, "Portiere", [sq.schierati.find(p => p.ruolo === "Portiere")], true);
+    creaRepartoCampo(recapCampo, "Difensore", sq.schierati.filter(p => p.ruolo === "Difensore"), true);
+    creaRepartoCampo(recapCampo, "Centrocampista", sq.schierati.filter(p => p.ruolo === "Centrocampista"), true);
+    creaRepartoCampo(recapCampo, "Attaccante", sq.schierati.filter(p => p.ruolo === "Attaccante"), true);
 
     const panchinaDiv = document.getElementById("recap-panchina");
     panchinaDiv.innerHTML = "";
@@ -2330,7 +2372,6 @@ function resetDraftState() {
     riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
     availablePlayers = [...customPlayersList];
     
-    // Nascondi campo e panchina durante il draft
     document.getElementById("campo-panel-container").style.display = "none";
     document.getElementById("panchina-panel-container").style.display = "none";
 
@@ -2539,45 +2580,153 @@ function renderSlots() {
                     <span class="valore-badge-slot">💰 ${p.valore} cr</span>
                 </div>
             `;
-            slot.onclick = () => schieraGiocatore(p, ruolo);
+            // MODALITÀ 1: Click sulla lista della rosa per schierare / gestire
+            slot.onclick = () => schieraGiocatoreDaLista(p, ruolo);
             div.appendChild(slot);
         });
     });
 }
 
-function schieraGiocatore(playerObj, ruolo) {
+// MODALITÀ 1: Click dalla Rosa sulla destra
+function schieraGiocatoreDaLista(playerObj, ruolo) {
     if (!isTestMode && new Date() >= MATCHDAY_DEADLINE) return;
-
     if (!moduloSelezionato) {
-        alert("Scegli prima il modulo per schierare la formazione");
+        alert("Scegli prima il modulo tattico");
         return;
     }
 
-    if (schierati.some(p => p.nome === playerObj.nome)) {
-        return alert(`${playerObj.nome} è già schierato in campo! Clicca sulla sua casella sul campo per rimuoverlo.`);
-    }
+    const isTit = schierati.some(s => s.nome === playerObj.nome);
+    const isBench = riserveSelezionate[ruolo].some(r => r.nome === playerObj.nome);
 
-    const zone = document.querySelectorAll(`.dropzone[data-ruolo="${ruolo}"]`);
-    const libera = Array.from(zone).find(z => z.dataset.player === "");
-
-    if (libera) {
-        libera.innerText = playerObj.nome;
-        libera.dataset.player = playerObj.nome;
-        libera.classList.add("filled");
-        schierati.push(playerObj);
-
-        riserveSelezionate[ruolo] = riserveSelezionate[ruolo].filter(p => p.nome !== playerObj.nome);
+    if (isTit) {
+        // Se è già titolare, rimuovilo dal campo
+        schierati = schierati.filter(s => s.nome !== playerObj.nome);
+    } else if (isBench) {
+        // Se è in panchina, rimuovilo dalla panchina e mettilo in campo (se c'è posto)
+        riserveSelezionate[ruolo] = riserveSelezionate[ruolo].filter(r => r.nome !== playerObj.nome);
+        aggiungiTitolareAutomatico(playerObj, ruolo);
     } else {
-        if (riserveSelezionate[ruolo].some(r => r.nome === playerObj.nome)) {
-            riserveSelezionate[ruolo] = riserveSelezionate[ruolo].filter(p => p.nome !== playerObj.nome);
+        // Non è né in campo né in panchina: prova a metterlo in campo, altrimenti in panchina
+        const [D, C, A] = moduloSelezionato.split("-").map(n => parseInt(n));
+        const maxTitolariRuolo = ruolo === "Portiere" ? 1 : (ruolo === "Difensore" ? D : (ruolo === "Centrocampista" ? C : A));
+        const titolariAttualiRuolo = schierati.filter(s => s.ruolo === ruolo).length;
+
+        if (titolariAttualiRuolo < maxTitolariRuolo) {
+            schierati.push(playerObj);
         } else {
-            if (riserveSelezionate[ruolo].length >= 2) {
-                return alert(`Hai già selezionato le 2 riserve per il ruolo: ${ruolo}`);
+            // Campo pieno per questo ruolo, mettilo in panchina se c'è posto (< 2)
+            if (riserveSelezionate[ruolo].length < 2) {
+                riserveSelezionate[ruolo].push(playerObj);
+            } else {
+                alert(`Hai già esaurito i posti in campo e le 2 riserve per il ruolo ${ruolo}!`);
             }
-            riserveSelezionate[ruolo].push(playerObj);
         }
     }
 
+    ripristinaCampoTattico();
+    renderSlots();
+    renderPanchinaGrafica();
+}
+
+function aggiungiTitolareAutomatico(playerObj, ruolo) {
+    const [D, C, A] = moduloSelezionato.split("-").map(n => parseInt(n));
+    const maxTitolariRuolo = ruolo === "Portiere" ? 1 : (ruolo === "Difensore" ? D : (ruolo === "Centrocampista" ? C : A));
+    const titolariAttualiRuolo = schierati.filter(s => s.ruolo === ruolo).length;
+
+    if (titolariAttualiRuolo < maxTitolariRuolo) {
+        schierati.push(playerObj);
+    }
+}
+
+// MODALITÀ 2: Click su una casella del campo (apre modale di scelta)
+function apriModaleSceltaCampo(ruolo, slotIndex) {
+    if (!isTestMode && new Date() >= MATCHDAY_DEADLINE) return;
+    if (!moduloSelezionato) {
+        alert("Scegli prima il modulo tattico");
+        return;
+    }
+
+    // Trova tutti i giocatori in rosa di quel ruolo
+    const giocatoriRuolo = rosa[ruolo];
+    if (giocatoriRuolo.length === 0) {
+        alert(`Non hai acquistato alcun giocatore nel ruolo: ${ruolo}`);
+        return;
+    }
+
+    // Crea la modale
+    const overlay = document.createElement("div");
+    overlay.className = "custom-modal-overlay";
+    overlay.id = "campo-selection-modal";
+
+    let cardHtml = `
+        <div class="custom-modal-card">
+            <h3 style="color:var(--accent-neon-green); font-size:16px; margin-bottom:12px;">Seleziona ${ruolo} per il Campo</h3>
+            <div style="max-height: 250px; overflow-y: auto; text-align: left; margin-bottom: 12px;">
+    `;
+
+    giocatoriRuolo.forEach(p => {
+        const isTitolarissimo = schierati.some(s => s.nome === p.nome);
+        const isRiserva = riserveSelezionate[ruolo].some(r => r.nome === p.nome);
+        
+        let statoLabel = `<span style="color:var(--accent-blue); font-size:10px;">Disponibile</span>`;
+        if (isTitolarissimo) statoLabel = `<span style="color:var(--accent-neon-green); font-size:10px;">👤 Già in Campo</span>`;
+        else if (isRiserva) statoLabel = `<span style="color:var(--accent-gold); font-size:10px;">🛋️ In Panchina</span>`;
+
+        cardHtml += `
+            <div class="modal-player-item" onclick="selezionaGiocatorePerCampo('${p.nome.replace(/'/g, "\\'")}', '${ruolo}')">
+                <div>
+                    <strong style="color:#fff; font-size:12px; display:block;">${p.nome}</strong>
+                    <span style="font-size:10px; color:var(--text-muted);">${p.squadra} • 💰${p.valore}cr</span>
+                </div>
+                <div>${statoLabel}</div>
+            </div>
+        `;
+    });
+
+    cardHtml += `
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button onclick="rimuoviDaSlotCampo('${ruolo}')" class="btn-action-danger" style="flex:1; padding:8px; font-size:11px;">Rimuovi Titolare</button>
+                <button onclick="chiudiModaleCampo()" class="btn-action-primary" style="flex:1; padding:8px; font-size:11px; background:rgba(51, 65, 85, 0.9);">Chiudi</button>
+            </div>
+        </div>
+    `;
+
+    overlay.innerHTML = cardHtml;
+    document.body.appendChild(overlay);
+}
+
+function chiudiModaleCampo() {
+    const modal = document.getElementById("campo-selection-modal");
+    if (modal) modal.remove();
+}
+
+function selezionaGiocatorePerCampo(nomeGiocatore, ruolo) {
+    const playerObj = rosa[ruolo].find(p => p.nome === nomeGiocatore);
+    if (!playerObj) return;
+
+    // Rimuovi eventuale presenza precedente di questo giocatore tra i titolari o panchina
+    schierati = schierati.filter(s => s.nome !== playerObj.nome);
+    riserveSelezionate[ruolo] = riserveSelezionate[ruolo].filter(r => r.nome !== playerObj.nome);
+
+    // Aggiungi come titolare
+    schierati.push(playerObj);
+
+    chiudiModaleCampo();
+    ripristinaCampoTattico();
+    renderSlots();
+    renderPanchinaGrafica();
+}
+
+function rimuoviDaSlotCampo(ruolo) {
+    // Rimuove l'ultimo titolare inserito di quel ruolo
+    const titolariRuolo = schierati.filter(s => s.ruolo === ruolo);
+    if (titolariRuolo.length > 0) {
+        const daRimuovere = titolariRuolo[titolariRuolo.length - 1];
+        schierati = schierati.filter(s => s.nome !== daRimuovere.nome);
+    }
+    chiudiModaleCampo();
+    ripristinaCampoTattico();
     renderSlots();
     renderPanchinaGrafica();
 }
@@ -2615,7 +2764,6 @@ function setModulo() {
     schierati = [];
     riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
 
-    // Rendi visibili campo e panchina ora che il draft è terminato
     document.getElementById("campo-panel-container").style.display = "block";
     document.getElementById("panchina-panel-container").style.display = "block";
 
@@ -2639,7 +2787,7 @@ function ripristinaCampoTattico() {
     creaRepartoCampo(campo, "Attaccante", A);
 }
 
-function creaRepartoCampo(campoContainer, ruolo, countOrPlayers) {
+function creaRepartoCampo(campoContainer, ruolo, countOrPlayers, isReadOnly = false) {
     const reparto = document.createElement("div");
     reparto.className = "reparto-campo";
 
@@ -2658,17 +2806,22 @@ function creaRepartoCampo(campoContainer, ruolo, countOrPlayers) {
                 dz.dataset.player = p.nome;
                 dz.classList.add("filled");
             }
+        } else {
+            // Controlla se c'è un titolare schierato per questo slot nel reparto
+            const titolariRuolo = schierati.filter(s => s.ruolo === ruolo);
+            if (titolariRuolo[i]) {
+                dz.innerText = titolariRuolo[i].nome;
+                dz.dataset.player = titolariRuolo[i].nome;
+                dz.classList.add("filled");
+            } else {
+                dz.innerText = `+ ${ruolo.substring(0,3)}`;
+            }
         }
 
-        dz.onclick = () => {
-            if ((!isTestMode && new Date() >= MATCHDAY_DEADLINE) || !dz.dataset.player) return;
-            schierati = schierati.filter(p => p.nome !== dz.dataset.player);
-            dz.innerText = "";
-            dz.dataset.player = "";
-            dz.classList.remove("filled");
-            renderSlots();
-            renderPanchinaGrafica();
-        };
+        if (!isReadOnly) {
+            // MODALITÀ 2: Cliccando sulla casella del campo si apre la modale di scelta giocatore
+            dz.onclick = () => apriModaleSceltaCampo(ruolo, i);
+        }
 
         reparto.appendChild(dz);
     }
@@ -2717,7 +2870,7 @@ function togglePanchina(ruolo, nomePlayer) {
     if (!isTestMode && new Date() >= MATCHDAY_DEADLINE) return;
 
     if (!moduloSelezionato) {
-        alert("Scegli prima il modulo per schierare la formazione");
+        alert("Scegli prima il modulo tattico");
         return;
     }
 
