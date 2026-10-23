@@ -9,7 +9,11 @@ const firebaseConfig = {
     measurementId: "G-THYVRMRWWH"
 };
 
-firebase.initializeApp(firebaseConfig);
+// Inizializzazione sicura di Firebase
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+
 const auth = firebase.auth();
 const db = firebase.firestore();
 
