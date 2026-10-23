@@ -1700,6 +1700,25 @@ let moduloSelezionato = "";
 
 const MATCHDAY_DEADLINE = new Date("2026-10-23T20:45:00"); 
 
+// Helper per estrarre con sicurezza l'Username reale di un utente
+function getRealUsername(uData, defaultAuthUser) {
+    if (uData && uData.username && uData.username.trim() !== "") {
+        return uData.username.trim();
+    }
+    if (uData && uData.displayName && uData.displayName.trim() !== "") {
+        return uData.displayName.trim();
+    }
+    if (defaultAuthUser) {
+        if (defaultAuthUser.displayName && defaultAuthUser.displayName.trim() !== "") {
+            return defaultAuthUser.displayName.trim();
+        }
+        if (defaultAuthUser.email) {
+            return defaultAuthUser.email.split('@')[0];
+        }
+    }
+    return "Fantallenatore";
+}
+
 function initCountdown() {
     function updateTimer() {
         const now = new Date();
@@ -1832,17 +1851,16 @@ auth.onAuthStateChanged(async (user) => {
         modal.style.display = 'none';
         globalHeader.style.display = 'flex';
         
-        // Recupera username dal DB Firestore o dal displayName dell'utente
         let displayUsername = user.displayName;
         try {
             const userDoc = await db.collection("utenti").doc(user.uid).get();
-            if (userDoc.exists && userDoc.data().username) {
-                displayUsername = userDoc.data().username;
+            if (userDoc.exists) {
+                displayUsername = getRealUsername(userDoc.data(), user);
             }
         } catch(e) {}
 
-        document.getElementById('user-display-name').innerText = displayUsername || user.email;
-        document.getElementById('welcome-greeting').innerText = `Bentornato, ${displayUsername || 'Fantallenatore'}!`;
+        document.getElementById('user-display-name').innerText = displayUsername;
+        document.getElementById('welcome-greeting').innerText = `Bentornato, ${displayUsername}!`;
         await caricaDatiUtenteCloud();
     } else {
         currentUser = null;
@@ -2022,8 +2040,7 @@ async function apriSchermataClassifica(giornata = 8) {
 
         snapshot.forEach(doc => {
             const uData = doc.data();
-            // Utilizziamo sempre l'username registrato dall'utente
-            const username = uData.username || uData.displayName || "Utente";
+            const username = getRealUsername(uData, null);
             const squadreArr = uData.squadre || [];
 
             squadreArr.forEach(sq => {
@@ -2123,7 +2140,7 @@ async function visualizzaSquadraGenerica(userId, nomeSquadra, giornata) {
         if (!doc.exists) return alert("Utente non trovato.");
 
         const uData = doc.data();
-        const username = uData.username || uData.displayName || "Utente";
+        const username = getRealUsername(uData, null);
         const squadreArr = uData.squadre || [];
 
         const sq = squadreArr.find(s => s.nomeSquadra.toLowerCase() === nomeSquadra.toLowerCase());
@@ -2137,17 +2154,17 @@ async function visualizzaSquadraGenerica(userId, nomeSquadra, giornata) {
 
 async function apriRecapSquadraUtenteCorrente(index) {
     const sq = userSquadre[index];
-    let username = "Tu";
+    let username = "Fantallenatore";
     if (currentUser) {
         try {
             const uDoc = await db.collection("utenti").doc(currentUser.uid).get();
-            if (uDoc.exists && uDoc.data().username) {
-                username = uDoc.data().username;
+            if (uDoc.exists) {
+                username = getRealUsername(uDoc.data(), currentUser);
             } else {
-                username = currentUser.displayName || currentUser.email;
+                username = getRealUsername(null, currentUser);
             }
         } catch(e) {
-            username = currentUser.displayName || currentUser.email;
+            username = getRealUsername(null, currentUser);
         }
     }
     renderRecapScreenReadOnly(sq, username, false);
@@ -2725,8 +2742,8 @@ async function confermaFormazioneDefinitiva() {
         if (currentUser) {
             try {
                 const uDoc = await db.collection("utenti").doc(currentUser.uid).get();
-                if (uDoc.exists && uDoc.data().username) currentUsername = uDoc.data().username;
-                else currentUsername = currentUser.displayName || currentUser.email;
+                if (uDoc.exists) currentUsername = getRealUsername(uDoc.data(), currentUser);
+                else currentUsername = getRealUsername(null, currentUser);
             } catch(e) {}
         }
 
