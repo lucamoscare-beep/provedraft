@@ -467,87 +467,107 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     box-shadow: 0 8px 20px rgba(0,0,0,0.3);
 }
 
-/* DASHBOARD HEADER: CREDITI IN PRIMO PIANO (BOX DORATO) E RUOLI SOTTOSTANTI */
+/* DASHBOARD HEADER IN STILE "GETTONI" DELLA HOMEPAGE */
 .dashboard-header {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    background: linear-gradient(135deg, #1e293b, #0f172a);
-    border: 1.5px solid rgba(251, 191, 36, 0.4);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.dash-card-row {
+    background: rgba(30, 41, 59, 0.85);
+    backdrop-filter: blur(12px);
     border-radius: 14px;
-    padding: 10px;
-    margin-bottom: 10px;
-    box-shadow: 0 0 20px rgba(251, 191, 36, 0.15);
-}
-
-@media (min-width: 600px) {
-    .dashboard-header {
-        grid-template-columns: repeat(4, 1fr);
-        padding: 14px;
-        gap: 10px;
-    }
-}
-
-.dash-box {
-    background: rgba(15, 23, 42, 0.85);
-    border: 1px solid var(--card-border);
-    padding: 8px 6px;
-    border-radius: 10px;
-    text-align: center;
-}
-
-.dash-box span {
+    padding: 12px 16px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 4px;
-    font-size: 10px;
+    justify-content: space-between;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.dash-card-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.dash-card-left i {
+    font-size: 24px;
+}
+
+.dash-card-text .title-text {
+    font-size: 12px;
+    font-weight: 800;
+    color: #fff;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #cbd5e1;
-    margin-bottom: 3px;
-    font-weight: 700;
 }
 
-.dash-box strong {
-    font-size: 22px;
+.dash-card-text .sub-text {
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+.dash-card-badge {
     font-weight: 900;
-    line-height: 1;
-    display: block;
+    font-size: 20px;
+    padding: 4px 16px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+    text-align: center;
+    min-width: 75px;
 }
 
-@media (min-width: 600px) {
-    .dash-box strong { font-size: 26px; }
-    .dash-box span { font-size: 11px; }
-}
-
-/* BOX CREDITI IN ALTO (PRIMO PIANO - DORATO COME GETTONI HOMEPAGE) */
-.dash-box.budget {
-    grid-column: 1 / -1;
+/* STILI SPECIFICI PER I CARD GETTONI DEL DRAFT */
+.dash-card-row.budget {
     border: 2px solid var(--accent-gold);
     background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(15, 23, 42, 0.85));
-    box-shadow: 0 4px 15px rgba(251, 191, 36, 0.25);
-    padding: 10px;
 }
-.dash-box.budget span { color: #fff; font-size: 11px; }
-.dash-box.budget strong { color: var(--accent-gold); font-size: 28px; }
-
-@media (min-width: 600px) {
-    .dash-box.budget strong { font-size: 32px; }
+.dash-card-row.budget i { color: var(--accent-gold); }
+.dash-card-row.budget .dash-card-badge {
+    background: linear-gradient(135deg, var(--accent-gold), #d97706);
+    color: #0f172a;
 }
 
-/* BOX RUOLI SPECIFICI COLORE */
-.dash-box.role-por { border-color: rgba(251, 191, 36, 0.4); background: linear-gradient(135deg, rgba(251, 191, 36, 0.12), rgba(15, 23, 42, 0.9)); }
-.dash-box.role-por strong { color: var(--role-por); }
+.dash-card-row.role-por {
+    border: 2px solid var(--role-por);
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(15, 23, 42, 0.85));
+}
+.dash-card-row.role-por i { color: var(--role-por); }
+.dash-card-row.role-por .dash-card-badge {
+    background: linear-gradient(135deg, var(--role-por), #d97706);
+    color: #0f172a;
+}
 
-.dash-box.role-dif { border-color: rgba(52, 211, 153, 0.4); background: linear-gradient(135deg, rgba(52, 211, 153, 0.12), rgba(15, 23, 42, 0.9)); }
-.dash-box.role-dif strong { color: var(--role-dif); }
+.dash-card-row.role-dif {
+    border: 2px solid var(--role-dif);
+    background: linear-gradient(135deg, rgba(52, 211, 153, 0.15), rgba(15, 23, 42, 0.85));
+}
+.dash-card-row.role-dif i { color: var(--role-dif); }
+.dash-card-row.role-dif .dash-card-badge {
+    background: linear-gradient(135deg, var(--role-dif), #059669);
+    color: #0f172a;
+}
 
-.dash-box.role-cen { border-color: rgba(56, 189, 248, 0.4); background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(15, 23, 42, 0.9)); }
-.dash-box.role-cen strong { color: var(--role-cen); }
+.dash-card-row.role-cen {
+    border: 2px solid var(--role-cen);
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(15, 23, 42, 0.85));
+}
+.dash-card-row.role-cen i { color: var(--role-cen); }
+.dash-card-row.role-cen .dash-card-badge {
+    background: linear-gradient(135deg, var(--role-cen), #0284c7);
+    color: #0f172a;
+}
 
-.dash-box.role-att { border-color: rgba(248, 113, 113, 0.4); background: linear-gradient(135deg, rgba(248, 113, 113, 0.12), rgba(15, 23, 42, 0.9)); }
-.dash-box.role-att strong { color: var(--role-att); }
+.dash-card-row.role-att {
+    border: 2px solid var(--role-att);
+    background: linear-gradient(135deg, rgba(248, 113, 113, 0.15), rgba(15, 23, 42, 0.85));
+}
+.dash-card-row.role-att i { color: var(--role-att); }
+.dash-card-row.role-att .dash-card-badge {
+    background: linear-gradient(135deg, var(--role-att), #dc2626);
+    color: #0f172a;
+}
 
 .progress-bar-container {
     width: 100%;
@@ -1632,31 +1652,66 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     </div>
 
     <div id="right">
-        <!-- DASHBOARD: CREDITI IN ALTO (DORATO) E RUOLI SOTTOSTANTI COLORATI -->
+        <!-- DASHBOARD CON CARD ORIZZONTALI IN STILE "GETTONI" -->
         <div class="dashboard-header">
-            <div class="dash-box budget">
-                <span><i class="fa-solid fa-coins"></i> Crediti Residui</span>
-                <strong><span id="budget-display">600</span></strong>
+            <!-- 1. CREDITI RESIDUI -->
+            <div class="dash-card-row budget">
+                <div class="dash-card-left">
+                    <i class="fa-solid fa-coins"></i>
+                    <div class="dash-card-text">
+                        <div class="title-text">Crediti Residui</div>
+                        <div class="sub-text">Budget disponibile per l'asta</div>
+                    </div>
+                </div>
+                <div class="dash-card-badge" id="budget-display">600</div>
             </div>
 
-            <div class="dash-box role-por">
-                <span><i class="fa-solid fa-hand"></i> Portieri</span>
-                <strong><span id="count-box-Portiere">0/3</span></strong>
+            <!-- 2. PORTIERI -->
+            <div class="dash-card-row role-por">
+                <div class="dash-card-left">
+                    <i class="fa-solid fa-hand"></i>
+                    <div class="dash-card-text">
+                        <div class="title-text">Portieri Mancanti</div>
+                        <div class="sub-text">Completamento reparto</div>
+                    </div>
+                </div>
+                <div class="dash-card-badge" id="count-box-Portiere">0/3</div>
             </div>
 
-            <div class="dash-box role-dif">
-                <span><i class="fa-solid fa-shield-halved"></i> Difensori</span>
-                <strong><span id="count-box-Difensore">0/7</span></strong>
+            <!-- 3. DIFENSORI -->
+            <div class="dash-card-row role-dif">
+                <div class="dash-card-left">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <div class="dash-card-text">
+                        <div class="title-text">Difensori Mancanti</div>
+                        <div class="sub-text">Completamento reparto</div>
+                    </div>
+                </div>
+                <div class="dash-card-badge" id="count-box-Difensore">0/7</div>
             </div>
 
-            <div class="dash-box role-cen">
-                <span><i class="fa-solid fa-person-running"></i> Centroc.</span>
-                <strong><span id="count-box-Centrocampista">0/8</span></strong>
+            <!-- 4. CENTROCAMPISTI -->
+            <div class="dash-card-row role-cen">
+                <div class="dash-card-left">
+                    <i class="fa-solid fa-person-running"></i>
+                    <div class="dash-card-text">
+                        <div class="title-text">Centrocampisti Mancanti</div>
+                        <div class="sub-text">Completamento reparto</div>
+                    </div>
+                </div>
+                <div class="dash-card-badge" id="count-box-Centrocampista">0/8</div>
             </div>
 
-            <div class="dash-box role-att">
-                <span><i class="fa-solid fa-futbol"></i> Attaccanti</span>
-                <strong><span id="count-box-Attaccante">0/6</span></strong>
+            <!-- 5. ATTACCANTI -->
+            <div class="dash-card-row role-att">
+                <div class="dash-card-left">
+                    <i class="fa-solid fa-futbol"></i>
+                    <div class="dash-card-text">
+                        <div class="title-text">Attaccanti Mancanti</div>
+                        <div class="sub-text">Completamento reparto</div>
+                    </div>
+                </div>
+                <div class="dash-card-badge" id="count-box-Attaccante">0/6</div>
             </div>
         </div>
 
