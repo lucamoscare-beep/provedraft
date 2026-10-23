@@ -434,7 +434,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     box-shadow: none;
 }
 
-/* MAIN DRAFT APP LAYOUT */
+/* MAIN DRAFT APP LAYOUT (Ottimizzato per larghezza intera durante il draft) */
 #main-app {
     display: none;
     flex-direction: column;
@@ -444,20 +444,17 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     animation: fadeInUp 0.4s ease-out;
 }
 
-#left { display: flex; flex-direction: column; order: 2; }
-#right { display: flex; flex-direction: column; order: 1; }
+#left { display: flex; flex-direction: column; order: 1; width: 100%; }
+#right { display: flex; flex-direction: column; order: 2; width: 100%; }
 
-.section-rosa { order: 3; }
-.section-panchina { order: 4; }
+.section-rosa { order: 1; }
+.section-panchina { order: 2; }
 
 @media (min-width: 1024px) {
     body { padding: 20px; }
     #main-app { flex-direction: row; gap: 25px; }
-    #left, #right { width: 50%; }
-    #left { order: 1; }
-    #right { order: 2; }
-    .section-rosa { order: unset; }
-    .section-panchina { order: unset; }
+    #left { width: 55%; }
+    #right { width: 45%; }
 }
 
 .panel {
@@ -536,7 +533,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     transition: width 0.3s ease;
 }
 
-/* CARD GIOCATORI DRAFT */
+/* CARD GIOCATORI DRAFT (Griglia 5 colonne espansa) */
 .players-container {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -1550,12 +1547,13 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             <div id="players" class="players-container"></div>
         </div>
 
-        <div class="panel">
+        <!-- CAMPO E PANCHINA (Inizialmente nascosti durante il Draft, compaiono a fine draft) -->
+        <div class="panel" id="campo-panel-container" style="display: none;">
             <h2>Schieramento Titolari</h2>
             <div id="campo" class="campo-style"></div>
         </div>
 
-        <div class="panel section-panchina">
+        <div class="panel section-panchina" id="panchina-panel-container" style="display: none;">
             <h2><i class="fa-solid fa-couch" style="color: var(--accent-gold);"></i> Panchina Ufficiale</h2>
             <div id="panchina-grafica" class="panchina-container"></div>
 
@@ -2332,6 +2330,10 @@ function resetDraftState() {
     riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
     availablePlayers = [...customPlayersList];
     
+    // Nascondi campo e panchina durante il draft
+    document.getElementById("campo-panel-container").style.display = "none";
+    document.getElementById("panchina-panel-container").style.display = "none";
+
     document.getElementById("campo").innerHTML = "";
     document.getElementById("panchina-grafica").innerHTML = "";
     document.getElementById("conferma-container").style.display = "none";
@@ -2612,6 +2614,10 @@ function setModulo() {
 
     schierati = [];
     riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
+
+    // Rendi visibili campo e panchina ora che il draft è terminato
+    document.getElementById("campo-panel-container").style.display = "block";
+    document.getElementById("panchina-panel-container").style.display = "block";
 
     ripristinaCampoTattico();
 
