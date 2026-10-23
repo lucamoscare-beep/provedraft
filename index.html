@@ -1700,7 +1700,7 @@ let moduloSelezionato = "";
 
 const MATCHDAY_DEADLINE = new Date("2026-10-23T20:45:00"); 
 
-// Helper per estrarre con sicurezza l'Username reale di un utente
+// Helper robusto per estrarre l'Username reale
 function getRealUsername(uData, defaultAuthUser) {
     if (uData && uData.username && uData.username.trim() !== "") {
         return uData.username.trim();
@@ -1708,15 +1708,22 @@ function getRealUsername(uData, defaultAuthUser) {
     if (uData && uData.displayName && uData.displayName.trim() !== "") {
         return uData.displayName.trim();
     }
+    if (uData && (uData.nome || uData.cognome)) {
+        const nomeCompleto = `${uData.nome || ''} ${uData.cognome || ''}`.trim();
+        if (nomeCompleto !== "") return nomeCompleto;
+    }
+    if (uData && uData.email && uData.email.includes('@')) {
+        return uData.email.split('@')[0];
+    }
     if (defaultAuthUser) {
         if (defaultAuthUser.displayName && defaultAuthUser.displayName.trim() !== "") {
             return defaultAuthUser.displayName.trim();
         }
-        if (defaultAuthUser.email) {
+        if (defaultAuthUser.email && defaultAuthUser.email.includes('@')) {
             return defaultAuthUser.email.split('@')[0];
         }
     }
-    return "Fantallenatore";
+    return "Utente";
 }
 
 function initCountdown() {
@@ -1813,10 +1820,12 @@ async function handleRegister(e) {
 
     try {
         const res = await auth.createUserWithEmailAndPassword(email, password);
+        
         await res.user.updateProfile({ displayName: username });
         
         await db.collection("utenti").doc(res.user.uid).set({
             username: username,
+            displayName: username,
             nome: nome,
             cognome: cognome,
             email: email,
