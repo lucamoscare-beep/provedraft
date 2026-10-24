@@ -444,11 +444,8 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     animation: fadeInUp 0.4s ease-out;
 }
 
-#left { display: flex; flex-direction: column; order: 1; width: 100%; }
-#right { display: flex; flex-direction: column; order: 2; width: 100%; }
-
-.section-rosa { order: 1; }
-.section-panchina { order: 2; }
+#left { display: flex; flex-direction: column; width: 100%; }
+#right { display: flex; flex-direction: column; width: 100%; }
 
 @media (min-width: 1024px) {
     body { padding: 20px; }
@@ -467,7 +464,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     box-shadow: 0 8px 20px rgba(0,0,0,0.3);
 }
 
-/* DASHBOARD HEADER MODIFICATA */
+/* DASHBOARD HEADER */
 .dashboard-header {
     display: flex;
     flex-direction: column;
@@ -1651,34 +1648,9 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 <!-- PAGINA PRINCIPALE DEL DRAFT -->
 <div id="main-app">
     <div id="left">
-        <div class="panel" id="draft-panel" style="display:block;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                <h2 id="draft-main-heading">Giocatori Disponibili</h2>
-                <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-arrow-rotate-left"></i> Ricomincia Draft</button>
-            </div>
-            <div id="players" class="players-container"></div>
-        </div>
-
-        <!-- CAMPO E PANCHINA (Compaiono a fine draft) -->
-        <div class="panel" id="campo-panel-container" style="display: none;">
-            <h2>Schieramento Titolari <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca sulle caselle per scegliere i giocatori)</span></h2>
-            <div id="campo" class="campo-style"></div>
-        </div>
-
-        <div class="panel section-panchina" id="panchina-panel-container" style="display: none;">
-            <h2><i class="fa-solid fa-couch" style="color: var(--accent-gold);"></i> Panchina Ufficiale</h2>
-            <div id="panchina-grafica" class="panchina-container"></div>
-
-            <div id="conferma-container" style="display: none; margin-top: 12px; text-align:center;">
-                <button id="btn-conferma-formazione" class="btn-action-primary" style="width:100%;" onclick="confermaFormazioneDefinitiva()">🔒 CONFERMA E SALVA FORMAZIONE (Consuma 1 Gettone)</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="right">
-        <!-- DASHBOARD HEADER: CREDITI SOPRA, 4 BOX RUOLI QUADRATI SOTTO -->
+        <!-- 1. DASHBOARD HEADER: CREDITI IN ALTO, 4 RUOLI QUADRATI SUBITO SOTTO -->
         <div class="dashboard-header">
-            <!-- 1. CREDITI RESIDUI (RETTANGOLARE IN ALTO) -->
+            <!-- 1. CREDITI RESIDUI -->
             <div class="dash-card-row budget">
                 <div class="dash-card-left">
                     <i class="fa-solid fa-coins"></i>
@@ -1690,7 +1662,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
                 <div class="dash-card-badge" id="budget-display">600</div>
             </div>
 
-            <!-- 2. I 4 BOX RUOLI QUADRATI TUTTI IN FILA -->
+            <!-- 2. I 4 BOX RUOLI QUADRATI ALLINEATI -->
             <div class="roles-grid-container">
                 <!-- Portieri -->
                 <div class="role-square-box role-por">
@@ -1722,6 +1694,16 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             <div class="progress-bar-fill" id="progress-bar"></div>
         </div>
 
+        <!-- 3. SELEZIONE GIOCATORI DRAFT -->
+        <div class="panel" id="draft-panel" style="display:block;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <h2 id="draft-main-heading">Scegli il tuo giocatore</h2>
+                <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-arrow-rotate-left"></i> Ricomincia Draft</button>
+            </div>
+            <div id="players" class="players-container"></div>
+        </div>
+
+        <!-- 4. LA TUA ROSA CHE SI COMPLETA (NELLA COLONNA DI SINISTRA/UNICA SU MOBILE) -->
         <div class="panel section-rosa">
             <h2 id="current-draft-team-title">La Tua Rosa <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca per schierare)</span></h2>
 
@@ -1744,6 +1726,23 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
                 <span><i class="fa-solid fa-futbol" style="color: var(--role-att);"></i> Attaccanti</span>
             </div>
             <div id="slot-Attaccante"></div>
+        </div>
+    </div>
+
+    <div id="right">
+        <!-- CAMPO E PANCHINA (Compaiono a fine draft per schieramento) -->
+        <div class="panel" id="campo-panel-container" style="display: none;">
+            <h2>Schieramento Titolari <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca sulle caselle per scegliere i giocatori)</span></h2>
+            <div id="campo" class="campo-style"></div>
+        </div>
+
+        <div class="panel section-panchina" id="panchina-panel-container" style="display: none;">
+            <h2><i class="fa-solid fa-couch" style="color: var(--accent-gold);"></i> Panchina Ufficiale</h2>
+            <div id="panchina-grafica" class="panchina-container"></div>
+
+            <div id="conferma-container" style="display: none; margin-top: 12px; text-align:center;">
+                <button id="btn-conferma-formazione" class="btn-action-primary" style="width:100%;" onclick="confermaFormazioneDefinitiva()">🔒 CONFERMA E SALVA FORMAZIONE (Consuma 1 Gettone)</button>
+            </div>
         </div>
     </div>
 </div>
@@ -2382,7 +2381,7 @@ function avviaTestDraft() {
 
     document.getElementById("draft-panel").innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-            <h2>Giocatori Disponibili (Modalità Test)</h2>
+            <h2>Scegli il tuo giocatore (Test)</h2>
             <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-arrow-rotate-left"></i> Ricomincia Test</button>
         </div>
         <div id="players" class="players-container"></div>
@@ -2432,7 +2431,7 @@ async function preparaEAvviaDraft() {
     
     document.getElementById("draft-panel").innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-            <h2>Giocatori Disponibili</h2>
+            <h2>Scegli il tuo giocatore</h2>
             <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-arrow-rotate-left"></i> Ricomincia Draft</button>
         </div>
         <div id="players" class="players-container"></div>
@@ -2471,7 +2470,7 @@ function resetDraftState() {
 
 function annullaERicominciaDraft() {
     if (confirm("Vuoi davvero ricominciare il draft? I giocatori selezionati verranno azzerati.")) {
-        const titleHtml = isTestMode ? '<h2>Giocatori Disponibili (Modalità Test)</h2>' : '<h2>Giocatori Disponibili</h2>';
+        const titleHtml = isTestMode ? '<h2>Scegli il tuo giocatore (Test)</h2>' : '<h2>Scegli il tuo giocatore</h2>';
         const btnText = isTestMode ? 'Ricomincia Test' : 'Ricomincia Draft';
 
         document.getElementById("draft-panel").innerHTML = `
@@ -2532,9 +2531,8 @@ function updateDashboardCounters() {
     ["Portiere", "Difensore", "Centrocampista", "Attaccante"].forEach(r => {
         let count = rosa[r].length;
         let max = limits[r];
-        let mancano = max - count;
-        // Aggiorna mostrando direttamente quanti ne mancano (es. 0/3)
-        document.getElementById(`count-box-${r}`).innerText = `${mancano}/${max}`;
+        // Mostra sempre Giocatori Acquistati / Max Totale (partendo da 0/3)
+        document.getElementById(`count-box-${r}`).innerText = `${count}/${max}`;
     });
 }
 
