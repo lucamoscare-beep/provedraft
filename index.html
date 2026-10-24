@@ -633,11 +633,11 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     transition: width 0.3s ease;
 }
 
-/* CARD GIOCATORI DRAFT */
+/* CARD GIOCATORI DRAFT INTERAMENTE CLICCABILI */
 .players-container {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 3px;
+    gap: 4px;
     justify-content: center;
 }
 
@@ -648,101 +648,82 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 .player-card {
     background: linear-gradient(145deg, #1e293b, #0f172a);
     border: 1px solid var(--card-border);
-    padding: 6px 2px;
-    border-radius: 8px;
+    padding: 8px 3px;
+    border-radius: 10px;
     text-align: center;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    align-items: center;
     position: relative;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0,0,0,0.4);
     animation: fadeInUp 0.3s ease-out;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    min-height: 130px;
+    transition: all 0.2s ease;
+    min-height: 115px;
+    cursor: pointer;
+    user-select: none;
 }
 
-.player-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+.player-card:hover, .player-card:active {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.7);
+    border-color: var(--accent-blue);
 }
 
-.player-card.Portiere { border-top: 4px solid var(--role-por); }
-.player-card.Difensore { border-top: 4px solid var(--role-dif); }
-.player-card.Centrocampista { border-top: 4px solid var(--role-cen); }
-.player-card.Attaccante { border-top: 4px solid var(--role-att); }
+.player-card.Portiere { border-top: 5px solid var(--role-por); }
+.player-card.Difensore { border-top: 5px solid var(--role-dif); }
+.player-card.Centrocampista { border-top: 5px solid var(--role-cen); }
+.player-card.Attaccante { border-top: 5px solid var(--role-att); }
 
 .player-name { 
     font-weight: 900; 
-    font-size: 11px; 
+    font-size: 13px; 
     color: #fff; 
-    margin-bottom: 1px; 
-    white-space: nowrap; 
-    overflow: hidden; 
-    text-overflow: ellipsis; 
-}
-
-.player-team { 
-    font-size: 8px; 
-    color: var(--text-muted); 
-    text-transform: uppercase; 
-    font-weight: 700; 
     margin-bottom: 2px; 
     white-space: nowrap; 
     overflow: hidden; 
+    text-overflow: ellipsis; 
+    width: 100%;
+}
+
+.player-team { 
+    font-size: 9px; 
+    color: var(--text-muted); 
+    text-transform: uppercase; 
+    font-weight: 700; 
+    margin-bottom: 3px; 
+    white-space: nowrap; 
+    overflow: hidden; 
     text-overflow: ellipsis;
+    width: 100%;
 }
 
 .player-role-label {
     font-size: 8px;
     font-weight: 800;
-    margin-bottom: 2px;
-    display: block;
-    padding: 1px 2px;
+    margin-bottom: 4px;
+    display: inline-block;
+    padding: 1px 4px;
     border-radius: 3px;
     background: rgba(255,255,255,0.06);
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 .player-card.Portiere .player-role-label { color: var(--role-por); }
 .player-card.Difensore .player-role-label { color: var(--role-dif); }
 .player-card.Centrocampista .player-role-label { color: var(--role-cen); }
 .player-card.Attaccante .player-role-label { color: var(--role-att); }
 
-/* VALORE IN CREDITI ULTERIORMENTE INGRANDITO */
 .valore-badge-draft {
     background: linear-gradient(135deg, #fbbf24, #f59e0b);
     color: #0f172a;
     font-weight: 900;
-    padding: 3px 6px;
-    border-radius: 5px;
-    font-size: 13px; /* Crediti ulteriormente ingranditi */
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 14px;
     display: inline-block;
-    margin: 3px 0;
-    box-shadow: 0 2px 5px rgba(245, 158, 11, 0.4);
-}
-
-.draft-btn {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    color: white;
-    padding: 5px 1px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 3px;
-    font-weight: 800;
-    font-size: 9px;
-    text-transform: uppercase;
-    width: 100%;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
-    white-space: nowrap;
-}
-
-.draft-btn:hover {
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
-    transform: scale(1.02);
+    margin-top: 2px;
+    box-shadow: 0 2px 6px rgba(245, 158, 11, 0.4);
 }
 
 .role-title {
@@ -762,14 +743,14 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     align-items: center;
     justify-content: space-between;
     padding: 0 8px;
-    height: 38px; /* Leggermente più alto per il font più grande */
+    height: 38px;
     border-radius: 6px;
     margin: 3px 0;
     font-weight: 700;
     cursor: pointer;
     background: rgba(255,255,255,0.03);
     border: 1px solid var(--card-border);
-    font-size: 13px; /* Nome giocatrice/giocatore ingrandito a 13px */
+    font-size: 13px;
     transition: all 0.2s ease;
 }
 
@@ -1701,8 +1682,11 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
         <!-- 4. SELEZIONE GIOCATORI DRAFT -->
         <div class="panel" id="draft-panel" style="display:block;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                <h2 id="draft-main-heading">Scegli il tuo giocatore</h2>
-                <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-arrow-rotate-left"></i> Ricomincia Draft</button>
+                <div>
+                    <h2 id="draft-main-heading" style="margin:0;">Scegli il tuo giocatore</h2>
+                    <span style="font-size:11px; color:var(--accent-blue); font-weight:600;">👇 Tocca la scheda per acquistarlo</span>
+                </div>
+                <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-arrow-rotate-left"></i> Ricomincia</button>
             </div>
             <div id="players" class="players-container"></div>
         </div>
@@ -2379,7 +2363,10 @@ function avviaTestDraft() {
 
     document.getElementById("draft-panel").innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-            <h2>Scegli il tuo giocatore (Test)</h2>
+            <div>
+                <h2>Scegli il tuo giocatore (Test)</h2>
+                <span style="font-size:11px; color:var(--accent-blue); font-weight:600;">👇 Tocca la scheda per acquistarlo</span>
+            </div>
             <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-arrow-rotate-left"></i> Ricomincia Test</button>
         </div>
         <div id="players" class="players-container"></div>
@@ -2429,7 +2416,10 @@ async function preparaEAvviaDraft() {
     
     document.getElementById("draft-panel").innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-            <h2>Scegli il tuo giocatore</h2>
+            <div>
+                <h2>Scegli il tuo giocatore</h2>
+                <span style="font-size:11px; color:var(--accent-blue); font-weight:600;">👇 Tocca la scheda per acquistarlo</span>
+            </div>
             <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-arrow-rotate-left"></i> Ricomincia Draft</button>
         </div>
         <div id="players" class="players-container"></div>
@@ -2473,7 +2463,10 @@ function annullaERicominciaDraft() {
 
         document.getElementById("draft-panel").innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                ${titleHtml}
+                <div>
+                    ${titleHtml}
+                    <span style="font-size:11px; color:var(--accent-blue); font-weight:600;">👇 Tocca la scheda per acquistarlo</span>
+                </div>
                 <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-arrow-rotate-left"></i> ${btnText}</button>
             </div>
             <div id="players" class="players-container"></div>
@@ -2617,15 +2610,17 @@ function renderPlayers() {
     five.forEach(p => {
         const card = document.createElement("div");
         card.className = `player-card ${p.ruolo}`;
+        
+        // La card intera diventa cliccabile per scegliere il giocatore
+        card.onclick = () => draft(p.nome);
 
         card.innerHTML = `
-            <div>
+            <div style="width: 100%;">
                 <div class="player-name">${p.nome}</div>
                 <div class="player-team">${p.squadra}</div>
                 <span class="player-role-label">${p.ruolo}</span>
-                <div class="valore-badge-draft">💰 ${p.valore}</div>
             </div>
-            <button class="draft-btn" onclick="draft('${p.nome.replace(/'/g, "\\'")}')">Scegli</button>
+            <div class="valore-badge-draft">💰 ${p.valore}</div>
         `;
         container.appendChild(card);
     });
