@@ -472,7 +472,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     margin-bottom: 12px;
 }
 
-/* 1. BOX CREDITI RETTANGOLARE DINAMICO IN ALTO */
+/* BOX CREDITI RETTANGOLARE DINAMICO IN ALTO */
 .dash-card-row.budget {
     backdrop-filter: blur(12px);
     border-radius: 14px;
@@ -547,7 +547,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     min-width: 75px;
 }
 
-/* 2. GRIGLIA 4 BOX RUOLI QUADRATI SOTTO I CREDITI */
+/* GRIGLIA 4 BOX RUOLI QUADRATI SOTTO I CREDITI */
 .roles-grid-container {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -633,10 +633,10 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     transition: width 0.3s ease;
 }
 
-/* CARD GIOCATORI DRAFT - 5 COLONNE FISSE COMPATTE E ULTRA-LEGGIBILI */
+/* CARD GIOCATORI DRAFT */
 .players-container {
     display: grid;
-    grid-template-columns: repeat(5, 1fr); /* Sempre 5 colonne visibili */
+    grid-template-columns: repeat(5, 1fr);
     gap: 3px;
     justify-content: center;
 }
@@ -659,7 +659,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     box-shadow: 0 4px 12px rgba(0,0,0,0.4);
     animation: fadeInUp 0.3s ease-out;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    min-height: 125px;
+    min-height: 130px;
 }
 
 .player-card:hover {
@@ -710,16 +710,17 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 .player-card.Centrocampista .player-role-label { color: var(--role-cen); }
 .player-card.Attaccante .player-role-label { color: var(--role-att); }
 
+/* VALORE IN CREDITI ULTERIORMENTE INGRANDITO */
 .valore-badge-draft {
     background: linear-gradient(135deg, #fbbf24, #f59e0b);
     color: #0f172a;
     font-weight: 900;
-    padding: 2px 4px;
-    border-radius: 4px;
-    font-size: 11px;
+    padding: 3px 6px;
+    border-radius: 5px;
+    font-size: 13px; /* Crediti ulteriormente ingranditi */
     display: inline-block;
-    margin: 2px 0;
-    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.4);
+    margin: 3px 0;
+    box-shadow: 0 2px 5px rgba(245, 158, 11, 0.4);
 }
 
 .draft-btn {
@@ -755,19 +756,20 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     align-items: center;
 }
 
+/* SLOT GIOCATORE NELLA ROSA (NOME INGRANDITO) */
 .slot {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 8px;
-    height: 34px;
+    height: 38px; /* Leggermente più alto per il font più grande */
     border-radius: 6px;
     margin: 3px 0;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     background: rgba(255,255,255,0.03);
     border: 1px solid var(--card-border);
-    font-size: 11px;
+    font-size: 13px; /* Nome giocatrice/giocatore ingrandito a 13px */
     transition: all 0.2s ease;
 }
 
@@ -849,7 +851,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     flex-wrap: wrap;
 }
 
-/* POSIZIONI IN CAMPO CON COLORI E NEON SPECIFICI PER RUOLO */
+/* POSIZIONI IN CAMPO */
 .pos {
     width: 22%;
     min-width: 65px;
@@ -1641,9 +1643,9 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 <!-- PAGINA PRINCIPALE DEL DRAFT -->
 <div id="main-app">
     <div id="left">
-        <!-- 1. DASHBOARD HEADER: CREDITI IN ALTO, 4 RUOLI QUADRATI SUBITO SOTTO -->
+        <!-- 1. DASHBOARD HEADER -->
         <div class="dashboard-header">
-            <!-- CREDITI RESIDUI (CON COLORI DINAMICI VERDE, GIALLO, ROSSO) -->
+            <!-- CREDITI RESIDUI -->
             <div class="dash-card-row budget high-credits" id="budget-card-row">
                 <div class="dash-card-left">
                     <i class="fa-solid fa-coins"></i>
@@ -1680,13 +1682,13 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             <div class="progress-bar-fill" id="progress-bar"></div>
         </div>
 
-        <!-- 2. CAMPO DA GIOCO (POSIZIONATO SOPRA LA ROSA PER IL MOBILE) -->
+        <!-- 2. CAMPO DA GIOCO -->
         <div class="panel" id="campo-panel-container" style="display: none;">
             <h2>Schieramento Titolari <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca sulle caselle per scegliere i giocatori)</span></h2>
             <div id="campo" class="campo-style"></div>
         </div>
 
-        <!-- 3. PANCHINA GRAFICA A SLOT (POSIZIONATA SOTTO IL CAMPO) -->
+        <!-- 3. PANCHINA GRAFICA A SLOT -->
         <div class="panel section-panchina" id="panchina-panel-container" style="display: none;">
             <h2><i class="fa-solid fa-couch" style="color: var(--accent-gold);"></i> Panchina Ufficiale <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(2 Riserve per Ruolo)</span></h2>
             <div id="panchina-grafica" class="panchina-container"></div>
@@ -1732,7 +1734,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     </div>
 
     <div id="right">
-        <!-- Spazio desktop aggiuntivo se necessario -->
+        <!-- Spazio desktop aggiuntivo -->
     </div>
 </div>
 
