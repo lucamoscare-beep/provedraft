@@ -60,10 +60,10 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes pulseGlow {
-    0% { box-shadow: 0 0 5px rgba(74, 222, 128, 0.4); }
-    100% { box-shadow: 0 0 18px rgba(74, 222, 128, 0.8); }
-}
+@keyframes pulseGlowPor { 0% { box-shadow: 0 0 4px rgba(251, 191, 36, 0.4); } 100% { box-shadow: 0 0 15px rgba(251, 191, 36, 0.8); } }
+@keyframes pulseGlowDif { 0% { box-shadow: 0 0 4px rgba(52, 211, 153, 0.4); } 100% { box-shadow: 0 0 15px rgba(52, 211, 153, 0.8); } }
+@keyframes pulseGlowCen { 0% { box-shadow: 0 0 4px rgba(56, 189, 248, 0.4); } 100% { box-shadow: 0 0 15px rgba(56, 189, 248, 0.8); } }
+@keyframes pulseGlowAtt { 0% { box-shadow: 0 0 4px rgba(248, 113, 113, 0.4); } 100% { box-shadow: 0 0 15px rgba(248, 113, 113, 0.8); } }
 
 /* NAVBAR GLOBALE */
 .global-header {
@@ -472,10 +472,8 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     margin-bottom: 12px;
 }
 
-/* 1. BOX CREDITI RETTANGOLARE IN ALTO */
+/* 1. BOX CREDITI RETTANGOLARE DINAMICO IN ALTO */
 .dash-card-row.budget {
-    background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(15, 23, 42, 0.85));
-    border: 2px solid var(--accent-gold);
     backdrop-filter: blur(12px);
     border-radius: 14px;
     padding: 12px 16px;
@@ -483,6 +481,38 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     align-items: center;
     justify-content: space-between;
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+}
+
+/* STATI COLORE CREDITI RESIDUI */
+.dash-card-row.budget.high-credits {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(15, 23, 42, 0.85));
+    border: 2px solid var(--accent-neon-green);
+}
+.dash-card-row.budget.high-credits i { color: var(--accent-neon-green); }
+.dash-card-row.budget.high-credits .dash-card-badge {
+    background: linear-gradient(135deg, var(--accent-neon-green), var(--accent-green));
+    color: #0f172a;
+}
+
+.dash-card-row.budget.medium-credits {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(15, 23, 42, 0.85));
+    border: 2px solid var(--accent-gold);
+}
+.dash-card-row.budget.medium-credits i { color: var(--accent-gold); }
+.dash-card-row.budget.medium-credits .dash-card-badge {
+    background: linear-gradient(135deg, var(--accent-gold), #d97706);
+    color: #0f172a;
+}
+
+.dash-card-row.budget.low-credits {
+    background: linear-gradient(135deg, rgba(248, 113, 113, 0.2), rgba(15, 23, 42, 0.85));
+    border: 2px solid var(--accent-red);
+}
+.dash-card-row.budget.low-credits i { color: var(--accent-red); }
+.dash-card-row.budget.low-credits .dash-card-badge {
+    background: linear-gradient(135deg, var(--accent-red), #dc2626);
+    color: #fff;
 }
 
 .dash-card-row.budget .dash-card-left {
@@ -493,7 +523,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 
 .dash-card-row.budget .dash-card-left i {
     font-size: 24px;
-    color: var(--accent-gold);
 }
 
 .dash-card-row.budget .title-text {
@@ -509,8 +538,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 }
 
 .dash-card-row.budget .dash-card-badge {
-    background: linear-gradient(135deg, var(--accent-gold), #d97706);
-    color: #0f172a;
     font-weight: 900;
     font-size: 20px;
     padding: 4px 16px;
@@ -821,13 +848,13 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     flex-wrap: wrap;
 }
 
+/* POSIZIONI IN CAMPO CON COLORI E NEON SPECIFICI PER RUOLO */
 .pos {
     width: 22%;
     min-width: 65px;
     max-width: 95px;
     height: 32px;
     background: rgba(15, 23, 42, 0.94);
-    border: 1.5px solid var(--accent-blue);
     border-radius: 6px;
     text-align: center;
     line-height: 30px;
@@ -845,24 +872,19 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 
 .pos:hover {
     transform: scale(1.06);
-    border-color: var(--accent-neon-green);
-    box-shadow: 0 0 12px rgba(74, 222, 128, 0.5);
 }
 
-.pos.filled {
-    border-color: var(--accent-neon-green);
-    background: rgba(15, 23, 42, 0.96);
-    animation: pulseGlow 2s infinite alternate;
-}
+.pos[data-ruolo="Portiere"] { border: 1.5px solid var(--role-por); color: var(--role-por); }
+.pos[data-ruolo="Portiere"].filled { border-color: var(--role-por); background: rgba(15, 23, 42, 0.96); color: #fff; animation: pulseGlowPor 2s infinite alternate; }
 
-.pos.bench-pos {
-    border-color: var(--accent-gold);
-}
+.pos[data-ruolo="Difensore"] { border: 1.5px solid var(--role-dif); color: var(--role-dif); }
+.pos[data-ruolo="Difensore"].filled { border-color: var(--role-dif); background: rgba(15, 23, 42, 0.96); color: #fff; animation: pulseGlowDif 2s infinite alternate; }
 
-.pos.bench-pos.filled {
-    border-color: var(--accent-gold);
-    box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
-}
+.pos[data-ruolo="Centrocampista"] { border: 1.5px solid var(--role-cen); color: var(--role-cen); }
+.pos[data-ruolo="Centrocampista"].filled { border-color: var(--role-cen); background: rgba(15, 23, 42, 0.96); color: #fff; animation: pulseGlowCen 2s infinite alternate; }
+
+.pos[data-ruolo="Attaccante"] { border: 1.5px solid var(--role-att); color: var(--role-att); }
+.pos[data-ruolo="Attaccante"].filled { border-color: var(--role-att); background: rgba(15, 23, 42, 0.96); color: #fff; animation: pulseGlowAtt 2s infinite alternate; }
 
 @media (min-width: 600px) {
     .campo-style { min-height: 550px; padding: 20px; }
@@ -943,7 +965,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
-/* MODALE SCELTA GIOCATORE CAMPO / PANCHINA */
+/* MODALE SCELTA GIOCATORE CON COLORI RUOLO */
 .custom-modal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
@@ -959,7 +981,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 
 .custom-modal-card {
     background: var(--card-bg);
-    border: 1px solid var(--card-border);
     border-radius: 16px;
     padding: 20px;
     width: 100%;
@@ -982,8 +1003,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 }
 
 .modal-player-item:hover {
-    background: rgba(16, 185, 129, 0.15);
-    border-color: var(--accent-neon-green);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 /* RECAP SCREEN */
@@ -1622,8 +1642,8 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     <div id="left">
         <!-- 1. DASHBOARD HEADER: CREDITI IN ALTO, 4 RUOLI QUADRATI SUBITO SOTTO -->
         <div class="dashboard-header">
-            <!-- CREDITI RESIDUI -->
-            <div class="dash-card-row budget">
+            <!-- CREDITI RESIDUI (CON COLORI DINAMICI VERDE, GIALLO, ROSSO) -->
+            <div class="dash-card-row budget high-credits" id="budget-card-row">
                 <div class="dash-card-left">
                     <i class="fa-solid fa-coins"></i>
                     <div>
@@ -1780,6 +1800,13 @@ const roleIcons = {
     Difensore: "fa-solid fa-shield-halved",
     Centrocampista: "fa-solid fa-person-running",
     Attaccante: "fa-solid fa-futbol"
+};
+
+const roleColors = {
+    Portiere: "var(--role-por)",
+    Difensore: "var(--role-dif)",
+    Centrocampista: "var(--role-cen)",
+    Attaccante: "var(--role-att)"
 };
 
 let userSquadre = []; 
@@ -2496,6 +2523,18 @@ function parseAndSetPlayers(data) {
 function updateDashboardCounters() {
     document.getElementById("budget-display").innerText = budget;
 
+    const budgetCard = document.getElementById("budget-card-row");
+    if (budgetCard) {
+        budgetCard.classList.remove("high-credits", "medium-credits", "low-credits");
+        if (budget >= 300) {
+            budgetCard.classList.add("high-credits");
+        } else if (budget >= 100) {
+            budgetCard.classList.add("medium-credits");
+        } else {
+            budgetCard.classList.add("low-credits");
+        }
+    }
+
     ["Portiere", "Difensore", "Centrocampista", "Attaccante"].forEach(r => {
         let count = rosa[r].length;
         let max = limits[r];
@@ -2682,6 +2721,8 @@ function apriModaleScelta(ruolo, targetType) {
         return;
     }
 
+    const colorRuolo = roleColors[ruolo];
+
     const overlay = document.createElement("div");
     overlay.className = "custom-modal-overlay";
     overlay.id = "selection-modal";
@@ -2689,8 +2730,8 @@ function apriModaleScelta(ruolo, targetType) {
     const titoloTarget = targetType === "campo" ? `Titolare (${ruolo})` : `Panchina R${targetType + 1} (${ruolo})`;
 
     let cardHtml = `
-        <div class="custom-modal-card">
-            <h3 style="color:var(--accent-neon-green); font-size:16px; margin-bottom:12px;">Seleziona ${titoloTarget}</h3>
+        <div class="custom-modal-card" style="border: 2px solid ${colorRuolo};">
+            <h3 style="color:${colorRuolo}; font-size:16px; margin-bottom:12px;">Seleziona ${titoloTarget}</h3>
             <div style="max-height: 250px; overflow-y: auto; text-align: left; margin-bottom: 12px;">
     `;
 
@@ -2703,7 +2744,7 @@ function apriModaleScelta(ruolo, targetType) {
         else if (isRiserva) statoLabel = `<span style="color:var(--accent-gold); font-size:10px;">🛋️ In Panchina</span>`;
 
         cardHtml += `
-            <div class="modal-player-item" onclick="assegnaGiocatoreDaModale('${p.nome.replace(/'/g, "\\'")}', '${ruolo}', '${targetType}')">
+            <div class="modal-player-item" style="border-left: 3px solid ${colorRuolo};" onclick="assegnaGiocatoreDaModale('${p.nome.replace(/'/g, "\\'")}', '${ruolo}', '${targetType}')">
                 <div>
                     <strong style="color:#fff; font-size:12px; display:block;">${p.nome}</strong>
                     <span style="font-size:10px; color:var(--text-muted);">${p.squadra}</span>
@@ -2883,14 +2924,13 @@ function renderPanchinaGrafica() {
             <div class="bench-slots-grid">
         `;
 
-        // 2 Slot per ogni ruolo esattamente come sul campo
         for (let i = 0; i < 2; i++) {
             const p = riserveRuolo[i];
             const isFilled = p !== undefined;
             const textDisplay = isFilled ? p.nome : `+ R${i+1}`;
 
             html += `
-                <div class="pos bench-pos ${isFilled ? 'filled' : ''}" onclick="apriModaleScelta('${ruolo}', ${i})">
+                <div class="pos bench-pos ${isFilled ? 'filled' : ''}" data-ruolo="${ruolo}" onclick="apriModaleScelta('${ruolo}', ${i})">
                     ${textDisplay}
                 </div>
             `;
