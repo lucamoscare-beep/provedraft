@@ -855,17 +855,26 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     animation: pulseGlow 2s infinite alternate;
 }
 
+.pos.bench-pos {
+    border-color: var(--accent-gold);
+}
+
+.pos.bench-pos.filled {
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+}
+
 @media (min-width: 600px) {
     .campo-style { min-height: 550px; padding: 20px; }
     .pos { width: 105px; height: 36px; line-height: 34px; font-size: 11px; }
     .reparto-campo { gap: 10px; }
 }
 
-/* PANCHINA GRAFICA */
+/* PANCHINA GRAFICA A SLOT */
 .panchina-container {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
     margin-top: 6px;
 }
 
@@ -873,7 +882,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     background: rgba(15, 23, 42, 0.6);
     border: 1px solid var(--card-border);
     border-radius: 8px;
-    padding: 6px 8px;
+    padding: 8px 10px;
 }
 
 .panchina-role-header {
@@ -881,50 +890,13 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     font-weight: 800;
     text-transform: uppercase;
     color: var(--text-muted);
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
 .bench-slots-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 6px;
-}
-
-.bench-card-slot {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px dashed rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    padding: 4px 6px;
-    min-height: 36px;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    cursor: pointer;
-    position: relative;
-    transition: all 0.2s ease;
-}
-
-.bench-card-slot:hover { background: rgba(255, 255, 255, 0.08); }
-
-.bench-card-slot.filled {
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
-    border: 1px solid var(--accent-blue);
-}
-
-.bench-order-badge {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    background: var(--accent-gold);
-    color: #000;
-    font-size: 8px;
-    font-weight: 900;
-    width: 15px;
-    height: 15px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    gap: 8px;
+    justify-content: flex-start;
 }
 
 .btn-action-primary {
@@ -971,7 +943,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
-/* MODALE SCELTA GIOCATORE CAMPO */
+/* MODALE SCELTA GIOCATORE CAMPO / PANCHINA */
 .custom-modal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
@@ -1650,7 +1622,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     <div id="left">
         <!-- 1. DASHBOARD HEADER: CREDITI IN ALTO, 4 RUOLI QUADRATI SUBITO SOTTO -->
         <div class="dashboard-header">
-            <!-- 1. CREDITI RESIDUI -->
+            <!-- CREDITI RESIDUI -->
             <div class="dash-card-row budget">
                 <div class="dash-card-left">
                     <i class="fa-solid fa-coins"></i>
@@ -1662,27 +1634,20 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
                 <div class="dash-card-badge" id="budget-display">600</div>
             </div>
 
-            <!-- 2. I 4 BOX RUOLI QUADRATI ALLINEATI -->
+            <!-- 4 BOX RUOLI QUADRATI -->
             <div class="roles-grid-container">
-                <!-- Portieri -->
                 <div class="role-square-box role-por">
                     <div class="role-name-txt">Portieri</div>
                     <div class="role-count-txt" id="count-box-Portiere">0/3</div>
                 </div>
-
-                <!-- Difensori -->
                 <div class="role-square-box role-dif">
                     <div class="role-name-txt">Difensori</div>
                     <div class="role-count-txt" id="count-box-Difensore">0/7</div>
                 </div>
-
-                <!-- Centrocampisti -->
                 <div class="role-square-box role-cen">
                     <div class="role-name-txt">Centroc.</div>
                     <div class="role-count-txt" id="count-box-Centrocampista">0/8</div>
                 </div>
-
-                <!-- Attaccanti -->
                 <div class="role-square-box role-att">
                     <div class="role-name-txt">Attaccanti</div>
                     <div class="role-count-txt" id="count-box-Attaccante">0/6</div>
@@ -1694,7 +1659,23 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             <div class="progress-bar-fill" id="progress-bar"></div>
         </div>
 
-        <!-- 3. SELEZIONE GIOCATORI DRAFT -->
+        <!-- 2. CAMPO DA GIOCO (POSIZIONATO SOPRA LA ROSA PER IL MOBILE) -->
+        <div class="panel" id="campo-panel-container" style="display: none;">
+            <h2>Schieramento Titolari <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca sulle caselle per scegliere i giocatori)</span></h2>
+            <div id="campo" class="campo-style"></div>
+        </div>
+
+        <!-- 3. PANCHINA GRAFICA A SLOT (POSIZIONATA SOTTO IL CAMPO) -->
+        <div class="panel section-panchina" id="panchina-panel-container" style="display: none;">
+            <h2><i class="fa-solid fa-couch" style="color: var(--accent-gold);"></i> Panchina Ufficiale <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(2 Riserve per Ruolo)</span></h2>
+            <div id="panchina-grafica" class="panchina-container"></div>
+
+            <div id="conferma-container" style="display: none; margin-top: 15px; text-align:center;">
+                <button id="btn-conferma-formazione" class="btn-action-primary" style="width:100%;" onclick="confermaFormazioneDefinitiva()">🔒 CONFERMA E SALVA FORMAZIONE (Consuma 1 Gettone)</button>
+            </div>
+        </div>
+
+        <!-- 4. SELEZIONE GIOCATORI DRAFT -->
         <div class="panel" id="draft-panel" style="display:block;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                 <h2 id="draft-main-heading">Scegli il tuo giocatore</h2>
@@ -1703,7 +1684,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             <div id="players" class="players-container"></div>
         </div>
 
-        <!-- 4. LA TUA ROSA CHE SI COMPLETA (NELLA COLONNA DI SINISTRA/UNICA SU MOBILE) -->
+        <!-- 5. LA TUA ROSA CHE SI COMPLETA -->
         <div class="panel section-rosa">
             <h2 id="current-draft-team-title">La Tua Rosa <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca per schierare)</span></h2>
 
@@ -1730,20 +1711,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     </div>
 
     <div id="right">
-        <!-- CAMPO E PANCHINA (Compaiono a fine draft per schieramento) -->
-        <div class="panel" id="campo-panel-container" style="display: none;">
-            <h2>Schieramento Titolari <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca sulle caselle per scegliere i giocatori)</span></h2>
-            <div id="campo" class="campo-style"></div>
-        </div>
-
-        <div class="panel section-panchina" id="panchina-panel-container" style="display: none;">
-            <h2><i class="fa-solid fa-couch" style="color: var(--accent-gold);"></i> Panchina Ufficiale</h2>
-            <div id="panchina-grafica" class="panchina-container"></div>
-
-            <div id="conferma-container" style="display: none; margin-top: 12px; text-align:center;">
-                <button id="btn-conferma-formazione" class="btn-action-primary" style="width:100%;" onclick="confermaFormazioneDefinitiva()">🔒 CONFERMA E SALVA FORMAZIONE (Consuma 1 Gettone)</button>
-            </div>
-        </div>
+        <!-- Spazio desktop aggiuntivo se necessario -->
     </div>
 </div>
 
@@ -2531,7 +2499,6 @@ function updateDashboardCounters() {
     ["Portiere", "Difensore", "Centrocampista", "Attaccante"].forEach(r => {
         let count = rosa[r].length;
         let max = limits[r];
-        // Mostra sempre Giocatori Acquistati / Max Totale (partendo da 0/3)
         document.getElementById(`count-box-${r}`).innerText = `${count}/${max}`;
     });
 }
@@ -2681,7 +2648,6 @@ function schieraGiocatoreDaLista(playerObj, ruolo) {
         schierati = schierati.filter(s => s.nome !== playerObj.nome);
     } else if (isBench) {
         riserveSelezionate[ruolo] = riserveSelezionate[ruolo].filter(r => r.nome !== playerObj.nome);
-        aggiungiTitolareAutomatico(playerObj, ruolo);
     } else {
         const [D, C, A] = moduloSelezionato.split("-").map(n => parseInt(n));
         const maxTitolariRuolo = ruolo === "Portiere" ? 1 : (ruolo === "Difensore" ? D : (ruolo === "Centrocampista" ? C : A));
@@ -2703,17 +2669,7 @@ function schieraGiocatoreDaLista(playerObj, ruolo) {
     renderPanchinaGrafica();
 }
 
-function aggiungiTitolareAutomatico(playerObj, ruolo) {
-    const [D, C, A] = moduloSelezionato.split("-").map(n => parseInt(n));
-    const maxTitolariRuolo = ruolo === "Portiere" ? 1 : (ruolo === "Difensore" ? D : (ruolo === "Centrocampista" ? C : A));
-    const titolariAttualiRuolo = schierati.filter(s => s.ruolo === ruolo).length;
-
-    if (titolariAttualiRuolo < maxTitolariRuolo) {
-        schierati.push(playerObj);
-    }
-}
-
-function apriModaleSceltaCampo(ruolo, slotIndex) {
+function apriModaleScelta(ruolo, targetType) {
     if (!isTestMode && new Date() >= MATCHDAY_DEADLINE) return;
     if (!moduloSelezionato) {
         alert("Scegli prima il modulo tattico");
@@ -2728,11 +2684,13 @@ function apriModaleSceltaCampo(ruolo, slotIndex) {
 
     const overlay = document.createElement("div");
     overlay.className = "custom-modal-overlay";
-    overlay.id = "campo-selection-modal";
+    overlay.id = "selection-modal";
+
+    const titoloTarget = targetType === "campo" ? `Titolare (${ruolo})` : `Panchina R${targetType + 1} (${ruolo})`;
 
     let cardHtml = `
         <div class="custom-modal-card">
-            <h3 style="color:var(--accent-neon-green); font-size:16px; margin-bottom:12px;">Seleziona ${ruolo} per il Campo</h3>
+            <h3 style="color:var(--accent-neon-green); font-size:16px; margin-bottom:12px;">Seleziona ${titoloTarget}</h3>
             <div style="max-height: 250px; overflow-y: auto; text-align: left; margin-bottom: 12px;">
     `;
 
@@ -2745,7 +2703,7 @@ function apriModaleSceltaCampo(ruolo, slotIndex) {
         else if (isRiserva) statoLabel = `<span style="color:var(--accent-gold); font-size:10px;">🛋️ In Panchina</span>`;
 
         cardHtml += `
-            <div class="modal-player-item" onclick="selezionaGiocatorePerCampo('${p.nome.replace(/'/g, "\\'")}', '${ruolo}')">
+            <div class="modal-player-item" onclick="assegnaGiocatoreDaModale('${p.nome.replace(/'/g, "\\'")}', '${ruolo}', '${targetType}')">
                 <div>
                     <strong style="color:#fff; font-size:12px; display:block;">${p.nome}</strong>
                     <span style="font-size:10px; color:var(--text-muted);">${p.squadra}</span>
@@ -2758,8 +2716,8 @@ function apriModaleSceltaCampo(ruolo, slotIndex) {
     cardHtml += `
             </div>
             <div style="display:flex; gap:8px;">
-                <button onclick="rimuoviDaSlotCampo('${ruolo}')" class="btn-action-danger" style="flex:1; padding:8px; font-size:11px;">Rimuovi Titolare</button>
-                <button onclick="chiudiModaleCampo()" class="btn-action-primary" style="flex:1; padding:8px; font-size:11px; background:rgba(51, 65, 85, 0.9);">Chiudi</button>
+                <button onclick="rimuoviSlotSelezionato('${ruolo}', '${targetType}')" class="btn-action-danger" style="flex:1; padding:8px; font-size:11px;">Rimuovi Giocatore</button>
+                <button onclick="chiudiModale()" class="btn-action-primary" style="flex:1; padding:8px; font-size:11px; background:rgba(51, 65, 85, 0.9);">Chiudi</button>
             </div>
         </div>
     `;
@@ -2768,33 +2726,49 @@ function apriModaleSceltaCampo(ruolo, slotIndex) {
     document.body.appendChild(overlay);
 }
 
-function chiudiModaleCampo() {
-    const modal = document.getElementById("campo-selection-modal");
+function chiudiModale() {
+    const modal = document.getElementById("selection-modal");
     if (modal) modal.remove();
 }
 
-function selezionaGiocatorePerCampo(nomeGiocatore, ruolo) {
+function assegnaGiocatoreDaModale(nomeGiocatore, ruolo, targetType) {
     const playerObj = rosa[ruolo].find(p => p.nome === nomeGiocatore);
     if (!playerObj) return;
 
     schierati = schierati.filter(s => s.nome !== playerObj.nome);
     riserveSelezionate[ruolo] = riserveSelezionate[ruolo].filter(r => r.nome !== playerObj.nome);
 
-    schierati.push(playerObj);
+    if (targetType === "campo") {
+        schierati.push(playerObj);
+    } else {
+        let index = parseInt(targetType);
+        if (riserveSelezionate[ruolo].length > index) {
+            riserveSelezionate[ruolo][index] = playerObj;
+        } else {
+            riserveSelezionate[ruolo].push(playerObj);
+        }
+    }
 
-    chiudiModaleCampo();
+    chiudiModale();
     ripristinaCampoTattico();
     renderSlots();
     renderPanchinaGrafica();
 }
 
-function rimuoviDaSlotCampo(ruolo) {
-    const titolariRuolo = schierati.filter(s => s.ruolo === ruolo);
-    if (titolariRuolo.length > 0) {
-        const daRimuovere = titolariRuolo[titolariRuolo.length - 1];
-        schierati = schierati.filter(s => s.nome !== daRimuovere.nome);
+function rimuoviSlotSelezionato(ruolo, targetType) {
+    if (targetType === "campo") {
+        const titolariRuolo = schierati.filter(s => s.ruolo === ruolo);
+        if (titolariRuolo.length > 0) {
+            const daRimuovere = titolariRuolo[titolariRuolo.length - 1];
+            schierati = schierati.filter(s => s.nome !== daRimuovere.nome);
+        }
+    } else {
+        let index = parseInt(targetType);
+        if (riserveSelezionate[ruolo][index]) {
+            riserveSelezionate[ruolo].splice(index, 1);
+        }
     }
-    chiudiModaleCampo();
+    chiudiModale();
     ripristinaCampoTattico();
     renderSlots();
     renderPanchinaGrafica();
@@ -2866,20 +2840,17 @@ function creaRepartoCampo(campoContainer, ruolo, countOrPlayers, isReadOnly = fa
         const dz = document.createElement("div");
         dz.className = "pos dropzone";
         dz.dataset.ruolo = ruolo;
-        dz.dataset.player = "";
 
         if (Array.isArray(countOrPlayers)) {
             const p = countOrPlayers[i];
             if (p) {
                 dz.innerText = p.nome;
-                dz.dataset.player = p.nome;
                 dz.classList.add("filled");
             }
         } else {
             const titolariRuolo = schierati.filter(s => s.ruolo === ruolo);
             if (titolariRuolo[i]) {
                 dz.innerText = titolariRuolo[i].nome;
-                dz.dataset.player = titolariRuolo[i].nome;
                 dz.classList.add("filled");
             } else {
                 dz.innerText = `+ ${ruolo.substring(0,3)}`;
@@ -2887,7 +2858,7 @@ function creaRepartoCampo(campoContainer, ruolo, countOrPlayers, isReadOnly = fa
         }
 
         if (!isReadOnly) {
-            dz.onclick = () => apriModaleSceltaCampo(ruolo, i);
+            dz.onclick = () => apriModaleScelta(ruolo, "campo");
         }
 
         reparto.appendChild(dz);
@@ -2903,8 +2874,7 @@ function renderPanchinaGrafica() {
         const group = document.createElement("div");
         group.className = "panchina-role-group";
 
-        const nonSchierati = rosa[ruolo].filter(p => !schierati.some(s => s.nome === p.nome));
-        const riserveRuolo = riserveSelezionate[ruolo];
+        const riserveRuolo = riserveSelezionate[ruolo] || [];
 
         let html = `
             <div class="panchina-role-header">
@@ -2913,49 +2883,23 @@ function renderPanchinaGrafica() {
             <div class="bench-slots-grid">
         `;
 
-        nonSchierati.forEach(p => {
-            let indexInBench = riserveRuolo.findIndex(r => r.nome === p.nome);
-            let isBench = indexInBench !== -1;
-            let badgeOrder = isBench ? `<span class="bench-order-badge">R${indexInBench + 1}</span>` : "";
+        // 2 Slot per ogni ruolo esattamente come sul campo
+        for (let i = 0; i < 2; i++) {
+            const p = riserveRuolo[i];
+            const isFilled = p !== undefined;
+            const textDisplay = isFilled ? p.nome : `+ R${i+1}`;
 
             html += `
-                <div class="bench-card-slot ${isBench ? 'filled' : ''}" onclick="togglePanchina('${ruolo}', '${p.nome.replace(/'/g, "\\'")}')">
-                    ${badgeOrder}
-                    <div style="font-size:10px; font-weight:700; color:#fff; width:100%; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.nome}</div>
+                <div class="pos bench-pos ${isFilled ? 'filled' : ''}" onclick="apriModaleScelta('${ruolo}', ${i})">
+                    ${textDisplay}
                 </div>
             `;
-        });
+        }
 
         html += `</div>`;
         group.innerHTML = html;
         container.appendChild(group);
     });
-}
-
-function togglePanchina(ruolo, nomePlayer) {
-    if (!isTestMode && new Date() >= MATCHDAY_DEADLINE) return;
-
-    if (!moduloSelezionato) {
-        alert("Scegli prima il modulo tattico");
-        return;
-    }
-
-    let pObj = rosa[ruolo].find(p => p.nome === nomePlayer);
-    if (!pObj) return;
-
-    let index = riserveSelezionate[ruolo].findIndex(r => r.nome === nomePlayer);
-
-    if (index !== -1) {
-        riserveSelezionate[ruolo].splice(index, 1);
-    } else {
-        if (riserveSelezionate[ruolo].length >= 2) {
-            return alert(`Puoi selezionare al massimo 2 riserve per il ruolo ${ruolo}!`);
-        }
-        riserveSelezionate[ruolo].push(pObj);
-    }
-
-    renderSlots();
-    renderPanchinaGrafica();
 }
 
 async function confermaFormazioneDefinitiva() {
