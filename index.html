@@ -467,7 +467,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     box-shadow: 0 8px 20px rgba(0,0,0,0.3);
 }
 
-/* DASHBOARD HEADER IN STILE "GETTONI" DELLA HOMEPAGE */
+/* DASHBOARD HEADER MODIFICATA */
 .dashboard-header {
     display: flex;
     flex-direction: column;
@@ -475,8 +475,10 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     margin-bottom: 12px;
 }
 
-.dash-card-row {
-    background: rgba(30, 41, 59, 0.85);
+/* 1. BOX CREDITI RETTANGOLARE IN ALTO */
+.dash-card-row.budget {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(15, 23, 42, 0.85));
+    border: 2px solid var(--accent-gold);
     backdrop-filter: blur(12px);
     border-radius: 14px;
     padding: 12px 16px;
@@ -486,29 +488,32 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
-.dash-card-left {
+.dash-card-row.budget .dash-card-left {
     display: flex;
     align-items: center;
     gap: 14px;
 }
 
-.dash-card-left i {
+.dash-card-row.budget .dash-card-left i {
     font-size: 24px;
+    color: var(--accent-gold);
 }
 
-.dash-card-text .title-text {
+.dash-card-row.budget .title-text {
     font-size: 12px;
     font-weight: 800;
     color: #fff;
     text-transform: uppercase;
 }
 
-.dash-card-text .sub-text {
+.dash-card-row.budget .sub-text {
     font-size: 10px;
     color: var(--text-muted);
 }
 
-.dash-card-badge {
+.dash-card-row.budget .dash-card-badge {
+    background: linear-gradient(135deg, var(--accent-gold), #d97706);
+    color: #0f172a;
     font-weight: 900;
     font-size: 20px;
     padding: 4px 16px;
@@ -518,56 +523,75 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     min-width: 75px;
 }
 
-/* STILI SPECIFICI PER I CARD GETTONI DEL DRAFT */
-.dash-card-row.budget {
-    border: 2px solid var(--accent-gold);
-    background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(15, 23, 42, 0.85));
-}
-.dash-card-row.budget i { color: var(--accent-gold); }
-.dash-card-row.budget .dash-card-badge {
-    background: linear-gradient(135deg, var(--accent-gold), #d97706);
-    color: #0f172a;
+/* 2. GRIGLIA 4 BOX RUOLI QUADRATI SOTTO I CREDITI */
+.roles-grid-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
 }
 
-.dash-card-row.role-por {
+.role-square-box {
+    aspect-ratio: 1 / 1;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.role-square-box .role-name-txt {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    line-height: 1.1;
+}
+
+.role-square-box .role-count-txt {
+    font-size: 18px;
+    font-weight: 900;
+    padding: 4px 8px;
+    border-radius: 8px;
+    line-height: 1;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+@media (min-width: 600px) {
+    .role-square-box .role-name-txt { font-size: 12px; }
+    .role-square-box .role-count-txt { font-size: 22px; padding: 6px 12px; }
+}
+
+/* COLORI SPECIFICI PER I 4 BOX RUOLI QUADRATI */
+.role-square-box.role-por {
     border: 2px solid var(--role-por);
-    background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(15, 23, 42, 0.85));
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.18), rgba(15, 23, 42, 0.9));
 }
-.dash-card-row.role-por i { color: var(--role-por); }
-.dash-card-row.role-por .dash-card-badge {
-    background: linear-gradient(135deg, var(--role-por), #d97706);
-    color: #0f172a;
-}
+.role-square-box.role-por .role-name-txt { color: var(--role-por); }
+.role-square-box.role-por .role-count-txt { background: linear-gradient(135deg, var(--role-por), #d97706); color: #0f172a; }
 
-.dash-card-row.role-dif {
+.role-square-box.role-dif {
     border: 2px solid var(--role-dif);
-    background: linear-gradient(135deg, rgba(52, 211, 153, 0.15), rgba(15, 23, 42, 0.85));
+    background: linear-gradient(135deg, rgba(52, 211, 153, 0.18), rgba(15, 23, 42, 0.9));
 }
-.dash-card-row.role-dif i { color: var(--role-dif); }
-.dash-card-row.role-dif .dash-card-badge {
-    background: linear-gradient(135deg, var(--role-dif), #059669);
-    color: #0f172a;
-}
+.role-square-box.role-dif .role-name-txt { color: var(--role-dif); }
+.role-square-box.role-dif .role-count-txt { background: linear-gradient(135deg, var(--role-dif), #059669); color: #0f172a; }
 
-.dash-card-row.role-cen {
+.role-square-box.role-cen {
     border: 2px solid var(--role-cen);
-    background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(15, 23, 42, 0.85));
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(15, 23, 42, 0.9));
 }
-.dash-card-row.role-cen i { color: var(--role-cen); }
-.dash-card-row.role-cen .dash-card-badge {
-    background: linear-gradient(135deg, var(--role-cen), #0284c7);
-    color: #0f172a;
-}
+.role-square-box.role-cen .role-name-txt { color: var(--role-cen); }
+.role-square-box.role-cen .role-count-txt { background: linear-gradient(135deg, var(--role-cen), #0284c7); color: #0f172a; }
 
-.dash-card-row.role-att {
+.role-square-box.role-att {
     border: 2px solid var(--role-att);
-    background: linear-gradient(135deg, rgba(248, 113, 113, 0.15), rgba(15, 23, 42, 0.85));
+    background: linear-gradient(135deg, rgba(248, 113, 113, 0.18), rgba(15, 23, 42, 0.9));
 }
-.dash-card-row.role-att i { color: var(--role-att); }
-.dash-card-row.role-att .dash-card-badge {
-    background: linear-gradient(135deg, var(--role-att), #dc2626);
-    color: #0f172a;
-}
+.role-square-box.role-att .role-name-txt { color: var(--role-att); }
+.role-square-box.role-att .role-count-txt { background: linear-gradient(135deg, var(--role-att), #dc2626); color: #0f172a; }
 
 .progress-bar-container {
     width: 100%;
@@ -1652,13 +1676,13 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     </div>
 
     <div id="right">
-        <!-- DASHBOARD CON CARD ORIZZONTALI IN STILE "GETTONI" -->
+        <!-- DASHBOARD HEADER: CREDITI SOPRA, 4 BOX RUOLI QUADRATI SOTTO -->
         <div class="dashboard-header">
-            <!-- 1. CREDITI RESIDUI -->
+            <!-- 1. CREDITI RESIDUI (RETTANGOLARE IN ALTO) -->
             <div class="dash-card-row budget">
                 <div class="dash-card-left">
                     <i class="fa-solid fa-coins"></i>
-                    <div class="dash-card-text">
+                    <div>
                         <div class="title-text">Crediti Residui</div>
                         <div class="sub-text">Budget disponibile per l'asta</div>
                     </div>
@@ -1666,52 +1690,31 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
                 <div class="dash-card-badge" id="budget-display">600</div>
             </div>
 
-            <!-- 2. PORTIERI -->
-            <div class="dash-card-row role-por">
-                <div class="dash-card-left">
-                    <i class="fa-solid fa-hand"></i>
-                    <div class="dash-card-text">
-                        <div class="title-text">Portieri Mancanti</div>
-                        <div class="sub-text">Completamento reparto</div>
-                    </div>
+            <!-- 2. I 4 BOX RUOLI QUADRATI TUTTI IN FILA -->
+            <div class="roles-grid-container">
+                <!-- Portieri -->
+                <div class="role-square-box role-por">
+                    <div class="role-name-txt">Portieri</div>
+                    <div class="role-count-txt" id="count-box-Portiere">0/3</div>
                 </div>
-                <div class="dash-card-badge" id="count-box-Portiere">0/3</div>
-            </div>
 
-            <!-- 3. DIFENSORI -->
-            <div class="dash-card-row role-dif">
-                <div class="dash-card-left">
-                    <i class="fa-solid fa-shield-halved"></i>
-                    <div class="dash-card-text">
-                        <div class="title-text">Difensori Mancanti</div>
-                        <div class="sub-text">Completamento reparto</div>
-                    </div>
+                <!-- Difensori -->
+                <div class="role-square-box role-dif">
+                    <div class="role-name-txt">Difensori</div>
+                    <div class="role-count-txt" id="count-box-Difensore">0/7</div>
                 </div>
-                <div class="dash-card-badge" id="count-box-Difensore">0/7</div>
-            </div>
 
-            <!-- 4. CENTROCAMPISTI -->
-            <div class="dash-card-row role-cen">
-                <div class="dash-card-left">
-                    <i class="fa-solid fa-person-running"></i>
-                    <div class="dash-card-text">
-                        <div class="title-text">Centrocampisti Mancanti</div>
-                        <div class="sub-text">Completamento reparto</div>
-                    </div>
+                <!-- Centrocampisti -->
+                <div class="role-square-box role-cen">
+                    <div class="role-name-txt">Centroc.</div>
+                    <div class="role-count-txt" id="count-box-Centrocampista">0/8</div>
                 </div>
-                <div class="dash-card-badge" id="count-box-Centrocampista">0/8</div>
-            </div>
 
-            <!-- 5. ATTACCANTI -->
-            <div class="dash-card-row role-att">
-                <div class="dash-card-left">
-                    <i class="fa-solid fa-futbol"></i>
-                    <div class="dash-card-text">
-                        <div class="title-text">Attaccanti Mancanti</div>
-                        <div class="sub-text">Completamento reparto</div>
-                    </div>
+                <!-- Attaccanti -->
+                <div class="role-square-box role-att">
+                    <div class="role-name-txt">Attaccanti</div>
+                    <div class="role-count-txt" id="count-box-Attaccante">0/6</div>
                 </div>
-                <div class="dash-card-badge" id="count-box-Attaccante">0/6</div>
             </div>
         </div>
 
@@ -2530,7 +2533,8 @@ function updateDashboardCounters() {
         let count = rosa[r].length;
         let max = limits[r];
         let mancano = max - count;
-        document.getElementById(`count-box-${r}`).innerText = `${count}/${max} (${mancano} mancanti)`;
+        // Aggiorna mostrando direttamente quanti ne mancano (es. 0/3)
+        document.getElementById(`count-box-${r}`).innerText = `${mancano}/${max}`;
     });
 }
 
