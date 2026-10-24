@@ -714,14 +714,18 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 .player-card.Centrocampista .player-role-label { color: var(--role-cen); }
 .player-card.Attaccante .player-role-label { color: var(--role-att); }
 
+/* DIMENSIONE FISSA UNIFORME PER I CREDITI */
 .valore-badge-draft {
     background: linear-gradient(135deg, #fbbf24, #f59e0b);
     color: #0f172a;
     font-weight: 900;
-    padding: 4px 8px;
     border-radius: 6px;
-    font-size: 14px;
-    display: inline-block;
+    font-size: 13px;
+    width: 62px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin-top: 2px;
     box-shadow: 0 2px 6px rgba(245, 158, 11, 0.4);
 }
@@ -2561,21 +2565,29 @@ function renderPlayers() {
     container.innerHTML = "";
 
     let totalAcquistati = Object.values(rosa).reduce((acc, curr) => acc + curr.length, 0);
-    let maxCostAllowed = budget - (24 - totalAcquistati - 1);
+    let giocatoriMancanti = 24 - totalAcquistati;
+    
+    // Riserva di sicurezza: assicura che dopo questo acquisto rimanga almeno 1 credito per ciascuno dei giocatori rimanenti
+    let maxCostAllowed = budget - (giocatoriMancanti - 1);
 
+    // 1. Filtra solo i giocatori i cui ruoli NON hanno raggiunto il limite E che l'utente può permettersi
     let candidates = availablePlayers.filter(p => rosa[p.ruolo].length < limits[p.ruolo] && p.valore <= maxCostAllowed);
-    if (candidates.length === 0) candidates = availablePlayers.filter(p => p.valore <= maxCostAllowed);
+
+    // Se per qualche motivo il budget è risicato, trova i più economici tra i ruoli ancora necessari
+    if (candidates.length === 0) {
+        candidates = availablePlayers.filter(p => rosa[p.ruolo].length < limits[p.ruolo]);
+    }
 
     if (candidates.length === 0) {
-        alert(`Nessun giocatore disponibile rientra nel budget residuo!`);
+        alert(`Attenzione: Impossibile trovare giocatori compatibili con il budget residuo!`);
         showModuloSelection();
         return;
     }
 
-    let ruoliDisponibili = new Set(candidates.map(p => p.ruolo));
+    let ruoliNecessari = Object.keys(limits).filter(r => rosa[r].length < limits[r]);
     let five = [];
 
-    if (ruoliDisponibili.size > 1) {
+    if (ruoliNecessari.length > 1) {
         let tentativi = 0;
         while (five.length < 5 && tentativi < 100) {
             tentativi++;
@@ -2611,7 +2623,7 @@ function renderPlayers() {
         const card = document.createElement("div");
         card.className = `player-card ${p.ruolo}`;
         
-        // La card intera diventa cliccabile per scegliere il giocatore
+        // Cliccando in qualsiasi punto del boxino si acquista il giocatore
         card.onclick = () => draft(p.nome);
 
         card.innerHTML = `
@@ -2633,7 +2645,18 @@ function draft(nome) {
     }
 
     const p = availablePlayers.find(x => x.nome === nome);
-    if (!p || p.valore > budget) return;
+    if (!p) return;
+
+    // Controllo ferreo sui limiti prima dell'acquisto
+    if (rosa[p.ruolo].length >= limits[p.ruolo]) {
+        alert(`Hai già raggiunto il limite massimo di ${limits[p.ruolo]} giocatori per il ruolo ${p.ruolo}!`);
+        return;
+    }
+
+    if (p.valore > budget) {
+        alert(`Non hai abbastanza crediti per acquistare ${p.nome}! Budget residuo: ${budget}`);
+        return;
+    }
 
     budget -= p.valore;
     rosa[p.ruolo].push(p);
