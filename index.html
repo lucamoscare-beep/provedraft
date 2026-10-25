@@ -633,7 +633,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     transition: width 0.3s ease;
 }
 
-/* CARD GIOCATORI DRAFT INTERAMENTE CLICCABILI */
+/* SELEZIONE GIOCATORI DRAFT (Griglia originale a 5 box invariata) */
 .players-container {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -730,31 +730,84 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     box-shadow: 0 2px 6px rgba(245, 158, 11, 0.4);
 }
 
-.role-title {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--text-muted);
-    margin: 10px 0 4px 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+/* LA TUA ROSA IN 4 COLONNE SEPARATE CON TRASPARENZA */
+.rosa-columns-container {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 10px;
+    margin-top: 10px;
 }
 
-/* SLOT GIOCATORE NELLA ROSA (NOME INGRANDITO) */
+@media (min-width: 650px) {
+    .rosa-columns-container {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+    }
+}
+
+.rosa-role-column {
+    border-radius: 12px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 180px;
+}
+
+/* Sfondi e bordi trasparenti per le 4 colonne della rosa */
+.rosa-role-column.Portiere {
+    background: rgba(251, 191, 36, 0.08);
+    border: 1.5px solid rgba(251, 191, 36, 0.35);
+}
+.rosa-role-column.Difensore {
+    background: rgba(52, 211, 153, 0.08);
+    border: 1.5px solid rgba(52, 211, 153, 0.35);
+}
+.rosa-role-column.Centrocampista {
+    background: rgba(56, 189, 248, 0.08);
+    border: 1.5px solid rgba(56, 189, 248, 0.35);
+}
+.rosa-role-column.Attaccante {
+    background: rgba(248, 113, 113, 0.08);
+    border: 1.5px solid rgba(248, 113, 113, 0.35);
+}
+
+.rosa-col-title {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    text-align: center;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+.rosa-role-column.Portiere .rosa-col-title { color: var(--role-por); }
+.rosa-role-column.Difensore .rosa-col-title { color: var(--role-dif); }
+.rosa-role-column.Centrocampista .rosa-col-title { color: var(--role-cen); }
+.rosa-role-column.Attaccante .rosa-col-title { color: var(--role-att); }
+
+.rosa-col-items {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+}
+
+/* SLOT GIOCATORE NELLA ROSA (Compatto e pulito) */
 .slot {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 8px;
-    height: 38px;
+    padding: 6px 8px;
     border-radius: 6px;
-    margin: 3px 0;
     font-weight: 700;
     cursor: pointer;
-    background: rgba(255,255,255,0.03);
+    background: rgba(15, 23, 42, 0.6);
     border: 1px solid var(--card-border);
-    font-size: 13px;
+    font-size: 11px;
     transition: all 0.2s ease;
 }
 
@@ -763,10 +816,10 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     border-color: var(--accent-blue);
 }
 
-.slot.Portiere { border-left: 3px solid var(--role-por); }
-.slot.Difensore { border-left: 3px solid var(--role-dif); }
-.slot.Centrocampista { border-left: 3px solid var(--role-cen); }
-.slot.Attaccante { border-left: 3px solid var(--role-att); }
+.slot.Portiere { border-left: 3px solid var(--role-por); color: #fff; }
+.slot.Difensore { border-left: 3px solid var(--role-dif); color: #fff; }
+.slot.Centrocampista { border-left: 3px solid var(--role-cen); color: #fff; }
+.slot.Attaccante { border-left: 3px solid var(--role-att); color: #fff; }
 
 .slot.schierato {
     opacity: 0.55;
@@ -775,10 +828,10 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 }
 
 .slot-tag {
-    font-size: 9px;
+    font-size: 8px;
     font-weight: 800;
-    padding: 2px 6px;
-    border-radius: 4px;
+    padding: 1px 4px;
+    border-radius: 3px;
     text-transform: uppercase;
 }
 .slot-tag.campo { background: rgba(16, 185, 129, 0.25); color: var(--accent-neon-green); border: 1px solid var(--accent-green); }
@@ -1683,7 +1736,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             </div>
         </div>
 
-        <!-- 4. SELEZIONE GIOCATORI DRAFT -->
+        <!-- 4. SELEZIONE GIOCATORI DRAFT (5 box in orizzontale) -->
         <div class="panel" id="draft-panel" style="display:block;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                 <div>
@@ -1695,29 +1748,32 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             <div id="players" class="players-container"></div>
         </div>
 
-        <!-- 5. LA TUA ROSA CHE SI COMPLETA -->
+        <!-- 5. LA TUA ROSA IN 4 COLONNE SEPARATE -->
         <div class="panel section-rosa">
             <h2 id="current-draft-team-title">La Tua Rosa <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca per schierare)</span></h2>
 
-            <div class="role-title">
-                <span><i class="fa-solid fa-hand" style="color: var(--role-por);"></i> Portieri</span>
+            <div class="rosa-columns-container">
+                <!-- Colonna Portieri -->
+                <div class="rosa-role-column Portiere">
+                    <div class="rosa-col-title"><i class="fa-solid fa-hand"></i> Portieri (<span id="count-rosa-Portiere">0</span>/3)</div>
+                    <div class="rosa-col-items" id="slot-Portiere"></div>
+                </div>
+                <!-- Colonna Difensori -->
+                <div class="rosa-role-column Difensore">
+                    <div class="rosa-col-title"><i class="fa-solid fa-shield-halved"></i> Difensori (<span id="count-rosa-Difensore">0</span>/7)</div>
+                    <div class="rosa-col-items" id="slot-Difensore"></div>
+                </div>
+                <!-- Colonna Centrocampisti -->
+                <div class="rosa-role-column Centrocampista">
+                    <div class="rosa-col-title"><i class="fa-solid fa-person-running"></i> Centrocampisti (<span id="count-rosa-Centrocampista">0</span>/8)</div>
+                    <div class="rosa-col-items" id="slot-Centrocampista"></div>
+                </div>
+                <!-- Colonna Attaccanti -->
+                <div class="rosa-role-column Attaccante">
+                    <div class="rosa-col-title"><i class="fa-solid fa-futbol"></i> Attaccanti (<span id="count-rosa-Attaccante">0</span>/6)</div>
+                    <div class="rosa-col-items" id="slot-Attaccante"></div>
+                </div>
             </div>
-            <div id="slot-Portiere"></div>
-
-            <div class="role-title">
-                <span><i class="fa-solid fa-shield-halved" style="color: var(--role-dif);"></i> Difensori</span>
-            </div>
-            <div id="slot-Difensore"></div>
-
-            <div class="role-title">
-                <span><i class="fa-solid fa-person-running" style="color: var(--role-cen);"></i> Centrocampisti</span>
-            </div>
-            <div id="slot-Centrocampista"></div>
-
-            <div class="role-title">
-                <span><i class="fa-solid fa-futbol" style="color: var(--role-att);"></i> Attaccanti</span>
-            </div>
-            <div id="slot-Attaccante"></div>
         </div>
     </div>
 
@@ -2566,14 +2622,9 @@ function renderPlayers() {
 
     let totalAcquistati = Object.values(rosa).reduce((acc, curr) => acc + curr.length, 0);
     let giocatoriMancanti = 24 - totalAcquistati;
-    
-    // Riserva di sicurezza: assicura che dopo questo acquisto rimanga almeno 1 credito per ciascuno dei giocatori rimanenti
     let maxCostAllowed = budget - (giocatoriMancanti - 1);
 
-    // 1. Filtra solo i giocatori i cui ruoli NON hanno raggiunto il limite E che l'utente può permettersi
     let candidates = availablePlayers.filter(p => rosa[p.ruolo].length < limits[p.ruolo] && p.valore <= maxCostAllowed);
-
-    // Se per qualche motivo il budget è risicato, trova i più economici tra i ruoli ancora necessari
     if (candidates.length === 0) {
         candidates = availablePlayers.filter(p => rosa[p.ruolo].length < limits[p.ruolo]);
     }
@@ -2622,8 +2673,6 @@ function renderPlayers() {
     five.forEach(p => {
         const card = document.createElement("div");
         card.className = `player-card ${p.ruolo}`;
-        
-        // Cliccando in qualsiasi punto del boxino si acquista il giocatore
         card.onclick = () => draft(p.nome);
 
         card.innerHTML = `
@@ -2647,7 +2696,6 @@ function draft(nome) {
     const p = availablePlayers.find(x => x.nome === nome);
     if (!p) return;
 
-    // Controllo ferreo sui limiti prima dell'acquisto
     if (rosa[p.ruolo].length >= limits[p.ruolo]) {
         alert(`Hai già raggiunto il limite massimo di ${limits[p.ruolo]} giocatori per il ruolo ${p.ruolo}!`);
         return;
@@ -2669,7 +2717,16 @@ function draft(nome) {
 function renderSlots() {
     ["Portiere","Difensore","Centrocampista","Attaccante"].forEach(ruolo => {
         const div = document.getElementById("slot-" + ruolo);
+        const countSpan = document.getElementById("count-rosa-" + ruolo);
+        
         div.innerHTML = "";
+        countSpan.innerText = rosa[ruolo].length;
+
+        if (rosa[ruolo].length === 0) {
+            div.innerHTML = `<div style="font-size:10px; color:var(--text-muted); text-align:center; padding:10px 0; font-style:italic;">Nessun giocatore</div>`;
+            return;
+        }
+
         rosa[ruolo].forEach(p => {
             const isTit = schierati.some(s => s.nome === p.nome);
             const isBench = riserveSelezionate[ruolo].some(r => r.nome === p.nome);
@@ -2683,10 +2740,8 @@ function renderSlots() {
 
             slot.className = `slot ${ruolo} ${statusClass}`;
             slot.innerHTML = `
-                <span><i class="${roleIcons[ruolo]}"></i> ${p.nome}</span>
-                <div>
-                    ${tagStatus}
-                </div>
+                <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><i class="${roleIcons[ruolo]}"></i> ${p.nome}</span>
+                <div>${tagStatus}</div>
             `;
             slot.onclick = () => schieraGiocatoreDaLista(p, ruolo);
             div.appendChild(slot);
