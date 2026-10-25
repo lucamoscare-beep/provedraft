@@ -747,67 +747,67 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     .valore-badge-draft { font-size: 13px; width: 62px; height: 24px; }
 }
 
-/* LA TUA ROSA IN 4 COLONNE FISSE (Anche su mobile) */
+/* LA TUA ROSA: 2 COLONNE SU MOBILE (2X2), 4 COLONNE SU DESKTOP */
 .rosa-columns-container {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 4px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
     margin-top: 8px;
 }
 
-@media (min-width: 600px) {
+@media (min-width: 768px) {
     .rosa-columns-container {
-        gap: 8px;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
     }
 }
 
 .rosa-role-column {
-    border-radius: 8px;
-    padding: 4px;
+    border-radius: 10px;
+    padding: 8px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    min-height: 150px;
+    gap: 6px;
+    min-height: 160px;
 }
 
-@media (min-width: 600px) {
-    .rosa-role-column { border-radius: 12px; padding: 8px; gap: 6px; min-height: 180px; }
+@media (min-width: 768px) {
+    .rosa-role-column { border-radius: 12px; padding: 10px; gap: 8px; min-height: 180px; }
 }
 
-/* Sfondi e bordi trasparenti per le 4 colonne della rosa */
+/* Sfondi e bordi trasparenti per le colonne della rosa */
 .rosa-role-column.Portiere {
     background: rgba(251, 191, 36, 0.08);
-    border: 1px solid rgba(251, 191, 36, 0.35);
+    border: 1.5px solid rgba(251, 191, 36, 0.35);
 }
 .rosa-role-column.Difensore {
     background: rgba(52, 211, 153, 0.08);
-    border: 1px solid rgba(52, 211, 153, 0.35);
+    border: 1.5px solid rgba(52, 211, 153, 0.35);
 }
 .rosa-role-column.Centrocampista {
     background: rgba(56, 189, 248, 0.08);
-    border: 1px solid rgba(56, 189, 248, 0.35);
+    border: 1.5px solid rgba(56, 189, 248, 0.35);
 }
 .rosa-role-column.Attaccante {
     background: rgba(248, 113, 113, 0.08);
-    border: 1px solid rgba(248, 113, 113, 0.35);
+    border: 1.5px solid rgba(248, 113, 113, 0.35);
 }
 
 .rosa-col-title {
-    font-size: 8px;
+    font-size: 10px;
     font-weight: 800;
     text-transform: uppercase;
     text-align: center;
-    padding-bottom: 3px;
+    padding-bottom: 4px;
     border-bottom: 1px solid rgba(255,255,255,0.1);
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
+    gap: 6px;
 }
 
-@media (min-width: 600px) {
-    .rosa-col-title { font-size: 11px; flex-direction: row; gap: 6px; padding-bottom: 4px; }
+@media (min-width: 768px) {
+    .rosa-col-title { font-size: 11px; padding-bottom: 6px; }
 }
 
 .rosa-role-column.Portiere .rosa-col-title { color: var(--role-por); }
@@ -818,27 +818,27 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 .rosa-col-items {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 5px;
     flex: 1;
 }
 
-/* SLOT GIOCATORE NELLA ROSA (Compatto per stare in 4 colonne strette) */
+/* SLOT GIOCATORE NELLA ROSA */
 .slot {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 4px 5px;
-    border-radius: 4px;
+    padding: 6px 8px;
+    border-radius: 6px;
     font-weight: 700;
     cursor: pointer;
-    background: rgba(15, 23, 42, 0.7);
+    background: rgba(15, 23, 42, 0.75);
     border: 1px solid var(--card-border);
-    font-size: 9px;
+    font-size: 10px;
     transition: all 0.2s ease;
 }
 
-@media (min-width: 600px) {
-    .slot { padding: 6px 8px; border-radius: 6px; font-size: 11px; }
+@media (min-width: 768px) {
+    .slot { padding: 6px 10px; font-size: 11px; }
 }
 
 .slot:hover {
@@ -846,17 +846,10 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     border-color: var(--accent-blue);
 }
 
-.slot.Portiere { border-left: 2px solid var(--role-por); color: #fff; }
-.slot.Difensore { border-left: 2px solid var(--role-dif); color: #fff; }
-.slot.Centrocampista { border-left: 2px solid var(--role-cen); color: #fff; }
-.slot.Attaccante { border-left: 2px solid var(--role-att); color: #fff; }
-
-@media (min-width: 600px) {
-    .slot.Portiere { border-left-width: 3px; }
-    .slot.Difensore { border-left-width: 3px; }
-    .slot.Centrocampista { border-left-width: 3px; }
-    .slot.Attaccante { border-left-width: 3px; }
-}
+.slot.Portiere { border-left: 3px solid var(--role-por); color: #fff; }
+.slot.Difensore { border-left: 3px solid var(--role-dif); color: #fff; }
+.slot.Centrocampista { border-left: 3px solid var(--role-cen); color: #fff; }
+.slot.Attaccante { border-left: 3px solid var(--role-att); color: #fff; }
 
 .slot.schierato {
     opacity: 0.55;
@@ -865,15 +858,11 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 }
 
 .slot-tag {
-    font-size: 7px;
+    font-size: 8px;
     font-weight: 800;
-    padding: 1px 3px;
-    border-radius: 2px;
+    padding: 1px 4px;
+    border-radius: 3px;
     text-transform: uppercase;
-}
-
-@media (min-width: 600px) {
-    .slot-tag { font-size: 8px; padding: 1px 4px; border-radius: 3px; }
 }
 
 .slot-tag.campo { background: rgba(16, 185, 129, 0.25); color: var(--accent-neon-green); border: 1px solid var(--accent-green); }
@@ -1790,7 +1779,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             <div id="players" class="players-container"></div>
         </div>
 
-        <!-- 5. LA TUA ROSA IN 4 COLONNE FISSE (Fisse anche su mobile) -->
+        <!-- 5. LA TUA ROSA (2x2 su mobile, 4 colonne su desktop) -->
         <div class="panel section-rosa">
             <h2 id="current-draft-team-title">La Tua Rosa <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca per schierare)</span></h2>
 
