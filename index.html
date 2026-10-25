@@ -354,10 +354,9 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 
 .team-card-item:hover { transform: translateY(-2px); border-color: var(--accent-blue); }
 
-/* STILE OTTIMIZZATO PER IL NOME SQUADRA E IL BOTTONE NELLE CARD HOME */
 .team-card-info {
     flex: 1;
-    min-width: 0; /* Fondamentale per far funzionare correttamente il troncamento con ellissi in flexbox */
+    min-width: 0;
 }
 
 .team-card-name {
@@ -505,27 +504,44 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     }
 }
 
-/* Su MOBILE usiamo flexbox e order per mettere Campo/Panchina prima della Rosa */
+/* SPOSTAMENTO ORDINE ESCLUSIVAMENTE SU MOBILE */
 .desktop-col-left {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    order: 1; /* 1. In cima su mobile: Crediti, Ruoli e Scelta Giocatori */
 }
 
 .desktop-col-right {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    order: 1; /* Su mobile va prima della rosa */
+    order: 2; /* 2. Sotto i giocatori su mobile: Campo e Panchina */
 }
 
 .section-rosa {
-    order: 2; /* Su mobile va sotto il campo */
+    order: 3; /* 3. Sotto il campo su mobile: Le tue Rose */
+}
+
+.bottom-actions-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+    width: 100%;
+    grid-column: 1 / -1; 
+    order: 4; /* 4. In fondo su mobile: Pulsanti salver/cancella */
 }
 
 @media (min-width: 1024px) {
+    .desktop-col-left { order: unset; }
     .desktop-col-right { order: unset; }
     .section-rosa { order: unset; }
+    .bottom-actions-container {
+        flex-direction: row;
+        justify-content: space-between;
+        order: unset;
+    }
 }
 
 .panel {
@@ -1065,25 +1081,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     display: flex;
     gap: 8px;
     justify-content: flex-start;
-}
-
-/* SEZIONE PULSANTI FINALI IN BASSO */
-.bottom-actions-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 15px;
-    width: 100%;
-    grid-column: 1 / -1; 
-    order: 3; /* Su mobile va dopo la rosa */
-}
-
-@media (min-width: 1024px) {
-    .bottom-actions-container {
-        flex-direction: row;
-        justify-content: space-between;
-        order: unset;
-    }
 }
 
 .btn-action-primary {
@@ -1808,7 +1805,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 <!-- PAGINA PRINCIPALE DEL DRAFT -->
 <div id="main-app">
     <div class="desktop-layout-grid">
-        <!-- COLONNA SINISTRA (o Blocco Superiore su Mobile) -->
+        <!-- COLONNA SINISTRA (o Blocco Superiore su Mobile: Crediti, Ruoli e Scelta Giocatori) -->
         <div class="desktop-col-left">
             <!-- 1. DASHBOARD HEADER (Crediti + 4 Box Ruoli) -->
             <div class="dashboard-header">
@@ -1860,48 +1857,48 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
                 </div>
                 <div id="players" class="players-container"></div>
             </div>
-
-            <!-- 3. LA TUA ROSA (Su mobile posizionata sotto il campo) -->
-            <div class="panel section-rosa">
-                <h2 id="current-draft-team-title">La Tua Rosa <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca per schierare)</span></h2>
-
-                <div class="rosa-columns-container">
-                    <!-- Colonna Portieri -->
-                    <div class="rosa-role-column Portiere">
-                        <div class="rosa-col-title"><i class="fa-solid fa-hand"></i> <span>Portieri (<span id="count-rosa-Portiere">0</span>/3)</span></div>
-                        <div class="rosa-col-items" id="slot-Portiere"></div>
-                    </div>
-                    <!-- Colonna Difensori -->
-                    <div class="rosa-role-column Difensore">
-                        <div class="rosa-col-title"><i class="fa-solid fa-shield-halved"></i> <span>Difensori (<span id="count-rosa-Difensore">0</span>/7)</span></div>
-                        <div class="rosa-col-items" id="slot-Difensore"></div>
-                    </div>
-                    <!-- Colonna Centrocampisti -->
-                    <div class="rosa-role-column Centrocampista">
-                        <div class="rosa-col-title"><i class="fa-solid fa-person-running"></i> <span>Centroc. (<span id="count-rosa-Centrocampista">0</span>/8)</span></div>
-                        <div class="rosa-col-items" id="slot-Centrocampista"></div>
-                    </div>
-                    <!-- Colonna Attaccanti -->
-                    <div class="rosa-role-column Attaccante">
-                        <div class="rosa-col-title"><i class="fa-solid fa-futbol"></i> <span>Attaccanti (<span id="count-rosa-Attaccante">0</span>/6)</span></div>
-                        <div class="rosa-col-items" id="slot-Attaccante"></div>
-                    </div>
-                </div>
-            </div>
         </div>
 
-        <!-- COLONNA DESTRA (Su mobile posizionata prima della rosa grazie a order: 1) -->
+        <!-- COLONNA DESTRA (o Secondo Blocco su Mobile: Campo e Panchina) -->
         <div class="desktop-col-right">
-            <!-- 4. CAMPO DA GIOCO -->
+            <!-- 3. CAMPO DA GIOCO -->
             <div class="panel" id="campo-panel-container" style="display: none;">
                 <h2>Schieramento Titolari <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca sulle caselle)</span></h2>
                 <div id="campo" class="campo-style"></div>
             </div>
 
-            <!-- 5. PANCHINA GRAFICA A SLOT -->
+            <!-- 4. PANCHINA GRAFICA A SLOT -->
             <div class="panel section-panchina" id="panchina-panel-container" style="display: none;">
                 <h2><i class="fa-solid fa-couch" style="color: var(--accent-gold);"></i> Panchina Ufficiale <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(2 Riserve per Ruolo)</span></h2>
                 <div id="panchina-grafica" class="panchina-container"></div>
+            </div>
+        </div>
+
+        <!-- 5. LA TUA ROSA (Sotto il campo su mobile) -->
+        <div class="panel section-rosa">
+            <h2 id="current-draft-team-title">La Tua Rosa <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca per schierare)</span></h2>
+
+            <div class="rosa-columns-container">
+                <!-- Colonna Portieri -->
+                <div class="rosa-role-column Portiere">
+                    <div class="rosa-col-title"><i class="fa-solid fa-hand"></i> <span>Portieri (<span id="count-rosa-Portiere">0</span>/3)</span></div>
+                    <div class="rosa-col-items" id="slot-Portiere"></div>
+                </div>
+                <!-- Colonna Difensori -->
+                <div class="rosa-role-column Difensore">
+                    <div class="rosa-col-title"><i class="fa-solid fa-shield-halved"></i> <span>Difensori (<span id="count-rosa-Difensore">0</span>/7)</span></div>
+                    <div class="rosa-col-items" id="slot-Difensore"></div>
+                </div>
+                <!-- Colonna Centrocampisti -->
+                <div class="rosa-role-column Centrocampista">
+                    <div class="rosa-col-title"><i class="fa-solid fa-person-running"></i> <span>Centroc. (<span id="count-rosa-Centrocampista">0</span>/8)</span></div>
+                    <div class="rosa-col-items" id="slot-Centrocampista"></div>
+                </div>
+                <!-- Colonna Attaccanti -->
+                <div class="rosa-role-column Attaccante">
+                    <div class="rosa-col-title"><i class="fa-solid fa-futbol"></i> <span>Attaccanti (<span id="count-rosa-Attaccante">0</span>/6)</span></div>
+                    <div class="rosa-col-items" id="slot-Attaccante"></div>
+                </div>
             </div>
         </div>
 
