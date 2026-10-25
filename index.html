@@ -678,7 +678,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 
 .player-name { 
     font-weight: 900; 
-    font-size: 13px; 
+    font-size: 11px; 
     color: #fff; 
     margin-bottom: 2px; 
     white-space: nowrap; 
@@ -687,8 +687,12 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     width: 100%;
 }
 
+@media (min-width: 600px) {
+    .player-name { font-size: 13px; }
+}
+
 .player-team { 
-    font-size: 9px; 
+    font-size: 8px; 
     color: var(--text-muted); 
     text-transform: uppercase; 
     font-weight: 700; 
@@ -699,16 +703,25 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     width: 100%;
 }
 
+@media (min-width: 600px) {
+    .player-team { font-size: 9px; }
+}
+
 .player-role-label {
-    font-size: 8px;
+    font-size: 7px;
     font-weight: 800;
     margin-bottom: 4px;
     display: inline-block;
-    padding: 1px 4px;
+    padding: 1px 3px;
     border-radius: 3px;
     background: rgba(255,255,255,0.06);
     white-space: nowrap;
 }
+
+@media (min-width: 600px) {
+    .player-role-label { font-size: 8px; padding: 1px 4px; }
+}
+
 .player-card.Portiere .player-role-label { color: var(--role-por); }
 .player-card.Difensore .player-role-label { color: var(--role-dif); }
 .player-card.Centrocampista .player-role-label { color: var(--role-cen); }
@@ -720,9 +733,9 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     color: #0f172a;
     font-weight: 900;
     border-radius: 6px;
-    font-size: 13px;
-    width: 62px;
-    height: 24px;
+    font-size: 11px;
+    width: 48px;
+    height: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -730,60 +743,73 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     box-shadow: 0 2px 6px rgba(245, 158, 11, 0.4);
 }
 
-/* LA TUA ROSA IN 4 COLONNE SEPARATE CON TRASPARENZA */
-.rosa-columns-container {
-    display: grid;
-    grid-template-columns: repeat(1, 1fr);
-    gap: 10px;
-    margin-top: 10px;
+@media (min-width: 600px) {
+    .valore-badge-draft { font-size: 13px; width: 62px; height: 24px; }
 }
 
-@media (min-width: 650px) {
+/* LA TUA ROSA IN 4 COLONNE FISSE (Anche su mobile) */
+.rosa-columns-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    margin-top: 8px;
+}
+
+@media (min-width: 600px) {
     .rosa-columns-container {
-        grid-template-columns: repeat(4, 1fr);
         gap: 8px;
     }
 }
 
 .rosa-role-column {
-    border-radius: 12px;
-    padding: 8px;
+    border-radius: 8px;
+    padding: 4px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    min-height: 180px;
+    gap: 4px;
+    min-height: 150px;
+}
+
+@media (min-width: 600px) {
+    .rosa-role-column { border-radius: 12px; padding: 8px; gap: 6px; min-height: 180px; }
 }
 
 /* Sfondi e bordi trasparenti per le 4 colonne della rosa */
 .rosa-role-column.Portiere {
     background: rgba(251, 191, 36, 0.08);
-    border: 1.5px solid rgba(251, 191, 36, 0.35);
+    border: 1px solid rgba(251, 191, 36, 0.35);
 }
 .rosa-role-column.Difensore {
     background: rgba(52, 211, 153, 0.08);
-    border: 1.5px solid rgba(52, 211, 153, 0.35);
+    border: 1px solid rgba(52, 211, 153, 0.35);
 }
 .rosa-role-column.Centrocampista {
     background: rgba(56, 189, 248, 0.08);
-    border: 1.5px solid rgba(56, 189, 248, 0.35);
+    border: 1px solid rgba(56, 189, 248, 0.35);
 }
 .rosa-role-column.Attaccante {
     background: rgba(248, 113, 113, 0.08);
-    border: 1.5px solid rgba(248, 113, 113, 0.35);
+    border: 1px solid rgba(248, 113, 113, 0.35);
 }
 
 .rosa-col-title {
-    font-size: 11px;
+    font-size: 8px;
     font-weight: 800;
     text-transform: uppercase;
     text-align: center;
-    padding-bottom: 4px;
+    padding-bottom: 3px;
     border-bottom: 1px solid rgba(255,255,255,0.1);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 2px;
 }
+
+@media (min-width: 600px) {
+    .rosa-col-title { font-size: 11px; flex-direction: row; gap: 6px; padding-bottom: 4px; }
+}
+
 .rosa-role-column.Portiere .rosa-col-title { color: var(--role-por); }
 .rosa-role-column.Difensore .rosa-col-title { color: var(--role-dif); }
 .rosa-role-column.Centrocampista .rosa-col-title { color: var(--role-cen); }
@@ -792,23 +818,27 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 .rosa-col-items {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 4px;
     flex: 1;
 }
 
-/* SLOT GIOCATORE NELLA ROSA (Compatto e pulito) */
+/* SLOT GIOCATORE NELLA ROSA (Compatto per stare in 4 colonne strette) */
 .slot {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 6px 8px;
-    border-radius: 6px;
+    padding: 4px 5px;
+    border-radius: 4px;
     font-weight: 700;
     cursor: pointer;
-    background: rgba(15, 23, 42, 0.6);
+    background: rgba(15, 23, 42, 0.7);
     border: 1px solid var(--card-border);
-    font-size: 11px;
+    font-size: 9px;
     transition: all 0.2s ease;
+}
+
+@media (min-width: 600px) {
+    .slot { padding: 6px 8px; border-radius: 6px; font-size: 11px; }
 }
 
 .slot:hover {
@@ -816,10 +846,17 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     border-color: var(--accent-blue);
 }
 
-.slot.Portiere { border-left: 3px solid var(--role-por); color: #fff; }
-.slot.Difensore { border-left: 3px solid var(--role-dif); color: #fff; }
-.slot.Centrocampista { border-left: 3px solid var(--role-cen); color: #fff; }
-.slot.Attaccante { border-left: 3px solid var(--role-att); color: #fff; }
+.slot.Portiere { border-left: 2px solid var(--role-por); color: #fff; }
+.slot.Difensore { border-left: 2px solid var(--role-dif); color: #fff; }
+.slot.Centrocampista { border-left: 2px solid var(--role-cen); color: #fff; }
+.slot.Attaccante { border-left: 2px solid var(--role-att); color: #fff; }
+
+@media (min-width: 600px) {
+    .slot.Portiere { border-left-width: 3px; }
+    .slot.Difensore { border-left-width: 3px; }
+    .slot.Centrocampista { border-left-width: 3px; }
+    .slot.Attaccante { border-left-width: 3px; }
+}
 
 .slot.schierato {
     opacity: 0.55;
@@ -828,12 +865,17 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 }
 
 .slot-tag {
-    font-size: 8px;
+    font-size: 7px;
     font-weight: 800;
-    padding: 1px 4px;
-    border-radius: 3px;
+    padding: 1px 3px;
+    border-radius: 2px;
     text-transform: uppercase;
 }
+
+@media (min-width: 600px) {
+    .slot-tag { font-size: 8px; padding: 1px 4px; border-radius: 3px; }
+}
+
 .slot-tag.campo { background: rgba(16, 185, 129, 0.25); color: var(--accent-neon-green); border: 1px solid var(--accent-green); }
 .slot-tag.panchina { background: rgba(251, 191, 36, 0.25); color: var(--accent-gold); border: 1px solid var(--accent-gold); }
 
@@ -1748,29 +1790,29 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             <div id="players" class="players-container"></div>
         </div>
 
-        <!-- 5. LA TUA ROSA IN 4 COLONNE SEPARATE -->
+        <!-- 5. LA TUA ROSA IN 4 COLONNE FISSE (Fisse anche su mobile) -->
         <div class="panel section-rosa">
             <h2 id="current-draft-team-title">La Tua Rosa <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca per schierare)</span></h2>
 
             <div class="rosa-columns-container">
                 <!-- Colonna Portieri -->
                 <div class="rosa-role-column Portiere">
-                    <div class="rosa-col-title"><i class="fa-solid fa-hand"></i> Portieri (<span id="count-rosa-Portiere">0</span>/3)</div>
+                    <div class="rosa-col-title"><i class="fa-solid fa-hand"></i> <span>Portieri (<span id="count-rosa-Portiere">0</span>/3)</span></div>
                     <div class="rosa-col-items" id="slot-Portiere"></div>
                 </div>
                 <!-- Colonna Difensori -->
                 <div class="rosa-role-column Difensore">
-                    <div class="rosa-col-title"><i class="fa-solid fa-shield-halved"></i> Difensori (<span id="count-rosa-Difensore">0</span>/7)</div>
+                    <div class="rosa-col-title"><i class="fa-solid fa-shield-halved"></i> <span>Difensori (<span id="count-rosa-Difensore">0</span>/7)</span></div>
                     <div class="rosa-col-items" id="slot-Difensore"></div>
                 </div>
                 <!-- Colonna Centrocampisti -->
                 <div class="rosa-role-column Centrocampista">
-                    <div class="rosa-col-title"><i class="fa-solid fa-person-running"></i> Centrocampisti (<span id="count-rosa-Centrocampista">0</span>/8)</div>
+                    <div class="rosa-col-title"><i class="fa-solid fa-person-running"></i> <span>Centroc. (<span id="count-rosa-Centrocampista">0</span>/8)</span></div>
                     <div class="rosa-col-items" id="slot-Centrocampista"></div>
                 </div>
                 <!-- Colonna Attaccanti -->
                 <div class="rosa-role-column Attaccante">
-                    <div class="rosa-col-title"><i class="fa-solid fa-futbol"></i> Attaccanti (<span id="count-rosa-Attaccante">0</span>/6)</div>
+                    <div class="rosa-col-title"><i class="fa-solid fa-futbol"></i> <span>Attaccanti (<span id="count-rosa-Attaccante">0</span>/6)</span></div>
                     <div class="rosa-col-items" id="slot-Attaccante"></div>
                 </div>
             </div>
@@ -2440,6 +2482,7 @@ function avviaTestDraft() {
     document.getElementById("main-app").style.display = "flex";
     document.getElementById("current-draft-team-title").innerText = `Rosa Test: ${tempNomeSquadra}`;
 
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     nextPick();
 }
 
@@ -2493,6 +2536,7 @@ async function preparaEAvviaDraft() {
     document.getElementById("main-app").style.display = "flex";
     document.getElementById("current-draft-team-title").innerText = `Rosa: ${tempNomeSquadra}`;
 
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     nextPick();
 }
 
@@ -2532,6 +2576,7 @@ function annullaERicominciaDraft() {
             <div id="players" class="players-container"></div>
         `;
         resetDraftState();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         nextPick();
     }
 }
@@ -2608,6 +2653,9 @@ function nextPick() {
     updateProgressBar();
     updateDashboardCounters();
     
+    // Riporta sempre la visualizzazione in cima alla pagina (crediti e draft)
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
     if (turno > 24) {
         showModuloSelection();
         return;
@@ -2723,7 +2771,7 @@ function renderSlots() {
         countSpan.innerText = rosa[ruolo].length;
 
         if (rosa[ruolo].length === 0) {
-            div.innerHTML = `<div style="font-size:10px; color:var(--text-muted); text-align:center; padding:10px 0; font-style:italic;">Nessun giocatore</div>`;
+            div.innerHTML = `<div style="font-size:9px; color:var(--text-muted); text-align:center; padding:8px 0; font-style:italic;">Vuoto</div>`;
             return;
         }
 
@@ -2735,12 +2783,12 @@ function renderSlots() {
             let statusClass = (isTit || isBench) ? "schierato" : "";
             
             let tagStatus = "";
-            if (isTit) tagStatus = `<span class="slot-tag campo">Campo</span>`;
-            else if (isBench) tagStatus = `<span class="slot-tag panchina">Panchina</span>`;
+            if (isTit) tagStatus = `<span class="slot-tag campo">C</span>`;
+            else if (isBench) tagStatus = `<span class="slot-tag panchina">P</span>`;
 
             slot.className = `slot ${ruolo} ${statusClass}`;
             slot.innerHTML = `
-                <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><i class="${roleIcons[ruolo]}"></i> ${p.nome}</span>
+                <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%;"><i class="${roleIcons[ruolo]}"></i> ${p.nome}</span>
                 <div>${tagStatus}</div>
             `;
             slot.onclick = () => schieraGiocatoreDaLista(p, ruolo);
@@ -2910,6 +2958,7 @@ function showModuloSelection() {
             <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-trash-can"></i> Scarta Rosa e Ricomincia</button>
         </div>
     `;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function setModulo() {
