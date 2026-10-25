@@ -348,10 +348,52 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 10px;
     transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
 .team-card-item:hover { transform: translateY(-2px); border-color: var(--accent-blue); }
+
+/* STILE OTTIMIZZATO PER IL NOME SQUADRA E IL BOTTONE NELLE CARD HOME */
+.team-card-info {
+    flex: 1;
+    min-width: 0; /* Fondamentale per far funzionare correttamente il troncamento con ellissi in flexbox */
+}
+
+.team-card-name {
+    color: var(--accent-neon-green);
+    font-size: 13px;
+    font-weight: 800;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    width: 100%;
+}
+
+.btn-small-recap {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 10px;
+    font-weight: 800;
+    cursor: pointer;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    transition: all 0.2s ease;
+}
+
+.btn-small-recap:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.5);
+}
 
 .home-nav-buttons {
     display: flex;
@@ -2266,16 +2308,16 @@ function renderWelcomeScreen() {
         
         let punteggioHtml = "";
         if (sq.punteggioTotale !== undefined && sq.punteggioTotale !== null) {
-            punteggioHtml = `<div style="font-size:12px; font-weight:900; color:var(--accent-gold); margin-top:2px;">🏆 Punteggio: ${sq.punteggioTotale} pt</div>`;
+            punteggioHtml = `<div style="font-size:11px; font-weight:900; color:var(--accent-gold); margin-top:2px;">🏆 Punteggio: ${sq.punteggioTotale} pt</div>`;
         }
 
         item.innerHTML = `
-            <div>
-                <strong style="color:var(--accent-neon-green); font-size:13px;">${sq.nomeSquadra}</strong>
+            <div class="team-card-info">
+                <span class="team-card-name" title="${sq.nomeSquadra}">${sq.nomeSquadra}</span>
                 <div style="font-size:10px; color:var(--text-muted);">Modulo: ${sq.moduloSelezionato}</div>
                 ${punteggioHtml}
             </div>
-            <button onclick="apriRecapSquadraUtenteCorrente(${idx})" class="btn-action-primary" style="padding:5px 10px; font-size:10px;">
+            <button onclick="apriRecapSquadraUtenteCorrente(${idx})" class="btn-small-recap">
                 <i class="fa-solid fa-eye"></i> Vedi Squadra
             </button>
         `;
@@ -2700,7 +2742,6 @@ function nextPick() {
     updateProgressBar();
     updateDashboardCounters();
     
-    // Scroll automatico in alto all'avvio/avanzamento del turno di draft
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     if (turno > 24) {
