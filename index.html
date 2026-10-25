@@ -434,24 +434,47 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     box-shadow: none;
 }
 
-/* MAIN DRAFT APP LAYOUT */
+/* MAIN DRAFT APP LAYOUT - OTTIMIZZATO PER DESKTOP A 2 COLONNE */
 #main-app {
     display: none;
     flex-direction: column;
-    gap: 12px;
+    gap: 15px;
     max-width: 1450px;
     margin: 0 auto;
     animation: fadeInUp 0.4s ease-out;
 }
 
-#left { display: flex; flex-direction: column; width: 100%; }
-#right { display: flex; flex-direction: column; width: 100%; }
+/* Contenitore Desktop per affiancare campo/panchina a destra dopo la scelta del modulo */
+.desktop-layout-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
 
 @media (min-width: 1024px) {
     body { padding: 20px; }
-    #main-app { flex-direction: row; gap: 25px; }
-    #left { width: 55%; }
-    #right { width: 45%; }
+    
+    .desktop-layout-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        align-items: start;
+    }
+    
+    /* Colonna sinistra desktop: Crediti, Ruoli, Draft / Modulo e Rosa */
+    .desktop-col-left {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    /* Colonna destra desktop: Campo e Panchina (appare dopo modulo) */
+    .desktop-col-right {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
 }
 
 .panel {
@@ -460,7 +483,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     border: 1px solid var(--card-border);
     border-radius: 14px;
     padding: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 0;
     box-shadow: 0 8px 20px rgba(0,0,0,0.3);
 }
 
@@ -633,7 +656,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     transition: width 0.3s ease;
 }
 
-/* SELEZIONE GIOCATORI DRAFT (Griglia originale a 5 box invariata) */
+/* SELEZIONE GIOCATORI DRAFT (Griglia a 5 box) */
 .players-container {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -747,7 +770,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     .valore-badge-draft { font-size: 13px; width: 62px; height: 24px; }
 }
 
-/* LA TUA ROSA: 2 COLONNE SU MOBILE (2X2), 4 COLONNE SU DESKTOP */
+/* LA TUA ROSA: 2x2 su mobile, 4 colonne su desktop */
 .rosa-columns-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -871,7 +894,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 /* CAMPO DA GIOCO DINAMICO */
 .campo-style {
     width: 100%;
-    min-height: 440px;
+    min-height: 420px;
     background-color: var(--grass-dark);
     background-image: repeating-linear-gradient(
         0deg,
@@ -959,16 +982,16 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 .pos[data-ruolo="Attaccante"].filled { border-color: var(--role-att); background: rgba(15, 23, 42, 0.96); color: #fff; animation: pulseGlowAtt 2s infinite alternate; }
 
 @media (min-width: 600px) {
-    .campo-style { min-height: 550px; padding: 20px; }
-    .pos { width: 105px; height: 36px; line-height: 34px; font-size: 11px; }
-    .reparto-campo { gap: 10px; }
+    .campo-style { min-height: 480px; padding: 20px; }
+    .pos { width: 95px; height: 34px; line-height: 32px; font-size: 10px; }
+    .reparto-campo { gap: 8px; }
 }
 
 /* PANCHINA GRAFICA A SLOT */
 .panchina-container {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     margin-top: 6px;
 }
 
@@ -976,7 +999,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     background: rgba(15, 23, 42, 0.6);
     border: 1px solid var(--card-border);
     border-radius: 8px;
-    padding: 8px 10px;
+    padding: 6px 10px;
 }
 
 .panchina-role-header {
@@ -984,7 +1007,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     font-weight: 800;
     text-transform: uppercase;
     color: var(--text-muted);
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .bench-slots-grid {
@@ -993,11 +1016,28 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     justify-content: flex-start;
 }
 
+/* SEZIONE PULSANTI FINALI IN BASSO */
+.bottom-actions-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+    width: 100%;
+    grid-column: 1 / -1; /* Occupa entrambe le colonne su desktop */
+}
+
+@media (min-width: 600px) {
+    .bottom-actions-container {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+}
+
 .btn-action-primary {
     background: linear-gradient(135deg, #10b981, #059669);
     color: white;
-    padding: 12px 20px;
-    font-size: 14px;
+    padding: 14px 20px;
+    font-size: 13px;
     font-weight: 800;
     border: none;
     border-radius: 10px;
@@ -1009,6 +1049,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     gap: 8px;
     justify-content: center;
     transition: all 0.2s ease;
+    flex: 2;
 }
 
 .btn-action-primary:hover {
@@ -1020,16 +1061,18 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     background: linear-gradient(135deg, #ef4444, #dc2626);
     color: white;
     border: 1px solid #fca5a5;
-    padding: 10px 16px;
-    border-radius: 8px;
-    font-size: 12px;
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-size: 13px;
     font-weight: 800;
     cursor: pointer;
     text-transform: uppercase;
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    justify-content: center;
     transition: all 0.2s ease;
+    flex: 1;
 }
 
 .btn-action-danger:hover {
@@ -1711,105 +1754,109 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 
 <!-- PAGINA PRINCIPALE DEL DRAFT -->
 <div id="main-app">
-    <div id="left">
-        <!-- 1. DASHBOARD HEADER -->
-        <div class="dashboard-header">
-            <!-- CREDITI RESIDUI -->
-            <div class="dash-card-row budget high-credits" id="budget-card-row">
-                <div class="dash-card-left">
-                    <i class="fa-solid fa-coins"></i>
-                    <div>
-                        <div class="title-text">Crediti Residui</div>
-                        <div class="sub-text">Budget disponibile per l'asta</div>
+    <div class="desktop-layout-grid">
+        <!-- COLONNA SINISTRA DESKTOP -->
+        <div class="desktop-col-left">
+            <!-- 1. DASHBOARD HEADER (Crediti + 4 Box Ruoli) -->
+            <div class="dashboard-header">
+                <!-- CREDITI RESIDUI -->
+                <div class="dash-card-row budget high-credits" id="budget-card-row">
+                    <div class="dash-card-left">
+                        <i class="fa-solid fa-coins"></i>
+                        <div>
+                            <div class="title-text">Crediti Residui</div>
+                            <div class="sub-text">Budget disponibile per l'asta</div>
+                        </div>
+                    </div>
+                    <div class="dash-card-badge" id="budget-display">600</div>
+                </div>
+
+                <!-- 4 BOX RUOLI QUADRATI -->
+                <div class="roles-grid-container">
+                    <div class="role-square-box role-por">
+                        <div class="role-name-txt">Portieri</div>
+                        <div class="role-count-txt" id="count-box-Portiere">0/3</div>
+                    </div>
+                    <div class="role-square-box role-dif">
+                        <div class="role-name-txt">Difensori</div>
+                        <div class="role-count-txt" id="count-box-Difensore">0/7</div>
+                    </div>
+                    <div class="role-square-box role-cen">
+                        <div class="role-name-txt">Centroc.</div>
+                        <div class="role-count-txt" id="count-box-Centrocampista">0/8</div>
+                    </div>
+                    <div class="role-square-box role-att">
+                        <div class="role-name-txt">Attaccanti</div>
+                        <div class="role-count-txt" id="count-box-Attaccante">0/6</div>
                     </div>
                 </div>
-                <div class="dash-card-badge" id="budget-display">600</div>
             </div>
 
-            <!-- 4 BOX RUOLI QUADRATI -->
-            <div class="roles-grid-container">
-                <div class="role-square-box role-por">
-                    <div class="role-name-txt">Portieri</div>
-                    <div class="role-count-txt" id="count-box-Portiere">0/3</div>
-                </div>
-                <div class="role-square-box role-dif">
-                    <div class="role-name-txt">Difensori</div>
-                    <div class="role-count-txt" id="count-box-Difensore">0/7</div>
-                </div>
-                <div class="role-square-box role-cen">
-                    <div class="role-name-txt">Centroc.</div>
-                    <div class="role-count-txt" id="count-box-Centrocampista">0/8</div>
-                </div>
-                <div class="role-square-box role-att">
-                    <div class="role-name-txt">Attaccanti</div>
-                    <div class="role-count-txt" id="count-box-Attaccante">0/6</div>
-                </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progress-bar"></div>
             </div>
-        </div>
 
-        <div class="progress-bar-container">
-            <div class="progress-bar-fill" id="progress-bar"></div>
-        </div>
-
-        <!-- 2. CAMPO DA GIOCO -->
-        <div class="panel" id="campo-panel-container" style="display: none;">
-            <h2>Schieramento Titolari <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca sulle caselle per scegliere i giocatori)</span></h2>
-            <div id="campo" class="campo-style"></div>
-        </div>
-
-        <!-- 3. PANCHINA GRAFICA A SLOT -->
-        <div class="panel section-panchina" id="panchina-panel-container" style="display: none;">
-            <h2><i class="fa-solid fa-couch" style="color: var(--accent-gold);"></i> Panchina Ufficiale <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(2 Riserve per Ruolo)</span></h2>
-            <div id="panchina-grafica" class="panchina-container"></div>
-
-            <div id="conferma-container" style="display: none; margin-top: 15px; text-align:center;">
-                <button id="btn-conferma-formazione" class="btn-action-primary" style="width:100%;" onclick="confermaFormazioneDefinitiva()">🔒 CONFERMA E SALVA FORMAZIONE (Consuma 1 Gettone)</button>
+            <!-- 2. SELEZIONE GIOCATORI DRAFT / SCELTA MODULO -->
+            <div class="panel" id="draft-panel" style="display:block;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <div>
+                        <h2 id="draft-main-heading" style="margin:0;">Scegli il tuo giocatore</h2>
+                        <span style="font-size:11px; color:var(--accent-blue); font-weight:600;">👇 Tocca la scheda per acquistarlo</span>
+                    </div>
+                    <button onclick="annullaERicominciaDraft()" class="btn-action-danger" style="padding:6px 12px; font-size:11px;"><i class="fa-solid fa-arrow-rotate-left"></i> Ricomincia</button>
+                </div>
+                <div id="players" class="players-container"></div>
             </div>
-        </div>
 
-        <!-- 4. SELEZIONE GIOCATORI DRAFT (5 box in orizzontale) -->
-        <div class="panel" id="draft-panel" style="display:block;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                <div>
-                    <h2 id="draft-main-heading" style="margin:0;">Scegli il tuo giocatore</h2>
-                    <span style="font-size:11px; color:var(--accent-blue); font-weight:600;">👇 Tocca la scheda per acquistarlo</span>
-                </div>
-                <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-arrow-rotate-left"></i> Ricomincia</button>
-            </div>
-            <div id="players" class="players-container"></div>
-        </div>
+            <!-- 3. LA TUA ROSA (Sotto il draft) -->
+            <div class="panel section-rosa">
+                <h2 id="current-draft-team-title">La Tua Rosa <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca per schierare)</span></h2>
 
-        <!-- 5. LA TUA ROSA (2x2 su mobile, 4 colonne su desktop) -->
-        <div class="panel section-rosa">
-            <h2 id="current-draft-team-title">La Tua Rosa <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca per schierare)</span></h2>
-
-            <div class="rosa-columns-container">
-                <!-- Colonna Portieri -->
-                <div class="rosa-role-column Portiere">
-                    <div class="rosa-col-title"><i class="fa-solid fa-hand"></i> <span>Portieri (<span id="count-rosa-Portiere">0</span>/3)</span></div>
-                    <div class="rosa-col-items" id="slot-Portiere"></div>
-                </div>
-                <!-- Colonna Difensori -->
-                <div class="rosa-role-column Difensore">
-                    <div class="rosa-col-title"><i class="fa-solid fa-shield-halved"></i> <span>Difensori (<span id="count-rosa-Difensore">0</span>/7)</span></div>
-                    <div class="rosa-col-items" id="slot-Difensore"></div>
-                </div>
-                <!-- Colonna Centrocampisti -->
-                <div class="rosa-role-column Centrocampista">
-                    <div class="rosa-col-title"><i class="fa-solid fa-person-running"></i> <span>Centroc. (<span id="count-rosa-Centrocampista">0</span>/8)</span></div>
-                    <div class="rosa-col-items" id="slot-Centrocampista"></div>
-                </div>
-                <!-- Colonna Attaccanti -->
-                <div class="rosa-role-column Attaccante">
-                    <div class="rosa-col-title"><i class="fa-solid fa-futbol"></i> <span>Attaccanti (<span id="count-rosa-Attaccante">0</span>/6)</span></div>
-                    <div class="rosa-col-items" id="slot-Attaccante"></div>
+                <div class="rosa-columns-container">
+                    <!-- Colonna Portieri -->
+                    <div class="rosa-role-column Portiere">
+                        <div class="rosa-col-title"><i class="fa-solid fa-hand"></i> <span>Portieri (<span id="count-rosa-Portiere">0</span>/3)</span></div>
+                        <div class="rosa-col-items" id="slot-Portiere"></div>
+                    </div>
+                    <!-- Colonna Difensori -->
+                    <div class="rosa-role-column Difensore">
+                        <div class="rosa-col-title"><i class="fa-solid fa-shield-halved"></i> <span>Difensori (<span id="count-rosa-Difensore">0</span>/7)</span></div>
+                        <div class="rosa-col-items" id="slot-Difensore"></div>
+                    </div>
+                    <!-- Colonna Centrocampisti -->
+                    <div class="rosa-role-column Centrocampista">
+                        <div class="rosa-col-title"><i class="fa-solid fa-person-running"></i> <span>Centroc. (<span id="count-rosa-Centrocampista">0</span>/8)</span></div>
+                        <div class="rosa-col-items" id="slot-Centrocampista"></div>
+                    </div>
+                    <!-- Colonna Attaccanti -->
+                    <div class="rosa-role-column Attaccante">
+                        <div class="rosa-col-title"><i class="fa-solid fa-futbol"></i> <span>Attaccanti (<span id="count-rosa-Attaccante">0</span>/6)</span></div>
+                        <div class="rosa-col-items" id="slot-Attaccante"></div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div id="right">
-        <!-- Spazio desktop aggiuntivo -->
+        <!-- COLONNA DESTRA DESKTOP (Compaiono dopo il draft alla scelta del modulo) -->
+        <div class="desktop-col-right">
+            <!-- 4. CAMPO DA GIOCO -->
+            <div class="panel" id="campo-panel-container" style="display: none;">
+                <h2>Schieramento Titolari <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca sulle caselle)</span></h2>
+                <div id="campo" class="campo-style"></div>
+            </div>
+
+            <!-- 5. PANCHINA GRAFICA A SLOT -->
+            <div class="panel section-panchina" id="panchina-panel-container" style="display: none;">
+                <h2><i class="fa-solid fa-couch" style="color: var(--accent-gold);"></i> Panchina Ufficiale <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(2 Riserve per Ruolo)</span></h2>
+                <div id="panchina-grafica" class="panchina-container"></div>
+            </div>
+        </div>
+
+        <!-- 6. PULSANTI FINALI IN BASSO (Verde e Rosso) -->
+        <div id="conferma-container" class="bottom-actions-container" style="display: none;">
+            <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-trash-can"></i> Cancella tutto e ricomincia il draft</button>
+            <button id="btn-conferma-formazione" class="btn-action-primary" onclick="confermaFormazioneDefinitiva()"><i class="fa-solid fa-lock"></i> Conferma e salva la tua formazione</button>
+        </div>
     </div>
 </div>
 
@@ -2458,12 +2505,12 @@ function avviaTestDraft() {
                 <h2>Scegli il tuo giocatore (Test)</h2>
                 <span style="font-size:11px; color:var(--accent-blue); font-weight:600;">👇 Tocca la scheda per acquistarlo</span>
             </div>
-            <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-arrow-rotate-left"></i> Ricomincia Test</button>
+            <button onclick="annullaERicominciaDraft()" class="btn-action-danger" style="padding:6px 12px; font-size:11px;"><i class="fa-solid fa-arrow-rotate-left"></i> Ricomincia Test</button>
         </div>
         <div id="players" class="players-container"></div>
     `;
 
-    document.getElementById("btn-conferma-formazione").innerText = "🧪 TERMINA TEST E VISUALIZZA RECAP";
+    document.getElementById("btn-conferma-formazione").innerHTML = `<i class="fa-solid fa-vials"></i> Termina Test e Visualizza Recap`;
 
     resetDraftState();
 
@@ -2512,12 +2559,12 @@ async function preparaEAvviaDraft() {
                 <h2>Scegli il tuo giocatore</h2>
                 <span style="font-size:11px; color:var(--accent-blue); font-weight:600;">👇 Tocca la scheda per acquistarlo</span>
             </div>
-            <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-arrow-rotate-left"></i> Ricomincia Draft</button>
+            <button onclick="annullaERicominciaDraft()" class="btn-action-danger" style="padding:6px 12px; font-size:11px;"><i class="fa-solid fa-arrow-rotate-left"></i> Ricomincia Draft</button>
         </div>
         <div id="players" class="players-container"></div>
     `;
 
-    document.getElementById("btn-conferma-formazione").innerText = "🔒 CONFERMA E SALVA FORMAZIONE (Consuma 1 Gettone)";
+    document.getElementById("btn-conferma-formazione").innerHTML = `<i class="fa-solid fa-lock"></i> Conferma e salva la tua formazione`;
 
     resetDraftState();
 
@@ -2560,7 +2607,7 @@ function annullaERicominciaDraft() {
                     ${titleHtml}
                     <span style="font-size:11px; color:var(--accent-blue); font-weight:600;">👇 Tocca la scheda per acquistarlo</span>
                 </div>
-                <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-arrow-rotate-left"></i> ${btnText}</button>
+                <button onclick="annullaERicominciaDraft()" class="btn-action-danger" style="padding:6px 12px; font-size:11px;"><i class="fa-solid fa-arrow-rotate-left"></i> ${btnText}</button>
             </div>
             <div id="players" class="players-container"></div>
         `;
@@ -2642,7 +2689,7 @@ function nextPick() {
     updateProgressBar();
     updateDashboardCounters();
     
-    // Riporta sempre la visualizzazione in cima alla pagina (crediti e draft)
+    // Scroll automatico in alto all'avvio/avanzamento del turno di draft
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     if (turno > 24) {
@@ -2969,7 +3016,7 @@ function setModulo() {
 
     renderSlots();
     renderPanchinaGrafica();
-    document.getElementById("conferma-container").style.display = "block";
+    document.getElementById("conferma-container").style.display = "flex";
 }
 
 function ripristinaCampoTattico() {
