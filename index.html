@@ -434,7 +434,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     box-shadow: none;
 }
 
-/* MAIN DRAFT APP LAYOUT - OTTIMIZZATO PER DESKTOP A 2 COLONNE */
+/* MAIN DRAFT APP LAYOUT */
 #main-app {
     display: none;
     flex-direction: column;
@@ -444,7 +444,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     animation: fadeInUp 0.4s ease-out;
 }
 
-/* Contenitore Desktop per affiancare campo/panchina a destra dopo la scelta del modulo */
+/* Contenitore Desktop a griglia */
 .desktop-layout-grid {
     display: flex;
     flex-direction: column;
@@ -461,20 +461,29 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
         gap: 20px;
         align-items: start;
     }
-    
-    /* Colonna sinistra desktop: Crediti, Ruoli, Draft / Modulo e Rosa */
-    .desktop-col-left {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
+}
 
-    /* Colonna destra desktop: Campo e Panchina (appare dopo modulo) */
-    .desktop-col-right {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
+/* Su MOBILE usiamo flexbox e order per mettere Campo/Panchina prima della Rosa */
+.desktop-col-left {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.desktop-col-right {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    order: 1; /* Su mobile va prima della rosa */
+}
+
+.section-rosa {
+    order: 2; /* Su mobile va sotto il campo */
+}
+
+@media (min-width: 1024px) {
+    .desktop-col-right { order: unset; }
+    .section-rosa { order: unset; }
 }
 
 .panel {
@@ -1023,13 +1032,15 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     gap: 10px;
     margin-top: 15px;
     width: 100%;
-    grid-column: 1 / -1; /* Occupa entrambe le colonne su desktop */
+    grid-column: 1 / -1; 
+    order: 3; /* Su mobile va dopo la rosa */
 }
 
-@media (min-width: 600px) {
+@media (min-width: 1024px) {
     .bottom-actions-container {
         flex-direction: row;
         justify-content: space-between;
+        order: unset;
     }
 }
 
@@ -1755,7 +1766,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 <!-- PAGINA PRINCIPALE DEL DRAFT -->
 <div id="main-app">
     <div class="desktop-layout-grid">
-        <!-- COLONNA SINISTRA DESKTOP -->
+        <!-- COLONNA SINISTRA (o Blocco Superiore su Mobile) -->
         <div class="desktop-col-left">
             <!-- 1. DASHBOARD HEADER (Crediti + 4 Box Ruoli) -->
             <div class="dashboard-header">
@@ -1808,7 +1819,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
                 <div id="players" class="players-container"></div>
             </div>
 
-            <!-- 3. LA TUA ROSA (Sotto il draft) -->
+            <!-- 3. LA TUA ROSA (Su mobile posizionata sotto il campo) -->
             <div class="panel section-rosa">
                 <h2 id="current-draft-team-title">La Tua Rosa <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca per schierare)</span></h2>
 
@@ -1837,7 +1848,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             </div>
         </div>
 
-        <!-- COLONNA DESTRA DESKTOP (Compaiono dopo il draft alla scelta del modulo) -->
+        <!-- COLONNA DESTRA (Su mobile posizionata prima della rosa grazie a order: 1) -->
         <div class="desktop-col-right">
             <!-- 4. CAMPO DA GIOCO -->
             <div class="panel" id="campo-panel-container" style="display: none;">
