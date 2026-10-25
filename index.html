@@ -110,6 +110,13 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     font-weight: 700;
     color: var(--accent-blue);
     border: 1px solid rgba(96, 165, 250, 0.3);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.user-badge:hover {
+    background: rgba(96, 165, 250, 0.15);
+    border-color: var(--accent-blue);
 }
 
 .btn-logout {
@@ -485,7 +492,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     animation: fadeInUp 0.4s ease-out;
 }
 
-/* Contenitore Desktop a griglia */
 .desktop-layout-grid {
     display: flex;
     flex-direction: column;
@@ -504,23 +510,22 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     }
 }
 
-/* SPOSTAMENTO ORDINE ESCLUSIVAMENTE SU MOBILE */
 .desktop-col-left {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    order: 1; /* 1. In cima su mobile: Crediti, Ruoli e Scelta Giocatori */
+    order: 1;
 }
 
 .desktop-col-right {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    order: 2; /* 2. Sotto i giocatori su mobile: Campo e Panchina */
+    order: 2;
 }
 
 .section-rosa {
-    order: 3; /* 3. Sotto il campo su mobile: Le tue Rose */
+    order: 3;
 }
 
 .bottom-actions-container {
@@ -530,7 +535,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     margin-top: 15px;
     width: 100%;
     grid-column: 1 / -1; 
-    order: 4; /* 4. In fondo su mobile: Pulsanti salver/cancella */
+    order: 4;
 }
 
 @media (min-width: 1024px) {
@@ -562,7 +567,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     margin-bottom: 12px;
 }
 
-/* BOX CREDITI RETTANGOLARE DINAMICO IN ALTO */
 .dash-card-row.budget {
     backdrop-filter: blur(12px);
     border-radius: 14px;
@@ -574,7 +578,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     transition: all 0.3s ease;
 }
 
-/* STATI COLORE CREDITI RESIDUI */
 .dash-card-row.budget.high-credits {
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(15, 23, 42, 0.85));
     border: 2px solid var(--accent-neon-green);
@@ -637,7 +640,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     min-width: 75px;
 }
 
-/* GRIGLIA 4 BOX RUOLI QUADRATI SOTTO I CREDITI */
 .roles-grid-container {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -678,7 +680,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     .role-square-box .role-count-txt { font-size: 22px; padding: 6px 12px; }
 }
 
-/* COLORI SPECIFICI PER I 4 BOX RUOLI QUADRATI */
 .role-square-box.role-por {
     border: 2px solid var(--role-por);
     background: linear-gradient(135deg, rgba(251, 191, 36, 0.18), rgba(15, 23, 42, 0.9));
@@ -723,7 +724,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     transition: width 0.3s ease;
 }
 
-/* SELEZIONE GIOCATORI DRAFT (Griglia a 5 box) */
 .players-container {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -817,7 +817,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 .player-card.Centrocampista .player-role-label { color: var(--role-cen); }
 .player-card.Attaccante .player-role-label { color: var(--role-att); }
 
-/* DIMENSIONE FISSA UNIFORME PER I CREDITI */
 .valore-badge-draft {
     background: linear-gradient(135deg, #fbbf24, #f59e0b);
     color: #0f172a;
@@ -837,7 +836,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     .valore-badge-draft { font-size: 13px; width: 62px; height: 24px; }
 }
 
-/* LA TUA ROSA: 2x2 su mobile, 4 colonne su desktop */
 .rosa-columns-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -865,7 +863,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     .rosa-role-column { border-radius: 12px; padding: 10px; gap: 8px; min-height: 180px; }
 }
 
-/* Sfondi e bordi trasparenti per le colonne della rosa */
 .rosa-role-column.Portiere {
     background: rgba(251, 191, 36, 0.08);
     border: 1.5px solid rgba(251, 191, 36, 0.35);
@@ -912,7 +909,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     flex: 1;
 }
 
-/* SLOT GIOCATORE NELLA ROSA */
 .slot {
     display: flex;
     align-items: center;
@@ -958,7 +954,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 .slot-tag.campo { background: rgba(16, 185, 129, 0.25); color: var(--accent-neon-green); border: 1px solid var(--accent-green); }
 .slot-tag.panchina { background: rgba(251, 191, 36, 0.25); color: var(--accent-gold); border: 1px solid var(--accent-gold); }
 
-/* CAMPO DA GIOCO DINAMICO */
 .campo-style {
     width: 100%;
     min-height: 420px;
@@ -1010,7 +1005,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     flex-wrap: wrap;
 }
 
-/* POSIZIONI IN CAMPO */
 .pos {
     width: 22%;
     min-width: 65px;
@@ -1054,7 +1048,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     .reparto-campo { gap: 8px; }
 }
 
-/* PANCHINA GRAFICA A SLOT */
 .panchina-container {
     display: flex;
     flex-direction: column;
@@ -1130,7 +1123,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
-/* MODALE SCELTA GIOCATORE CON COLORI RUOLO */
 .custom-modal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
@@ -1325,7 +1317,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 }
 
 .podium-team-name { font-size: 16px; font-weight: 800; color: #fff; margin-top: 10px; }
-.podium-user-name { font-size: 13px; color: var(--accent-blue); font-weight: 700; margin-bottom: 8px; }
+.podium-user-name { font-size: 13px; color: var(--accent-blue); font-weight: 700; margin-bottom: 8px; cursor: pointer; text-decoration: underline; }
 .podium-score { font-size: 24px; font-weight: 900; color: var(--accent-neon-green); }
 
 .classifica-table-container {
@@ -1398,6 +1390,60 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     border-color: var(--accent-blue);
     box-shadow: 0 0 10px rgba(96, 165, 250, 0.4);
 }
+
+/* PAGINA PROFILO / STATISTICHE UTENTE */
+#profilo-screen {
+    display: none;
+    max-width: 1000px;
+    margin: 0 auto;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    animation: fadeInUp 0.4s ease-out;
+}
+
+.profilo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--card-border);
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.profilo-title {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--accent-blue);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-transform: uppercase;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.stat-box {
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.stat-box i { font-size: 28px; margin-bottom: 8px; color: var(--accent-gold); }
+.stat-box .stat-val { font-size: 24px; font-weight: 900; color: #fff; margin-top: 4px; }
+.stat-box .stat-lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
 
 /* AUTH & INPUTS */
 .auth-overlay {
@@ -1551,7 +1597,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
         <span>Draft Serie A</span>
     </div>
     <div class="user-area">
-        <div class="user-badge">
+        <div class="user-badge" onclick="apriProfiloUtente(currentUser.uid)" title="Il tuo Profilo e Statistiche">
             <i class="fa-solid fa-user"></i>
             <span id="user-display-name">-</span>
         </div>
@@ -1802,14 +1848,67 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     </div>
 </div>
 
+<!-- PAGINA PROFILO E STATISTICHE UTENTE -->
+<div id="profilo-screen">
+    <div class="profilo-header">
+        <div class="profilo-title">
+            <i class="fa-solid fa-id-badge"></i>
+            <span id="profilo-username-title">Profilo Fantallenatore</span>
+        </div>
+        <button onclick="tornaAllaHome()" class="btn-action-primary" style="padding:8px 16px; font-size:12px;">
+            <i class="fa-solid fa-house"></i> Torna alla Home
+        </button>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-box">
+            <i class="fa-solid fa-shield-halved" style="color:var(--accent-neon-green);"></i>
+            <div class="stat-lbl">Squadre Create</div>
+            <div class="stat-val" id="stat-squadre-create">0</div>
+        </div>
+        <div class="stat-box">
+            <i class="fa-solid fa-arrows-rotate" style="color:var(--accent-blue);"></i>
+            <div class="stat-lbl">Draft Totali Tentati</div>
+            <div class="stat-val" id="stat-draft-tentati">0</div>
+        </div>
+        <div class="stat-box">
+            <i class="fa-solid fa-star" style="color:var(--accent-gold);"></i>
+            <div class="stat-lbl">Miglior Punteggio</div>
+            <div class="stat-val" id="stat-miglior-punteggio">0 pt</div>
+        </div>
+        <div class="stat-box">
+            <i class="fa-solid fa-calculator" style="color:#a78bfa;"></i>
+            <div class="stat-lbl">Punti Totali Lega</div>
+            <div class="stat-val" id="stat-punti-totali">0 pt</div>
+        </div>
+    </div>
+
+    <h3 style="color:var(--accent-gold); font-size:16px; margin-bottom:15px;"><i class="fa-solid fa-trophy"></i> Bacheca Podi & Piazzamenti</h3>
+    <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="stat-box" style="border: 2px solid #fbbf24;">
+            <img src="icone/coppa1.png" style="height:32px; margin-bottom:4px;" alt="1° Posto">
+            <div class="stat-lbl">1° Posto (Ori)</div>
+            <div class="stat-val" id="stat-podi-oro">0</div>
+        </div>
+        <div class="stat-box" style="border: 2px solid #94a3b8;">
+            <img src="icone/coppa2.png" style="height:32px; margin-bottom:4px;" alt="2° Posto">
+            <div class="stat-lbl">2° Posto (Argenti)</div>
+            <div class="stat-val" id="stat-podi-argento">0</div>
+        </div>
+        <div class="stat-box" style="border: 2px solid #d97706;">
+            <img src="icone/coppa3.png" style="height:32px; margin-bottom:4px;" alt="3° Posto">
+            <div class="stat-lbl">3° Posto (Bronzi)</div>
+            <div class="stat-val" id="stat-podi-bronzo">0</div>
+        </div>
+    </div>
+</div>
+
 <!-- PAGINA PRINCIPALE DEL DRAFT -->
 <div id="main-app">
     <div class="desktop-layout-grid">
-        <!-- COLONNA SINISTRA (o Blocco Superiore su Mobile: Crediti, Ruoli e Scelta Giocatori) -->
+        <!-- COLONNA SINISTRA (Crediti, Ruoli e Scelta Giocatori) -->
         <div class="desktop-col-left">
-            <!-- 1. DASHBOARD HEADER (Crediti + 4 Box Ruoli) -->
             <div class="dashboard-header">
-                <!-- CREDITI RESIDUI -->
                 <div class="dash-card-row budget high-credits" id="budget-card-row">
                     <div class="dash-card-left">
                         <i class="fa-solid fa-coins"></i>
@@ -1821,7 +1920,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
                     <div class="dash-card-badge" id="budget-display">600</div>
                 </div>
 
-                <!-- 4 BOX RUOLI QUADRATI -->
                 <div class="roles-grid-container">
                     <div class="role-square-box role-por">
                         <div class="role-name-txt">Portieri</div>
@@ -1846,7 +1944,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
                 <div class="progress-bar-fill" id="progress-bar"></div>
             </div>
 
-            <!-- 2. SELEZIONE GIOCATORI DRAFT / SCELTA MODULO -->
             <div class="panel" id="draft-panel" style="display:block;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                     <div>
@@ -1859,42 +1956,36 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             </div>
         </div>
 
-        <!-- COLONNA DESTRA (o Secondo Blocco su Mobile: Campo e Panchina) -->
+        <!-- COLONNA DESTRA (Campo e Panchina) -->
         <div class="desktop-col-right">
-            <!-- 3. CAMPO DA GIOCO -->
             <div class="panel" id="campo-panel-container" style="display: none;">
                 <h2>Schieramento Titolari <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca sulle caselle)</span></h2>
                 <div id="campo" class="campo-style"></div>
             </div>
 
-            <!-- 4. PANCHINA GRAFICA A SLOT -->
             <div class="panel section-panchina" id="panchina-panel-container" style="display: none;">
                 <h2><i class="fa-solid fa-couch" style="color: var(--accent-gold);"></i> Panchina Ufficiale <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(2 Riserve per Ruolo)</span></h2>
                 <div id="panchina-grafica" class="panchina-container"></div>
             </div>
         </div>
 
-        <!-- 5. LA TUA ROSA (Sotto il campo su mobile) -->
+        <!-- LA TUA ROSA -->
         <div class="panel section-rosa">
             <h2 id="current-draft-team-title">La Tua Rosa <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca per schierare)</span></h2>
 
             <div class="rosa-columns-container">
-                <!-- Colonna Portieri -->
                 <div class="rosa-role-column Portiere">
                     <div class="rosa-col-title"><i class="fa-solid fa-hand"></i> <span>Portieri (<span id="count-rosa-Portiere">0</span>/3)</span></div>
                     <div class="rosa-col-items" id="slot-Portiere"></div>
                 </div>
-                <!-- Colonna Difensori -->
                 <div class="rosa-role-column Difensore">
                     <div class="rosa-col-title"><i class="fa-solid fa-shield-halved"></i> <span>Difensori (<span id="count-rosa-Difensore">0</span>/7)</span></div>
                     <div class="rosa-col-items" id="slot-Difensore"></div>
                 </div>
-                <!-- Colonna Centrocampisti -->
                 <div class="rosa-role-column Centrocampista">
                     <div class="rosa-col-title"><i class="fa-solid fa-person-running"></i> <span>Centroc. (<span id="count-rosa-Centrocampista">0</span>/8)</span></div>
                     <div class="rosa-col-items" id="slot-Centrocampista"></div>
                 </div>
-                <!-- Colonna Attaccanti -->
                 <div class="rosa-role-column Attaccante">
                     <div class="rosa-col-title"><i class="fa-solid fa-futbol"></i> <span>Attaccanti (<span id="count-rosa-Attaccante">0</span>/6)</span></div>
                     <div class="rosa-col-items" id="slot-Attaccante"></div>
@@ -1902,7 +1993,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             </div>
         </div>
 
-        <!-- 6. PULSANTI FINALI IN BASSO (Verde e Rosso) -->
+        <!-- PULSANTI FINALI IN BASSO -->
         <div id="conferma-container" class="bottom-actions-container" style="display: none;">
             <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-trash-can"></i> Cancella tutto e ricomincia il draft</button>
             <button id="btn-conferma-formazione" class="btn-action-primary" onclick="confermaFormazioneDefinitiva()"><i class="fa-solid fa-lock"></i> Conferma e salva la tua formazione</button>
@@ -1949,7 +2040,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 </div>
 
 <script>
-// CONFIGURAZIONE FIREBASE
 const firebaseConfig = {
     apiKey: "AIzaSyAURiTLIXNg6fFkL1fnHkiHafMytsDHW8I",
     authDomain: "draft-serie-a-4aadd.firebaseapp.com",
@@ -2127,6 +2217,7 @@ async function handleRegister(e) {
             cognome: cognome,
             email: email,
             squadre: [],
+            draftTentati: 0,
             creatoIl: new Date()
         });
         alert(`Registrazione completata! Benvenuto, ${username}.`);
@@ -2277,6 +2368,7 @@ function renderWelcomeScreen() {
     document.getElementById("main-app").style.display = "none";
     document.getElementById("recap-screen").style.display = "none";
     document.getElementById("classifica-screen").style.display = "none";
+    document.getElementById("profilo-screen").style.display = "none";
 
     let gettoniRimasti = 3 - userSquadre.length;
     document.getElementById("tokens-count-display-inline").innerText = `${gettoniRimasti} / 3`;
@@ -2328,6 +2420,7 @@ async function apriSchermataClassifica(giornata = 8) {
     document.getElementById("welcome-screen").style.display = "none";
     document.getElementById("main-app").style.display = "none";
     document.getElementById("recap-screen").style.display = "none";
+    document.getElementById("profilo-screen").style.display = "none";
     document.getElementById("classifica-screen").style.display = "block";
 
     document.getElementById("classifica-heading-text").innerText = `Classifica della giornata n°${giornata}`;
@@ -2381,7 +2474,7 @@ async function apriSchermataClassifica(giornata = 8) {
                 card.innerHTML = `
                     <div class="podium-rank-badge"><img src="${trophyImages[i]}" class="fanta-trophy-img" alt="Podio ${i+1}°"></div>
                     <div class="podium-team-name">${item.nomeSquadra}</div>
-                    <div class="podium-user-name"><i class="fa-solid fa-user"></i> ${item.username}</div>
+                    <div class="podium-user-name" onclick="apriProfiloUtente('${item.userId}')"><i class="fa-solid fa-user"></i> ${item.username}</div>
                     <div style="font-size:10px; color:var(--text-muted); margin-bottom:5px;">Modulo: ${item.modulo}</div>
                     <div class="podium-score">${item.punteggio} pt</div>
                     <button onclick="visualizzaSquadraGenerica('${item.userId}', '${item.nomeSquadra.replace(/'/g, "\\'")}', ${giornata})" class="btn-action-primary" style="padding:4px 10px; font-size:10px; margin-top:8px;">
@@ -2407,7 +2500,7 @@ async function apriSchermataClassifica(giornata = 8) {
 
             tr.innerHTML = `
                 <td class="rank-cell">${rankDisplay}</td>
-                <td style="font-weight:700; color:var(--accent-blue);"><i class="fa-solid fa-user"></i> ${item.username}</td>
+                <td style="font-weight:700; color:var(--accent-blue); cursor:pointer;" onclick="apriProfiloUtente('${item.userId}')"><i class="fa-solid fa-user"></i> ${item.username}</td>
                 <td style="font-weight:800; color:#fff;">${item.nomeSquadra}</td>
                 <td style="color:var(--text-muted);">${item.modulo}</td>
                 <td style="font-weight:900; color:var(--accent-neon-green); font-size:13px;">${item.punteggio} pt</td>
@@ -2423,6 +2516,100 @@ async function apriSchermataClassifica(giornata = 8) {
     } catch (err) {
         console.error("Errore recupero classifica:", err);
         tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--accent-red);">Errore durante il caricamento della classifica.</td></tr>`;
+    }
+}
+
+// GESTIONE PAGINA PROFILO / STATISTICHE UTENTE
+async function apriProfiloUtente(targetUserId) {
+    document.getElementById("welcome-screen").style.display = "none";
+    document.getElementById("main-app").style.display = "none";
+    document.getElementById("recap-screen").style.display = "none";
+    document.getElementById("classifica-screen").style.display = "none";
+    document.getElementById("profilo-screen").style.display = "block";
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    try {
+        const userDoc = await db.collection("utenti").doc(targetUserId).get();
+        if (!userDoc.exists) {
+            alert("Utente non trovato.");
+            tornaAllaHome();
+            return;
+        }
+
+        const uData = userDoc.data();
+        const username = getRealUsername(uData, null);
+        document.getElementById("profilo-username-title").innerText = `Profilo di ${username}`;
+
+        const squadre = uData.squadre || [];
+        const draftTentati = uData.draftTentati || 0;
+
+        let squadreCreateCount = squadre.length;
+        let puntiTotali = 0;
+        let migliorPunteggio = 0;
+
+        squadre.forEach(sq => {
+            let pts = sq.punteggioTotale !== undefined && sq.punteggioTotale !== null ? sq.punteggioTotale : 0;
+            puntiTotali += pts;
+            if (pts > migliorPunteggio) migliorPunteggio = pts;
+        });
+
+        // Calcoliamo i piazzamenti su tutte le giornate registrate nella lega
+        let ori = 0, argenti = 0, bronzi = 0;
+        
+        for (let g = 1; g <= 8; g++) {
+            const snapAll = await db.collection("utenti").get();
+            let listaGiornata = [];
+            snapAll.forEach(docU => {
+                const dU = docU.data();
+                const sArr = dU.squadre || [];
+                sArr.forEach(sq => {
+                    let gSq = sq.giornata !== undefined ? sq.giornata : 8;
+                    if (gSq === g) {
+                        listaGiornata.push({
+                            userId: docU.id,
+                            punteggio: sq.punteggioTotale !== null && sq.punteggioTotale !== undefined ? sq.punteggioTotale : 0
+                        });
+                    }
+                });
+            });
+
+            listaGiornata.sort((a, b) => b.punteggio - a.punteggio);
+            if (listaGiornata.length > 0 && listaGiornata[0].userId === targetUserId) ori++;
+            if (listaGiornata.length > 1 && listaGiornata[1].userId === targetUserId) argenti++;
+            if (listaGiornata.length > 2 && listaGiornata[2].userId === targetUserId) bronzi++;
+        }
+
+        document.getElementById("stat-squadre-create").innerText = squadreCreateCount;
+        document.getElementById("stat-draft-tentati").innerText = draftTentati;
+        document.getElementById("stat-miglior-punteggio").innerText = `${migliorPunteggio.toFixed(1)} pt`;
+        document.getElementById("stat-punti-totali").innerText = `${puntiTotali.toFixed(1)} pt`;
+
+        document.getElementById("stat-podi-oro").innerText = ori;
+        document.getElementById("stat-podi-argento").innerText = argenti;
+        document.getElementById("stat-podi-bronzo").innerText = bronzi;
+
+    } catch (err) {
+        console.error("Errore caricamento profilo:", err);
+        alert("Errore nel caricamento delle statistiche utente.");
+        tornaAllaHome();
+    }
+}
+
+async function incrementaDraftTentatiCloud() {
+    if (!currentUser) return;
+    try {
+        const userRef = db.collection("utenti").doc(currentUser.uid);
+        await db.runTransaction(async (transaction) => {
+            const doc = await transaction.get(userRef);
+            let currentDrafts = 0;
+            if (doc.exists && doc.data().draftTentati !== undefined) {
+                currentDrafts = doc.data().draftTentati;
+            }
+            transaction.update(userRef, { draftTentati: currentDrafts + 1 });
+        });
+    } catch (e) {
+        console.error("Errore aggiornamento contatore draft:", e);
     }
 }
 
@@ -2479,6 +2666,7 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false) {
     document.getElementById("welcome-screen").style.display = "none";
     document.getElementById("main-app").style.display = "none";
     document.getElementById("classifica-screen").style.display = "none";
+    document.getElementById("profilo-screen").style.display = "none";
     document.getElementById("recap-screen").style.display = "block";
 
     document.getElementById("recap-nome-squadra").innerText = sq.nomeSquadra;
@@ -2546,6 +2734,7 @@ function avviaTestDraft() {
         return;
     }
 
+    incrementaDraftTentatiCloud();
     isTestMode = true;
     tempNomeSquadra = "🧪 Squadra Test Draft";
 
@@ -2600,6 +2789,7 @@ async function preparaEAvviaDraft() {
         return;
     }
 
+    incrementaDraftTentatiCloud();
     isTestMode = false;
     tempNomeSquadra = inputName;
     
@@ -2648,6 +2838,7 @@ function resetDraftState() {
 
 function annullaERicominciaDraft() {
     if (confirm("Vuoi davvero ricominciare il draft? I giocatori selezionati verranno azzerati.")) {
+        incrementaDraftTentatiCloud();
         const titleHtml = isTestMode ? '<h2>Scegli il tuo giocatore (Test)</h2>' : '<h2>Scegli il tuo giocatore</h2>';
         const btnText = isTestMode ? 'Ricomincia Test' : 'Ricomincia Draft';
 
