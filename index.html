@@ -231,7 +231,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 .top-info-row {
     display: flex;
     gap: 12px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     flex-wrap: wrap;
 }
 
@@ -278,6 +278,65 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     padding: 4px 14px;
     border-radius: 10px;
     box-shadow: 0 3px 10px rgba(251, 191, 36, 0.4);
+}
+
+/* HOME PROFILO BANNER WIDGET */
+.home-profile-banner {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.25), rgba(15, 23, 42, 0.9));
+    border: 2px solid var(--accent-blue);
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.25);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.home-profile-banner:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+    border-color: #93c5fd;
+}
+
+.home-profile-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.home-profile-icon {
+    font-size: 28px;
+    color: var(--accent-blue);
+    background: rgba(96, 165, 250, 0.15);
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(96, 165, 250, 0.4);
+}
+
+.home-profile-text .title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #fff;
+}
+
+.home-profile-text .subtitle {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.home-profile-btn {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    box-shadow: 0 3px 10px rgba(59, 130, 246, 0.4);
 }
 
 .top-info-text .title-text {
@@ -1720,6 +1779,18 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
         </div>
     </div>
 
+    <!-- BOX WIDGET ACCESSO RAPIDO PROFILO -->
+    <div class="home-profile-banner" onclick="apriProfiloUtente(currentUser.uid)">
+        <div class="home-profile-left">
+            <div class="home-profile-icon"><i class="fa-solid fa-id-badge"></i></div>
+            <div class="home-profile-text">
+                <div class="title">Il Mio Profilo & Statistiche di Gioco</div>
+                <div class="subtitle">Visualizza podi, record personali, draft fatti e storico squadre</div>
+            </div>
+        </div>
+        <button class="home-profile-btn">Visualizza <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+
     <div class="top-info-row">
         <div class="top-info-card global-teams-box">
             <div style="display:flex; align-items:center; gap:12px;">
@@ -2521,6 +2592,9 @@ async function apriSchermataClassifica(giornata = 8) {
 
 // GESTIONE PAGINA PROFILO / STATISTICHE UTENTE
 async function apriProfiloUtente(targetUserId) {
+    if (!targetUserId && currentUser) targetUserId = currentUser.uid;
+    if (!targetUserId) return;
+
     document.getElementById("welcome-screen").style.display = "none";
     document.getElementById("main-app").style.display = "none";
     document.getElementById("recap-screen").style.display = "none";
