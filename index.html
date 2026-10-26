@@ -1797,7 +1797,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             <div style="display:flex; align-items:center; gap:12px;">
                 <i class="fa-solid fa-shield-halved"></i>
                 <div class="top-info-text">
-                    <div class="title-text" id="global-teams-card-title">Squadre Iscritte (Giornata 9)</div>
+                    <div class="title-text" id="global-teams-card-title">Squadre Iscritte</div>
                     <div class="sub-text">Totale di tutta la lega</div>
                 </div>
             </div>
@@ -2129,11 +2129,18 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 // ----------------------------------------------------
-// CONFIGURAZIONE DINAMICA DELLA GIORNATA CORRENTE
+// CALENDARIO DI SICUREZZA (FALLBACK IN CASO DI RETE ASSENTE)
 // ----------------------------------------------------
-const ACTIVE_MATCHDAY = 9; 
-// Scadenza esatta della 9ª giornata: inizio della prima partita (Sassuolo-Lazio, 27 ottobre 2026 alle 18:30)
-const CURRENT_MATCHDAY_DEADLINE = new Date("2026-10-27T18:30:00"); 
+const CALENDARIO_FALLBACK = {
+    8: new Date("2026-10-20T18:30:00"),
+    9: new Date("2026-10-27T18:30:00"),
+    10: new Date("2026-11-03T18:30:00"),
+    11: new Date("2026-11-10T18:30:00"),
+    12: new Date("2026-11-24T18:30:00")
+};
+
+let ACTIVE_MATCHDAY = 9; 
+let CURRENT_MATCHDAY_DEADLINE = new Date("2026-10-27T18:30:00"); 
 
 let currentUser = null;
 let customPlayersList = [];
@@ -2168,6 +2175,76 @@ let riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Atta
 
 let turno = 0;
 let moduloSelezionato = "";
+
+// ----------------------------------------------------
+// GESTIONE AUTOMATICA DINAMICA DEL MERCATO CON API & CACHE
+// ----------------------------------------------------
+async function inizializzaGiornataEDeadlineDinamica() {
+    const keyCache = "draft_seriea_matchday_info";
+    const keyTime = "draft_seriea_matchday_time";
+    const oraAttuale = new Date().getTime();
+    const durataCache = 2 * 60 * 60 * 1000; // Cache di 2 Ore
+
+    const cacheSalvata = localStorage.getItem(keyCache);
+    const timeSalvato = localStorage.getItem(keyTime);
+
+    // 1. Controlla prima la cache locale se valida
+    if (cacheSalvata && timeSalvato && (oraAttuale - parseInt(timeSalvato) < durataCache)) {
+        try {
+            const parsed = JSON.parse(cacheSalvata);
+            const deadlineCache = new Date(parsed.deadline);
+            if (deadlineCache > new Date()) {
+                ACTIVE_MATCHDAY = parsed.giornata;
+                CURRENT_MATCHDAY_DEADLINE = deadlineCache;
+                currentSelectedMatchday = ACTIVE_MATCHDAY;
+                console.log("⚡ Dati Giornata recuperati da Cache Fast-Load:", ACTIVE_MATCHDAY);
+                return;
+            }
+        } catch(e) {}
+    }
+
+    // 2. Prova il recupero dinamico dall'API Football-Data.org
+    try {
+        const response = await fetch("https://api.football-data.org/v4/competitions/SA/matches?status=SCHEDULED", {
+            headers: { "X-Auth-Token": "1803bfcd108f4c2cb2ee7663a7d45761" }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data && data.matches && data.matches.length > 0) {
+                const primoMatch = data.matches[0];
+                ACTIVE_MATCHDAY = primoMatch.matchday;
+                CURRENT_MATCHDAY_DEADLINE = new Date(primoMatch.utcDate);
+                currentSelectedMatchday = ACTIVE_MATCHDAY;
+
+                // Salva in cache
+                localStorage.setItem(keyCache, JSON.stringify({
+                    giornata: ACTIVE_MATCHDAY,
+                    deadline: CURRENT_MATCHDAY_DEADLINE.toISOString()
+                }));
+                localStorage.setItem(keyTime, oraAttuale.toString());
+                console.log("🌐 Dati Giornata aggiornati con successo da API Web:", ACTIVE_MATCHDAY);
+                return;
+            }
+        }
+    } catch (err) {
+        console.warn("⚠️ API momentaneamente non raggiungibile, attivazione Fallback Interno...", err);
+    }
+
+    // 3. Fallback di Sicurezza (Zero Interruzioni)
+    const adesso = new Date();
+    let trovata = 9;
+    for (let [giornata, deadline] of Object.entries(CALENDARIO_FALLBACK)) {
+        if (adesso < deadline) {
+            trovata = parseInt(giornata);
+            break;
+        }
+    }
+    ACTIVE_MATCHDAY = trovata;
+    CURRENT_MATCHDAY_DEADLINE = CALENDARIO_FALLBACK[ACTIVE_MATCHDAY] || new Date("2026-10-27T18:30:00");
+    currentSelectedMatchday = ACTIVE_MATCHDAY;
+    console.log("🛡️ Giornata calcolata da Calendario Fallback di Sicurezza:", ACTIVE_MATCHDAY);
+}
 
 function getRealUsername(uData, defaultAuthUser) {
     if (uData && uData.username && uData.username.trim() !== "") {
@@ -2225,6 +2302,7 @@ function initCountdown() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+    await inizializzaGiornataEDeadlineDinamica();
     initCountdown();
     await caricaGiocatoriDaExcel();
     await verificaDisponibilitaVotiOk();
@@ -2419,7 +2497,6 @@ async function ottieniNomiSquadreGlobaliGiornata(giornata) {
     }
 }
 
-// Cerca il file con la nomenclatura specifica voti_okX.xlsx (es. voti_ok9.xlsx)
 function verificaDisponibilitaVotiOk() {
     const fileName = `voti_ok${ACTIVE_MATCHDAY}.xlsx`;
     fetch(fileName, { method: "HEAD" })
@@ -3745,7 +3822,7 @@ function mostraTabellinoVoti(sq) {
     html += `</tbody></table>
     <div class="totale-punteggio">🏆 Totale Squadra: ${sq.punteggioTotale !== null ? sq.punteggioTotale : totale} Punti</div>`;
 
-    container.html = html;
+    container.innerHTML = html;
 }
 </script>
 </body>
