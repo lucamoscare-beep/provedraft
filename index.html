@@ -1917,13 +1917,13 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
         <table class="classifica-table">
             <thead>
                 <tr>
-                    <th style="text-align:center;">Pos</th>
+                    <th style="text-align:center;">Posizione</th>
                     <th>Username</th>
                     <th>Nome Squadra</th>
-                    <th>Modulo</th>
-                    <th>Budget Residuo</th>
                     <th>Punti Totali</th>
-                    <th style="text-align:right;">Azione</th>
+                    <th>Budget Rimanente</th>
+                    <th>Modulo</th>
+                    <th style="text-align:right;">Voti</th>
                 </tr>
             </thead>
             <tbody id="classifica-table-body">
@@ -2708,7 +2708,7 @@ async function apriSchermataClassifica(giornata) {
                         <div class="podium-score">${leaderCard.punteggio} pt</div>
                         ${subtextHtml}
                         <button onclick="visualizzaSquadraGenerica('${leaderCard.userId}', '${leaderCard.nomeSquadra.replace(/'/g, "\\'")}', ${giornata})" class="btn-action-primary" style="padding:4px 10px; font-size:10px; margin-top:8px;">
-                            <i class="fa-solid fa-eye"></i> Vedi Formazione
+                            <i class="fa-solid fa-eye"></i> Voti squadra
                         </button>
                     `;
                     podiumArea.appendChild(card);
@@ -2733,12 +2733,12 @@ async function apriSchermataClassifica(giornata) {
                 <td class="rank-cell">${rankDisplay}</td>
                 <td style="font-weight:700; color:var(--accent-blue); cursor:pointer;" onclick="apriProfiloUtente('${item.userId}')"><i class="fa-solid fa-user"></i> ${item.username}</td>
                 <td style="font-weight:800; color:#fff;">${item.nomeSquadra}</td>
-                <td style="color:var(--text-muted);">${item.modulo}</td>
-                <td style="color:var(--accent-gold); font-weight:700;">${item.budgetResiduo} cr</td>
                 <td style="font-weight:900; color:var(--accent-neon-green); font-size:13px;">${item.punteggio} pt</td>
+                <td style="color:var(--accent-gold); font-weight:700;">${item.budgetResiduo} cr</td>
+                <td style="color:var(--text-muted);">${item.modulo}</td>
                 <td style="text-align:right;">
                     <button onclick="visualizzaSquadraGenerica('${item.userId}', '${item.nomeSquadra.replace(/'/g, "\\'")}', ${giornata})" class="btn-action-primary" style="padding:4px 8px; font-size:10px;">
-                        <i class="fa-solid fa-eye"></i> Voti & Schieramento
+                        <i class="fa-solid fa-eye"></i> Voti squadra
                     </button>
                 </td>
             `;
