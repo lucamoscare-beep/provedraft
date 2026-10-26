@@ -506,41 +506,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 
 .btn-home-test:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6); }
 
-.home-voti-area {
-    background: rgba(15, 23, 42, 0.9);
-    border: 1px solid var(--accent-blue);
-    border-radius: 14px;
-    padding: 18px;
-    text-align: center;
-    margin-top: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-
-.btn-home-voti {
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
-    color: #fff;
-    border: 1px solid var(--accent-blue);
-    padding: 12px 24px;
-    border-radius: 10px;
-    font-weight: 800;
-    font-size: 14px;
-    cursor: pointer;
-    text-transform: uppercase;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.btn-home-voti:disabled {
-    background: rgba(51, 65, 85, 0.6);
-    border-color: rgba(255,255,255,0.1);
-    color: var(--text-muted);
-    cursor: not-allowed;
-    box-shadow: none;
-}
-
 /* MAIN DRAFT APP LAYOUT */
 #main-app {
     display: none;
@@ -2212,10 +2177,11 @@ function initCountdown() {
     setInterval(updateTimer, 1000);
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     initCountdown();
-    caricaGiocatoriDaExcel();
-    verificaDisponibilitaVotiOk();
+    await caricaGiocatoriDaExcel();
+    await verificaDisponibilitaVotiOk();
+    await verificaECalcolaVotiAutomaticamente(); // 👈 Calcolo automatico in background per tutte le squadre della giornata
 });
 
 function togglePasswordVisibility(inputId, iconElement) {
@@ -2628,7 +2594,6 @@ async function apriProfiloUtente(targetUserId) {
             if (pts > migliorPunteggio) migliorPunteggio = pts;
         });
 
-        // Calcoliamo i piazzamenti su tutte le giornate registrate nella lega
         let ori = 0, argenti = 0, bronzi = 0;
         
         for (let g = 1; g <= 8; g++) {
@@ -3515,111 +3480,122 @@ function parseColumnVal(row, colNames) {
     return 0;
 }
 
-async function calcolaVotiTutteSquadre() {
-    if (userSquadre.length === 0) return;
-
-    const btn = document.getElementById("btn-calc-home-voti");
-    const txt = document.getElementById("btn-home-voti-text");
-    btn.disabled = true;
-    txt.innerText = "⏳ Calcolo voti in corso...";
-
+// CALCOLO AUTOMATICO IN BACKGROUND PER TUTTE LE SQUADRE DELLA LEGA
+async function verificaECalcolaVotiAutomaticamente() {
     try {
-        const response = await fetch("voti_ok.xlsx");
-        if (!response.ok) throw new Error("File voti_ok.xlsx non trovato!");
+        const response = await fetch("voti_ok.xlsx", { method: "HEAD" });
+        if (!response.ok) return; // File non disponibile
 
-        const arrayBuffer = await response.arrayBuffer();
-        const data = new Uint8Array(arrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array' });
+        // Legge tutti gli utenti e calcola i punteggi per le squadre della giornata in corso
+        const snapshot = await db.collection("utenti").get();
+        let fileResponse = await fetch("voti_ok.xlsx");
+        let arrayBuffer = await fileResponse.arrayBuffer();
+        let workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
 
         let nomeFoglioVoti = workbook.SheetNames.find(s => s.trim().toLowerCase() === "voti") || workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[nomeFoglioVoti];
-        const rows = XLSX.utils.sheet_to_json(worksheet);
+        let rows = XLSX.utils.sheet_to_json(workbook.Sheets[nomeFoglioVoti]);
 
-        userSquadre.forEach(sq => {
-            let votiObj = {};
-            let totaleSquadra = 0;
-            let riserveGiaSubentrate = new Set();
+        for (const docUser of snapshot.docs) {
+            let uData = docUser.data();
+            let squadreArr = uData.squadre || [];
+            let modificato = false;
 
-            const tutteLeRiserve = Object.values(sq.riserveSelezionate).flat();
-            const tuttiGiocatori = [...sq.schierati, ...tutteLeRiserve];
+            squadreArr.forEach(sq => {
+                let giornataSquadra = sq.giornata !== undefined ? sq.giornata : 8;
+                // Calcola solo se manca il punteggio o se è la giornata corrente
+                if (giornataSquadra === currentSelectedMatchday && (sq.punteggioTotale === undefined || sq.punteggioTotale === null)) {
+                    let votiObj = {};
+                    let totaleSquadra = 0;
+                    let riserveGiaSubentrate = new Set();
 
-            tuttiGiocatori.forEach(p => {
-                let nomePulito = p.nome.trim().toLowerCase();
+                    const tutteLeRiserve = Object.values(sq.riserveSelezionate || {}).flat();
+                    const tuttiGiocatori = [...(sq.schierati || []), ...tutteLeRiserve];
 
-                let matchRow = rows.find(row => {
-                    let nomeInRow = String(row.nome || row.Nome || row.NOME || row.calciatore || row.Calciatore || row.Giocatore || "").trim().toLowerCase();
-                    return nomeInRow === nomePulito || nomeInRow.includes(nomePulito) || nomePulito.includes(nomeInRow);
-                });
+                    tuttiGiocatori.forEach(p => {
+                        let nomePulito = p.nome.trim().toLowerCase();
+                        let matchRow = rows.find(row => {
+                            let nomeInRow = String(row.nome || row.Nome || row.NOME || row.calciatore || row.Calciatore || row.Giocatore || "").trim().toLowerCase();
+                            return nomeInRow === nomePulito || nomeInRow.includes(nomePulito) || nomePulito.includes(nomeInRow);
+                        });
 
-                if (matchRow) {
-                    let rawVotoPuro = parseColumnVal(matchRow, ["voto", "Voto", "VOTO"]);
-                    let rawFanta = parseColumnVal(matchRow, ["fantavoto", "Fantavoto", "FANTAVOTO"]);
+                        if (matchRow) {
+                            let rawVotoPuro = parseColumnVal(matchRow, ["voto", "Voto", "VOTO"]);
+                            let rawFanta = parseColumnVal(matchRow, ["fantavoto", "Fantavoto", "FANTAVOTO"]);
+                            if (rawFanta === 0 && rawVotoPuro > 0) rawFanta = rawVotoPuro;
 
-                    if (rawFanta === 0 && rawVotoPuro > 0) rawFanta = rawVotoPuro;
-
-                    if (rawFanta > 0 || rawVotoPuro > 0) {
-                        votiObj[p.nome] = {
-                            voto: rawVotoPuro,
-                            fantavoto: rawFanta,
-                            sv: false,
-                            gf: parseColumnVal(matchRow, ["gf"]),
-                            gs: parseColumnVal(matchRow, ["gs"]),
-                            ass: parseColumnVal(matchRow, ["ass"]),
-                            au: parseColumnVal(matchRow, ["au"]),
-                            esp: parseColumnVal(matchRow, ["Esp", "esp"]),
-                            amm: parseColumnVal(matchRow, ["amm", "Amm"]),
-                            rp: parseColumnVal(matchRow, ["rp"]),
-                            rs: parseColumnVal(matchRow, ["rs"]),
-                            rf: parseColumnVal(matchRow, ["rf"])
-                        };
-                        return;
-                    }
-                }
-
-                votiObj[p.nome] = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
-            });
-
-            sq.schierati.forEach(tit => {
-                let vInfo = votiObj[tit.nome];
-                let eff = vInfo;
-
-                if (!vInfo || vInfo.sv) {
-                    let riserveRuolo = sq.riserveSelezionate[tit.ruolo] || [];
-                    let riservaValida = null;
-
-                    for (let ris of riserveRuolo) {
-                        if (!riserveGiaSubentrate.has(ris.nome)) {
-                            let risInfo = votiObj[ris.nome];
-                            if (risInfo && !risInfo.sv) {
-                                riservaValida = { obj: ris, info: risInfo };
-                                riserveGiaSubentrate.add(ris.nome);
-                                break;
+                            if (rawFanta > 0 || rawVotoPuro > 0) {
+                                votiObj[p.nome] = {
+                                    voto: rawVotoPuro,
+                                    fantavoto: rawFanta,
+                                    sv: false,
+                                    gf: parseColumnVal(matchRow, ["gf"]),
+                                    gs: parseColumnVal(matchRow, ["gs"]),
+                                    ass: parseColumnVal(matchRow, ["ass"]),
+                                    au: parseColumnVal(matchRow, ["au"]),
+                                    esp: parseColumnVal(matchRow, ["esp", "Esp"]),
+                                    amm: parseColumnVal(matchRow, ["amm", "Amm"]),
+                                    rp: parseColumnVal(matchRow, ["rp"]),
+                                    rs: parseColumnVal(matchRow, ["rs"]),
+                                    rf: parseColumnVal(matchRow, ["rf"])
+                                };
+                                return;
                             }
                         }
-                    }
+                        votiObj[p.nome] = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
+                    });
 
-                    if (riservaValida) {
-                        eff = riservaValida.info;
-                    } else {
-                        eff = { voto: 0, fantavoto: 0, sv: true };
-                    }
+                    (sq.schierati || []).forEach(tit => {
+                        let vInfo = votiObj[tit.nome];
+                        let eff = vInfo;
+
+                        if (!vInfo || vInfo.sv) {
+                            let riserveRuolo = (sq.riserveSelezionate || {})[tit.ruolo] || [];
+                            let riservaValida = null;
+
+                            for (let ris of riserveRuolo) {
+                                if (!riserveGiaSubentrate.has(ris.nome)) {
+                                    let risInfo = votiObj[ris.nome];
+                                    if (risInfo && !risInfo.sv) {
+                                        riservaValida = { obj: ris, info: risInfo };
+                                        riserveGiaSubentrate.add(ris.nome);
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (riservaValida) {
+                                eff = riservaValida.info;
+                            } else {
+                                eff = { voto: 0, fantavoto: 0, sv: true };
+                            }
+                        }
+                        totaleSquadra += (eff.fantavoto > 0 ? eff.fantavoto : 0);
+                    });
+
+                    sq.votiGiornata = votiObj;
+                    sq.punteggioTotale = totaleSquadra;
+                    modificato = true;
                 }
-
-                totaleSquadra += (eff.fantavoto > 0 ? eff.fantavoto : 0);
             });
 
-            sq.votiGiornata = votiObj;
-            sq.punteggioTotale = totaleSquadra;
-        });
+            if (modificato) {
+                await db.collection("utenti").doc(docUser.id).update({ squadre: squadreArr });
+            }
+        }
 
-        await db.collection("utenti").doc(currentUser.uid).set({ squadre: userSquadre }, { merge: true });
-        alert("🎉 Punteggi calcolati con successo per tutte le tue squadre!");
-        renderWelcomeScreen();
-
+        // Ricarica i dati dell'utente corrente se loggato
+        if (currentUser) {
+            await caricaDatiUtenteCloud();
+        }
+        console.log("✅ Ricalcolo automatico di tutte le squadre completato con successo!");
     } catch (err) {
-        alert("⚠️ Errore nel calcolo dei voti: " + err.message);
-        updateHomeVotiButtonState();
+        console.log("Errore durante il calcolo automatico in background:", err);
     }
+}
+
+async function calcolaVotiTutteSquadre() {
+    await verificaECalcolaVotiAutomaticamente();
+    alert("🎉 Punteggi calcolati con successo per tutte le squadre della giornata!");
 }
 
 function generaIconeBonusMalus(vInfo) {
