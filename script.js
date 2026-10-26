@@ -1271,7 +1271,7 @@ function schieraGiocatoreDaLista(playerObj, ruolo) {
     renderPanchinaGrafica();
 }
 
-function apriModaleScelta(ruolo, targetType) {
+function apriModaleScelta(ruolo, targetType, indexTitolare = null) {
     if (!isTestMode && !isMarketOpen()) return;
     if (!moduloSelezionato) {
         alert("Scegli prima il modulo tattico");
@@ -1290,7 +1290,10 @@ function apriModaleScelta(ruolo, targetType) {
     overlay.className = "custom-modal-overlay";
     overlay.id = "selection-modal";
 
-    const titoloTarget = targetType === "campo" ? `Titolare (${ruolo})` : `Panchina R${targetType + 1} (${ruolo})`;
+    let titoloTarget = targetType === "campo" ? `Titolare (${ruolo})` : `Panchina R${targetType + 1} (${ruolo})`;
+    if (targetType === "campo_indice" && indexTitolare !== null) {
+        titoloTarget = `Slot Titolare #${indexTitolare + 1} (${ruolo})`;
+    }
 
     let cardHtml = `
         <div class="custom-modal-card" style="border: 2px solid ${colorRuolo};">
@@ -1306,8 +1309,11 @@ function apriModaleScelta(ruolo, targetType) {
         if (isTitolarissimo) statoLabel = `<span style="color:var(--accent-neon-green); font-size:10px;">👤 Già in Campo</span>`;
         else if (isRiserva) statoLabel = `<span style="color:var(--accent-gold); font-size:10px;">🛋️ In Panchina</span>`;
 
+        let paramType = targetType;
+        if (targetType === "campo_indice") paramType = `campo_indice_${indexTitolare}`;
+
         cardHtml += `
-            <div class="modal-player-item" style="border-left: 3px solid ${colorRuolo};" onclick="assegnaGiocatoreDaModale('${p.nome.replace(/'/g, "\\'")}', '${ruolo}', '${targetType}')">
+            <div class="modal-player-item" style="border-left: 3px solid ${colorRuolo};" onclick="assegnaGiocatoreDaModale('${p.nome.replace(/'/g, "\\'")}', '${ruolo}', '${paramType}')">
                 <div>
                     <div class="marquee-container" style="max-width:200px;"><span class="marquee-text" style="color:#fff; font-size:12px; font-weight:bold;">${p.nome}</span></div>
                     <span style="font-size:10px; color:var(--text-muted);">${p.squadra}</span>
@@ -1320,7 +1326,7 @@ function apriModaleScelta(ruolo, targetType) {
     cardHtml += `
             </div>
             <div style="display:flex; gap:8px;">
-                <button onclick="rimuoviSlotSelezionato('${ruolo}', '${targetType}')" class="btn-action-danger" style="flex:1; padding:8px; font-size:11px;">Rimuovi Giocatore</button>
+                <button onclick="rimuoviSlotSelezionato('${ruolo}', '${targetType}', ${indexTitolare})" class="btn-action-danger" style="flex:1; padding:8px; font-size:11px;">Rimuovi / Svuota</button>
                 <button onclick="chiudiModale()" class="btn-action-primary" style="flex:1; padding:8px; font-size:11px; background:rgba(51, 65, 85, 0.9);">Chiudi</button>
             </div>
         </div>
@@ -1345,6 +1351,15 @@ function assegnaGiocatoreDaModale(nomeGiocatore, ruolo, targetType) {
 
     if (targetType === "campo") {
         schierati.push(playerObj);
+    } else if (targetType.startsWith("campo_indice_")) {
+        let indexTitolare = parseInt(targetType.replace("campo_indice_", ""));
+        let titolariRuolo = schierati.filter(s => s.ruolo === ruolo);
+        
+        // Rimuoviamo il vecchio titolare in quella posizione se esisteva
+        if (titolariRuolo[indexTitolare]) {
+            schierati = schierati.filter(s => s.nome !== titolariRuolo[indexTitolare].nome);
+        }
+        schierati.push(playerObj);
     } else {
         let index = parseInt(targetType);
         if (riserveSelezionate[ruolo].length > index) {
@@ -1360,10 +1375,16 @@ function assegnaGiocatoreDaModale(nomeGiocatore, ruolo, targetType) {
     renderPanchinaGrafica();
 }
 
-function rimuoviSlotSelezionato(ruolo, targetType) {
-    if (targetType === "campo") {
-        const titolariRuolo = schierati.filter(s => s.ruolo === ruolo);
-        if (titolariRuolo.length > 0) {
+function rimuoviSlotSelezionato(ruolo, targetType, indexTitolare = null) {
+    if (targetType === "campo" || targetType.startsWith("campo_indice_")) {
+        let idx = indexTitolare;
+        if (targetType.startsWith("campo_indice_")) {
+            idx = parseInt(targetType.replace("campo_indice_", ""));
+        }
+        let titolariRuolo = schierati.filter(s => s.ruolo === ruolo);
+        if (idx !== null && !isNaN(idx) && titolariRuolo[idx]) {
+            schierati = schierati.filter(s => s.nome !== titolariRuolo[idx].nome);
+        } else if (titolariRuolo.length > 0) {
             const daRimuovere = titolariRuolo[titolariRuolo.length - 1];
             schierati = schierati.filter(s => s.nome !== daRimuovere.nome);
         }
@@ -1466,7 +1487,8 @@ function creaRepartoCampo(campoContainer, ruolo, countOrPlayers, isReadOnly = fa
         }
 
         if (!isReadOnly) {
-            dz.onclick = () => apriModaleScelta(ruolo, "campo");
+            const indexSlot = i;
+            dz.onclick = () => apriModaleScelta(ruolo, "campo_indice", indexSlot);
         }
 
         reparto.appendChild(dz);
