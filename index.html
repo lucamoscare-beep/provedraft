@@ -1348,7 +1348,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     padding: 15px;
     text-align: center;
     width: 100%;
-    max-width: 280px;
+    max-width: 300px;
     position: relative;
     box-shadow: 0 8px 25px rgba(0,0,0,0.5);
     transition: transform 0.3s ease;
@@ -1377,8 +1377,9 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 }
 
 .podium-team-name { font-size: 16px; font-weight: 800; color: #fff; margin-top: 10px; }
-.podium-user-name { font-size: 13px; color: var(--accent-blue); font-weight: 700; margin-bottom: 8px; cursor: pointer; text-decoration: underline; }
-.podium-score { font-size: 24px; font-weight: 900; color: var(--accent-neon-green); }
+.podium-user-name { font-size: 13px; color: var(--accent-blue); font-weight: 700; margin-bottom: 6px; cursor: pointer; text-decoration: underline; }
+.podium-score { font-size: 22px; font-weight: 900; color: var(--accent-neon-green); }
+.podium-tie-subtext { font-size: 11px; color: var(--accent-gold); font-weight: 700; margin-top: 6px; background: rgba(251, 191, 36, 0.1); padding: 4px 8px; border-radius: 6px; border: 1px dashed rgba(251, 191, 36, 0.3); }
 
 .classifica-table-container {
     width: 100%;
@@ -1829,9 +1830,9 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
                 <p style="color:var(--text-muted); font-size:11px; margin:0;">Ogni settimana hai 3 gettoni per schierare fino a 3 squadre differenti con nomi diversi.</p>
             </div>
             <div class="rule-box">
-                <i class="fa-solid fa-arrows-rotate"></i>
-                <h4 style="color:#fff; font-size:14px; margin-bottom:4px;">Draft Illimitati</h4>
-                <p style="color:var(--text-muted); font-size:11px; margin:0;">Puoi fare quanti tentativi di draft desideri. Il gettone viene consumato solo quando confermi la squadra!</p>
+                <i class="fa-solid fa-coins"></i>
+                <h4 style="color:#fff; font-size:14px; margin-bottom:4px;">Regola Spartiacque</h4>
+                <p style="color:var(--text-muted); font-size:11px; margin:0;">A parità di punteggio totale in classifica, la posizione superiore viene assegnata in base al <strong>Budget Residuo</strong> più alto.</p>
             </div>
             <div class="rule-box">
                 <i class="fa-solid fa-lock"></i>
@@ -1894,6 +1895,12 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
         </button>
     </div>
 
+    <!-- NOTA INFORMATIVA SPARTIACQUE BUDGET -->
+    <div style="background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); padding: 10px 14px; border-radius: 10px; margin-bottom: 20px; font-size: 12px; color: var(--accent-gold); display: flex; align-items: center; gap: 10px;">
+        <i class="fa-solid fa-circle-info" style="font-size: 16px;"></i>
+        <span><strong>Regola di Parità:</strong> A parità di punteggio totale, la classifica e i piazzamenti sul podio premiano la squadra con il <strong>Budget Residuo</strong> più alto.</span>
+    </div>
+
     <div id="podium-area" class="podium-container"></div>
 
     <h3>Tutti i Partecipanti</h3>
@@ -1905,12 +1912,13 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
                     <th>Username</th>
                     <th>Nome Squadra</th>
                     <th>Modulo</th>
+                    <th>Budget Residuo</th>
                     <th>Punti Totali</th>
                     <th style="text-align:right;">Azione</th>
                 </tr>
             </thead>
             <tbody id="classifica-table-body">
-                <tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Caricamento classifica...</td></tr>
+                <tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Caricamento classifica...</td></tr>
             </tbody>
         </table>
     </div>
@@ -2605,7 +2613,7 @@ async function apriSchermataClassifica(giornata) {
     const podiumArea = document.getElementById("podium-area");
     const tableBody = document.getElementById("classifica-table-body");
     podiumArea.innerHTML = "";
-    tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Caricamento dati classifica in corso...</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Caricamento dati classifica in corso...</td></tr>`;
 
     try {
         const snapshot = await db.collection("utenti").get();
@@ -2619,71 +2627,89 @@ async function apriSchermataClassifica(giornata) {
             squadreArr.forEach(sq => {
                 let g = sq.giornata !== undefined ? sq.giornata : 8; 
                 if (g === giornata) {
+                    let budgetResiduo = sq.budget !== undefined && sq.budget !== null ? sq.budget : 0;
                     tutteSquadreLega.push({
                         username: username,
                         userId: doc.id,
                         nomeSquadra: sq.nomeSquadra,
                         modulo: sq.moduloSelezionato,
                         punteggio: sq.punteggioTotale !== null && sq.punteggioTotale !== undefined ? sq.punteggioTotale : 0,
+                        budgetResiduo: budgetResiduo,
                         squadraObj: sq
                     });
                 }
             });
         });
 
-        // Ordinamento per punteggio decrescente
-        tutteSquadreLega.sort((a, b) => b.punteggio - a.punteggio);
+        // Ordinamento con discriminante di spartiacque:
+        // 1. Punteggio Totale decrescente
+        // 2. Budget Residuo decrescente (a parità di punti, chi ha risparmiato più crediti sta sopra)
+        tutteSquadreLega.sort((a, b) => {
+            if (b.punteggio !== a.punteggio) {
+                return b.punteggio - a.punteggio;
+            }
+            return b.budgetResiduo - a.budgetResiduo;
+        });
 
         if (tutteSquadreLega.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Nessuna squadra iscritta per la giornata n°${giornata}.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Nessuna squadra iscritta per la giornata n°${giornata}.</td></tr>`;
             return;
         }
 
-        // Assegnazione dei piazzamenti con gestione parimerito (ex aequo)
+        // Assegnazione rigorosa dei ranghi progressivi (1, 2, 3, 4...) grazie allo spartiacque del budget
         let classificaConRango = [];
-        let currentRank = 1;
         for (let i = 0; i < tutteSquadreLega.length; i++) {
-            if (i > 0 && tutteSquadreLega[i].punteggio < tutteSquadreLega[i - 1].punteggio) {
-                currentRank = i + 1;
-            }
             classificaConRango.push({
                 ...tutteSquadreLega[i],
-                rank: currentRank
+                rank: i + 1
             });
         }
 
-        // Podio: seleziona tutte le squadre che rientrano nel 1°, 2° o 3° posto (gestendo eventuali parimeriti multipli)
-        const topPodioSquadre = classificaConRango.filter(item => item.rank <= 3);
+        // Creazione del Podio (1°, 2°, 3° posto) con conteggio esatto di chi ha lo stesso punteggio
+        const topTre = classificaConRango.filter(item => item.rank <= 3);
 
-        if (topPodioSquadre.length > 0) {
-            // Raggruppiamo per rango (1, 2, 3) per costruire le card del podio ordinate correttamente
+        if (topTre.length > 0) {
+            // Raggruppiamo per posizione sul podio (1, 2, 3)
             const gruppiPodio = { 1: [], 2: [], 3: [] };
-            topPodioSquadre.forEach(item => {
+            topTre.forEach(item => {
                 if (gruppiPodio[item.rank]) gruppiPodio[item.rank].push(item);
             });
 
-            // Struttura visiva ordinata: Argento (2) a sinistra, Oro (1) al centro, Bronzo (3) a destra (se presenti)
+            // Struttura visiva: Argento (2) a sinistra, Oro (1) al centro, Bronzo (3) a destra
             [2, 1, 3].forEach(targetRank => {
                 const listaGruppo = gruppiPodio[targetRank];
                 if (listaGruppo && listaGruppo.length > 0) {
                     const classes = { 1: "gold", 2: "silver", 3: "bronze" };
                     const trophyImages = { 1: "icone/coppa1.png", 2: "icone/coppa2.png", 3: "icone/coppa3.png" };
+                    
+                    // Il primo classificato in quel gradino è il "protagonista" della card
+                    const leaderCard = listaGruppo[0];
+                    // Quanti altri hanno esattamente lo stesso punteggio?
+                    const puntiLeader = leaderCard.punteggio;
+                    
+                    // Contiamo quanti nella lega totale hanno lo stesso identico punteggio di questo gruppo
+                    const quantiConStessoPunteggio = tutteSquadreLega.filter(x => x.punteggio === puntiLeader).length;
+                    const altriPariPunti = quantiConStessoPunteggio - 1;
 
-                    listaGruppo.forEach(item => {
-                        const card = document.createElement("div");
-                        card.className = `podium-card ${classes[targetRank]}`;
-                        card.innerHTML = `
-                            <div class="podium-rank-badge"><img src="${trophyImages[targetRank]}" class="fanta-trophy-img" alt="${targetRank}° Posto"></div>
-                            <div class="podium-team-name">${item.nomeSquadra}</div>
-                            <div class="podium-user-name" onclick="apriProfiloUtente('${item.userId}')"><i class="fa-solid fa-user"></i> ${item.username}</div>
-                            <div style="font-size:10px; color:var(--text-muted); margin-bottom:5px;">Modulo: ${item.modulo} | ${targetRank}° Posto</div>
-                            <div class="podium-score">${item.punteggio} pt</div>
-                            <button onclick="visualizzaSquadraGenerica('${item.userId}', '${item.nomeSquadra.replace(/'/g, "\\'")}', ${giornata})" class="btn-action-primary" style="padding:4px 10px; font-size:10px; margin-top:8px;">
-                                <i class="fa-solid fa-eye"></i> Vedi Formazione
-                            </button>
-                        `;
-                        podiumArea.appendChild(card);
-                    });
+                    let subtextHtml = "";
+                    if (altriPariPunti > 0) {
+                        subtextHtml = `<div class="podium-tie-subtext">🤝 e altri ${altriPariPunti} fantallenator${altriPariPunti === 1 ? 'e' : 'i'} a ${puntiLeader} pt</div>`;
+                    }
+
+                    const card = document.createElement("div");
+                    card.className = `podium-card ${classes[targetRank]}`;
+                    card.innerHTML = `
+                        <div class="podium-rank-badge"><img src="${trophyImages[targetRank]}" class="fanta-trophy-img" alt="${targetRank}° Posto"></div>
+                        <div class="podium-team-name">${leaderCard.nomeSquadra}</div>
+                        <div class="podium-user-name" onclick="apriProfiloUtente('${leaderCard.userId}')"><i class="fa-solid fa-user"></i> ${leaderCard.username}</div>
+                        <div style="font-size:10px; color:var(--text-muted); margin-bottom:4px;">Modulo: ${leaderCard.modulo} | Budget: ${leaderCard.budgetResiduo} cr</div>
+                        <div class="podium-score">${leaderCard.punteggio} pt</div>
+                        ${subtextHtml}
+                        <button onclick="visualizzaSquadraGenerica('${leaderCard.userId}', '${leaderCard.nomeSquadra.replace(/'/g, "\\'")}', ${giornata})" class="btn-action-primary" style="padding:4px 10px; font-size:10px; margin-top:8px;">
+                            <i class="fa-solid fa-eye"></i> Vedi Formazione
+                        </button>
+                    `;
+                    podiumArea.appendChild(card);
                 }
             });
         }
@@ -2706,6 +2732,7 @@ async function apriSchermataClassifica(giornata) {
                 <td style="font-weight:700; color:var(--accent-blue); cursor:pointer;" onclick="apriProfiloUtente('${item.userId}')"><i class="fa-solid fa-user"></i> ${item.username}</td>
                 <td style="font-weight:800; color:#fff;">${item.nomeSquadra}</td>
                 <td style="color:var(--text-muted);">${item.modulo}</td>
+                <td style="color:var(--accent-gold); font-weight:700;">${item.budgetResiduo} cr</td>
                 <td style="font-weight:900; color:var(--accent-neon-green); font-size:13px;">${item.punteggio} pt</td>
                 <td style="text-align:right;">
                     <button onclick="visualizzaSquadraGenerica('${item.userId}', '${item.nomeSquadra.replace(/'/g, "\\'")}', ${giornata})" class="btn-action-primary" style="padding:4px 8px; font-size:10px;">
@@ -2717,7 +2744,7 @@ async function apriSchermataClassifica(giornata) {
         });
 
     } catch (err) {
-        tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--accent-red);">Errore durante il caricamento della classifica.</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--accent-red);">Errore durante il caricamento della classifica.</td></tr>`;
     }
 }
 
@@ -2758,7 +2785,7 @@ async function apriProfiloUtente(targetUserId) {
             if (pts > migliorPunteggio) migliorPunteggio = pts;
         });
 
-        // Calcolo bacheca coppe con supporto completo ai parimeriti (ex aequo)
+        // Calcolo bacheca coppe basato sulla classifica ordinata (con spartiacque budget)
         let ori = 0, argenti = 0, bronzi = 0;
         const ultimaGiornataVoti = getUltimaGiornataConVoti();
         
@@ -2773,7 +2800,8 @@ async function apriProfiloUtente(targetUserId) {
                     if (gSq === g) {
                         listaGiornata.push({
                             userId: docU.id,
-                            punteggio: sq.punteggioTotale !== null && sq.punteggioTotale !== undefined ? sq.punteggioTotale : 0
+                            punteggio: sq.punteggioTotale !== null && sq.punteggioTotale !== undefined ? sq.punteggioTotale : 0,
+                            budgetResiduo: sq.budget !== undefined && sq.budget !== null ? sq.budget : 0
                         });
                     }
                 });
@@ -2781,27 +2809,18 @@ async function apriProfiloUtente(targetUserId) {
 
             if (listaGiornata.length === 0) continue;
 
-            listaGiornata.sort((a, b) => b.punteggio - a.punteggio);
+            // Ordinamento identico alla classifica ufficiale
+            listaGiornata.sort((a, b) => {
+                if (b.punteggio !== a.punteggio) return b.punteggio - a.punteggio;
+                return b.budgetResiduo - a.budgetResiduo;
+            });
 
-            // Assegnazione ranghi con parimerito
-            let classificaGiornataRango = [];
-            let currentRank = 1;
-            for (let i = 0; i < listaGiornata.length; i++) {
-                if (i > 0 && listaGiornata[i].punteggio < listaGiornata[i - 1].punteggio) {
-                    currentRank = i + 1;
-                }
-                classificaGiornataRango.push({
-                    userId: listaGiornata[i].userId,
-                    rank: currentRank
-                });
-            }
-
-            // Verifica se l'utente possiede squadre che rientrano in 1°, 2° o 3° posto (anche a pari merito)
-            classificaGiornataRango.forEach(item => {
+            listaGiornata.forEach((item, index) => {
+                let rank = index + 1;
                 if (item.userId === targetUserId) {
-                    if (item.rank === 1) ori++;
-                    else if (item.rank === 2) argenti++;
-                    else if (item.rank === 3) bronzi++;
+                    if (rank === 1) ori++;
+                    else if (rank === 2) argenti++;
+                    else if (rank === 3) bronzi++;
                 }
             });
         }
@@ -3576,6 +3595,7 @@ async function confermaFormazioneDefinitiva() {
             moduloSelezionato: moduloSelezionato,
             schierati: JSON.parse(JSON.stringify(schierati)),
             riserveSelezionate: JSON.parse(JSON.stringify(riserveSelezionate)),
+            budget: budget,
             votiGiornata: {},
             punteggioTotale: null,
             isTest: true
