@@ -2188,7 +2188,6 @@ async function inizializzaGiornataEDeadlineDinamica() {
     const cacheSalvata = localStorage.getItem(keyCache);
     const timeSalvato = localStorage.getItem(keyTime);
 
-    // 1. Controlla prima la cache locale se valida
     if (cacheSalvata && timeSalvato && (oraAttuale - parseInt(timeSalvato) < durataCache)) {
         try {
             const parsed = JSON.parse(cacheSalvata);
@@ -2197,13 +2196,11 @@ async function inizializzaGiornataEDeadlineDinamica() {
                 ACTIVE_MATCHDAY = parsed.giornata;
                 CURRENT_MATCHDAY_DEADLINE = deadlineCache;
                 currentSelectedMatchday = getUltimaGiornataConVoti();
-                console.log("⚡ Dati Giornata recuperati da Cache Fast-Load:", ACTIVE_MATCHDAY);
                 return;
             }
         } catch(e) {}
     }
 
-    // 2. Prova il recupero dinamico dall'API Football-Data.org
     try {
         const response = await fetch("https://api.football-data.org/v4/competitions/SA/matches?status=SCHEDULED", {
             headers: { "X-Auth-Token": "1803bfcd108f4c2cb2ee7663a7d45761" }
@@ -2217,21 +2214,16 @@ async function inizializzaGiornataEDeadlineDinamica() {
                 CURRENT_MATCHDAY_DEADLINE = new Date(primoMatch.utcDate);
                 currentSelectedMatchday = getUltimaGiornataConVoti();
 
-                // Salva in cache
                 localStorage.setItem(keyCache, JSON.stringify({
                     giornata: ACTIVE_MATCHDAY,
                     deadline: CURRENT_MATCHDAY_DEADLINE.toISOString()
                 }));
                 localStorage.setItem(keyTime, oraAttuale.toString());
-                console.log("🌐 Dati Giornata aggiornati con successo da API Web:", ACTIVE_MATCHDAY);
                 return;
             }
         }
-    } catch (err) {
-        console.warn("⚠️ API momentaneamente non raggiungibile, attivazione Fallback Interno...", err);
-    }
+    } catch (err) {}
 
-    // 3. Fallback di Sicurezza (Zero Interruzioni)
     const adesso = new Date();
     let trovata = 9;
     for (let [giornata, deadline] of Object.entries(CALENDARIO_FALLBACK)) {
@@ -2243,11 +2235,9 @@ async function inizializzaGiornataEDeadlineDinamica() {
     ACTIVE_MATCHDAY = trovata;
     CURRENT_MATCHDAY_DEADLINE = CALENDARIO_FALLBACK[ACTIVE_MATCHDAY] || new Date("2026-10-27T18:30:00");
     currentSelectedMatchday = getUltimaGiornataConVoti();
-    console.log("🛡️ Giornata calcolata da Calendario Fallback di Sicurezza:", ACTIVE_MATCHDAY);
 }
 
 function getUltimaGiornataConVoti() {
-    // Restituisce sempre l'ultima giornata con voti calcolati (es. se Active è 9, restituisce 8)
     return Math.max(1, ACTIVE_MATCHDAY - 1);
 }
 
@@ -2474,7 +2464,6 @@ async function calcolaEVisualizzaTotaleSquadreGlobali(giornataCorrente = ACTIVE_
         const titleEl = document.getElementById("global-teams-card-title");
         if (titleEl) titleEl.innerText = `Squadre Iscritte (Giornata ${giornataCorrente})`;
     } catch (err) {
-        console.error("Errore calcolo squadre globali:", err);
         const badgeEl = document.getElementById("total-global-teams-count");
         if (badgeEl) badgeEl.innerText = "0";
     }
@@ -2497,7 +2486,6 @@ async function ottieniNomiSquadreGlobaliGiornata(giornata) {
         });
         return nomiSquadre;
     } catch (err) {
-        console.error("Errore recupero nomi squadre globali:", err);
         return [];
     }
 }
@@ -2643,6 +2631,7 @@ async function apriSchermataClassifica(giornata) {
             });
         });
 
+        // Ordinamento per punteggio decrescente
         tutteSquadreLega.sort((a, b) => b.punteggio - a.punteggio);
 
         if (tutteSquadreLega.length === 0) {
@@ -2650,40 +2639,67 @@ async function apriSchermataClassifica(giornata) {
             return;
         }
 
-        if (tutteSquadreLega.length >= 1) {
-            const top3 = tutteSquadreLega.slice(0, 3);
-            const classes = ["gold", "silver", "bronze"];
-            const trophyImages = ["icone/coppa1.png", "icone/coppa2.png", "icone/coppa3.png"];
+        // Assegnazione dei piazzamenti con gestione parimerito (ex aequo)
+        let classificaConRango = [];
+        let currentRank = 1;
+        for (let i = 0; i < tutteSquadreLega.length; i++) {
+            if (i > 0 && tutteSquadreLega[i].punteggio < tutteSquadreLega[i - 1].punteggio) {
+                currentRank = i + 1;
+            }
+            classificaConRango.push({
+                ...tutteSquadreLega[i],
+                rank: currentRank
+            });
+        }
 
-            top3.forEach((item, i) => {
-                const card = document.createElement("div");
-                card.className = `podium-card ${classes[i]}`;
-                card.innerHTML = `
-                    <div class="podium-rank-badge"><img src="${trophyImages[i]}" class="fanta-trophy-img" alt="Podio ${i+1}°"></div>
-                    <div class="podium-team-name">${item.nomeSquadra}</div>
-                    <div class="podium-user-name" onclick="apriProfiloUtente('${item.userId}')"><i class="fa-solid fa-user"></i> ${item.username}</div>
-                    <div style="font-size:10px; color:var(--text-muted); margin-bottom:5px;">Modulo: ${item.modulo}</div>
-                    <div class="podium-score">${item.punteggio} pt</div>
-                    <button onclick="visualizzaSquadraGenerica('${item.userId}', '${item.nomeSquadra.replace(/'/g, "\\'")}', ${giornata})" class="btn-action-primary" style="padding:4px 10px; font-size:10px; margin-top:8px;">
-                        <i class="fa-solid fa-eye"></i> Vedi Formazione
-                    </button>
-                `;
-                podiumArea.appendChild(card);
+        // Podio: seleziona tutte le squadre che rientrano nel 1°, 2° o 3° posto (gestendo eventuali parimeriti multipli)
+        const topPodioSquadre = classificaConRango.filter(item => item.rank <= 3);
+
+        if (topPodioSquadre.length > 0) {
+            // Raggruppiamo per rango (1, 2, 3) per costruire le card del podio ordinate correttamente
+            const gruppiPodio = { 1: [], 2: [], 3: [] };
+            topPodioSquadre.forEach(item => {
+                if (gruppiPodio[item.rank]) gruppiPodio[item.rank].push(item);
+            });
+
+            // Struttura visiva ordinata: Argento (2) a sinistra, Oro (1) al centro, Bronzo (3) a destra (se presenti)
+            [2, 1, 3].forEach(targetRank => {
+                const listaGruppo = gruppiPodio[targetRank];
+                if (listaGruppo && listaGruppo.length > 0) {
+                    const classes = { 1: "gold", 2: "silver", 3: "bronze" };
+                    const trophyImages = { 1: "icone/coppa1.png", 2: "icone/coppa2.png", 3: "icone/coppa3.png" };
+
+                    listaGruppo.forEach(item => {
+                        const card = document.createElement("div");
+                        card.className = `podium-card ${classes[targetRank]}`;
+                        card.innerHTML = `
+                            <div class="podium-rank-badge"><img src="${trophyImages[targetRank]}" class="fanta-trophy-img" alt="${targetRank}° Posto"></div>
+                            <div class="podium-team-name">${item.nomeSquadra}</div>
+                            <div class="podium-user-name" onclick="apriProfiloUtente('${item.userId}')"><i class="fa-solid fa-user"></i> ${item.username}</div>
+                            <div style="font-size:10px; color:var(--text-muted); margin-bottom:5px;">Modulo: ${item.modulo} | ${targetRank}° Posto</div>
+                            <div class="podium-score">${item.punteggio} pt</div>
+                            <button onclick="visualizzaSquadraGenerica('${item.userId}', '${item.nomeSquadra.replace(/'/g, "\\'")}', ${giornata})" class="btn-action-primary" style="padding:4px 10px; font-size:10px; margin-top:8px;">
+                                <i class="fa-solid fa-eye"></i> Vedi Formazione
+                            </button>
+                        `;
+                        podiumArea.appendChild(card);
+                    });
+                }
             });
         }
 
         tableBody.innerHTML = "";
-        tutteSquadreLega.forEach((item, idx) => {
+        classificaConRango.forEach((item) => {
             const tr = document.createElement("tr");
             
             if (currentUser && item.userId === currentUser.uid) {
                 tr.className = "current-user-row";
             }
 
-            let rankDisplay = idx + 1;
-            if (idx === 0) rankDisplay = `<img src="icone/coppa1.png" class="fanta-trophy-img" alt="1° Posto">`;
-            else if (idx === 1) rankDisplay = `<img src="icone/coppa2.png" class="fanta-trophy-img" alt="2° Posto">`;
-            else if (idx === 2) rankDisplay = `<img src="icone/coppa3.png" class="fanta-trophy-img" alt="3° Posto">`;
+            let rankDisplay = item.rank;
+            if (item.rank === 1) rankDisplay = `<img src="icone/coppa1.png" class="fanta-trophy-img" alt="1° Posto">`;
+            else if (item.rank === 2) rankDisplay = `<img src="icone/coppa2.png" class="fanta-trophy-img" alt="2° Posto">`;
+            else if (item.rank === 3) rankDisplay = `<img src="icone/coppa3.png" class="fanta-trophy-img" alt="3° Posto">`;
 
             tr.innerHTML = `
                 <td class="rank-cell">${rankDisplay}</td>
@@ -2701,7 +2717,6 @@ async function apriSchermataClassifica(giornata) {
         });
 
     } catch (err) {
-        console.error("Errore recupero classifica:", err);
         tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--accent-red);">Errore durante il caricamento della classifica.</td></tr>`;
     }
 }
@@ -2743,6 +2758,7 @@ async function apriProfiloUtente(targetUserId) {
             if (pts > migliorPunteggio) migliorPunteggio = pts;
         });
 
+        // Calcolo bacheca coppe con supporto completo ai parimeriti (ex aequo)
         let ori = 0, argenti = 0, bronzi = 0;
         const ultimaGiornataVoti = getUltimaGiornataConVoti();
         
@@ -2763,10 +2779,31 @@ async function apriProfiloUtente(targetUserId) {
                 });
             });
 
+            if (listaGiornata.length === 0) continue;
+
             listaGiornata.sort((a, b) => b.punteggio - a.punteggio);
-            if (listaGiornata.length > 0 && listaGiornata[0].userId === targetUserId) ori++;
-            if (listaGiornata.length > 1 && listaGiornata[1].userId === targetUserId) argenti++;
-            if (listaGiornata.length > 2 && listaGiornata[2].userId === targetUserId) bronzi++;
+
+            // Assegnazione ranghi con parimerito
+            let classificaGiornataRango = [];
+            let currentRank = 1;
+            for (let i = 0; i < listaGiornata.length; i++) {
+                if (i > 0 && listaGiornata[i].punteggio < listaGiornata[i - 1].punteggio) {
+                    currentRank = i + 1;
+                }
+                classificaGiornataRango.push({
+                    userId: listaGiornata[i].userId,
+                    rank: currentRank
+                });
+            }
+
+            // Verifica se l'utente possiede squadre che rientrano in 1°, 2° o 3° posto (anche a pari merito)
+            classificaGiornataRango.forEach(item => {
+                if (item.userId === targetUserId) {
+                    if (item.rank === 1) ori++;
+                    else if (item.rank === 2) argenti++;
+                    else if (item.rank === 3) bronzi++;
+                }
+            });
         }
 
         document.getElementById("stat-squadre-create").innerText = squadreCreateCount;
@@ -2779,7 +2816,6 @@ async function apriProfiloUtente(targetUserId) {
         document.getElementById("stat-podi-bronzo").innerText = bronzi;
 
     } catch (err) {
-        console.error("Errore caricamento profilo:", err);
         alert("Errore nel caricamento delle statistiche utente.");
         tornaAllaHome();
     }
@@ -2797,9 +2833,7 @@ async function incrementaDraftTentatiCloud() {
             }
             transaction.update(userRef, { draftTentati: currentDrafts + 1 });
         });
-    } catch (e) {
-        console.error("Errore aggiornamento contatore draft:", e);
-    }
+    } catch (e) {}
 }
 
 function renderMatchdayPills(selectedDay) {
@@ -3063,9 +3097,7 @@ async function caricaGiocatoriDaExcel() {
         if (jsonData.length === 0) throw new Error("Il file giocatori.xlsx è vuoto!");
 
         parseAndSetPlayers(jsonData);
-    } catch (error) {
-        console.error("Errore caricamento giocatori.xlsx:", error);
-    }
+    } catch (error) {}
 }
 
 function parseAndSetPlayers(data) {
@@ -3746,9 +3778,7 @@ async function verificaECalcolaVotiAutomaticamente() {
         if (currentUser) {
             await caricaDatiUtenteCloud();
         }
-    } catch (err) {
-        console.log("Errore durante il calcolo automatico in background:", err);
-    }
+    } catch (err) {}
 }
 
 function generaIconeBonusMalus(vInfo) {
