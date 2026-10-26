@@ -1858,7 +1858,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 
         <!-- BANNER DINAMICO STATO VOTI -->
         <div id="home-status-banner-container" style="display:none;">
-            <div id="home-status-banner" class="home-status-banner" onclick="apriSchermataClassifica(ACTIVE_MATCHDAY)">
+            <div id="home-status-banner" class="home-status-banner" onclick="apriSchermataClassifica()">
                 <i id="home-status-icon" class="fa-solid fa-hourglass-half"></i>
                 <span id="home-status-text">In attesa dei voti della giornata</span>
             </div>
@@ -1872,7 +1872,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
         </div>
 
         <div class="home-nav-buttons">
-            <button onclick="apriSchermataClassifica(ACTIVE_MATCHDAY)" class="btn-home-classifica">
+            <button onclick="apriSchermataClassifica()" class="btn-home-classifica">
                 <i class="fa-solid fa-ranking-star"></i> Vedi classifica di giornata
             </button>
             <button onclick="avviaTestDraft()" class="btn-home-test">
@@ -2084,7 +2084,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             <div id="recap-utente-owner" style="font-size:11px; color:var(--accent-blue); font-weight:700;">-</div>
         </div>
         <div style="display:flex; gap:8px;">
-            <button id="btn-recap-back-classifica" onclick="apriSchermataClassifica(currentSelectedMatchday)" class="btn-action-primary" style="background:linear-gradient(135deg, #f59e0b, #d97706); padding:8px 14px; font-size:12px; display:none;"><i class="fa-solid fa-ranking-star"></i> Vedi classifica di giornata</button>
+            <button id="btn-recap-back-classifica" onclick="apriSchermataClassifica()" class="btn-action-primary" style="background:linear-gradient(135deg, #f59e0b, #d97706); padding:8px 14px; font-size:12px; display:none;"><i class="fa-solid fa-ranking-star"></i> Vedi classifica di giornata</button>
             <button onclick="tornaAllaHome()" class="btn-action-primary" style="padding:8px 14px; font-size:12px;"><i class="fa-solid fa-house"></i> Home Page</button>
         </div>
     </div>
@@ -2196,7 +2196,7 @@ async function inizializzaGiornataEDeadlineDinamica() {
             if (deadlineCache > new Date()) {
                 ACTIVE_MATCHDAY = parsed.giornata;
                 CURRENT_MATCHDAY_DEADLINE = deadlineCache;
-                currentSelectedMatchday = ACTIVE_MATCHDAY;
+                currentSelectedMatchday = getUltimaGiornataConVoti();
                 console.log("⚡ Dati Giornata recuperati da Cache Fast-Load:", ACTIVE_MATCHDAY);
                 return;
             }
@@ -2215,7 +2215,7 @@ async function inizializzaGiornataEDeadlineDinamica() {
                 const primoMatch = data.matches[0];
                 ACTIVE_MATCHDAY = primoMatch.matchday;
                 CURRENT_MATCHDAY_DEADLINE = new Date(primoMatch.utcDate);
-                currentSelectedMatchday = ACTIVE_MATCHDAY;
+                currentSelectedMatchday = getUltimaGiornataConVoti();
 
                 // Salva in cache
                 localStorage.setItem(keyCache, JSON.stringify({
@@ -2242,8 +2242,13 @@ async function inizializzaGiornataEDeadlineDinamica() {
     }
     ACTIVE_MATCHDAY = trovata;
     CURRENT_MATCHDAY_DEADLINE = CALENDARIO_FALLBACK[ACTIVE_MATCHDAY] || new Date("2026-10-27T18:30:00");
-    currentSelectedMatchday = ACTIVE_MATCHDAY;
+    currentSelectedMatchday = getUltimaGiornataConVoti();
     console.log("🛡️ Giornata calcolata da Calendario Fallback di Sicurezza:", ACTIVE_MATCHDAY);
+}
+
+function getUltimaGiornataConVoti() {
+    // Restituisce sempre l'ultima giornata con voti calcolati (es. se Active è 9, restituisce 8)
+    return Math.max(1, ACTIVE_MATCHDAY - 1);
 }
 
 function getRealUsername(uData, defaultAuthUser) {
@@ -2498,7 +2503,8 @@ async function ottieniNomiSquadreGlobaliGiornata(giornata) {
 }
 
 function verificaDisponibilitaVotiOk() {
-    const fileName = `voti_ok${ACTIVE_MATCHDAY}.xlsx`;
+    const ultimaGiornataVoti = getUltimaGiornataConVoti();
+    const fileName = `voti_ok${ultimaGiornataVoti}.xlsx`;
     fetch(fileName, { method: "HEAD" })
         .then(res => { 
             isVotiOkAvailable = res.ok; 
@@ -2515,17 +2521,18 @@ function updateHomeStatusBannerState() {
     const banner = document.getElementById("home-status-banner");
     const icon = document.getElementById("home-status-icon");
     const text = document.getElementById("home-status-text");
+    const ultimaGiornataVoti = getUltimaGiornataConVoti();
 
     container.style.display = "block";
 
     if (!isVotiOkAvailable) {
         banner.className = "home-status-banner waiting";
         icon.className = "fa-solid fa-hourglass-half";
-        text.innerText = `In attesa dei voti della giornata ${ACTIVE_MATCHDAY}`;
+        text.innerText = `In attesa dei voti della giornata ${ultimaGiornataVoti}`;
     } else {
         banner.className = "home-status-banner ready";
         icon.className = "fa-solid fa-trophy";
-        text.innerText = `Voti aggiornati per la giornata ${ACTIVE_MATCHDAY}! Guarda i risultati delle tue squadre`;
+        text.innerText = `Voti aggiornati per la giornata ${ultimaGiornataVoti}! Guarda i risultati delle tue squadre`;
     }
 }
 
@@ -2591,7 +2598,10 @@ function renderWelcomeScreen() {
     });
 }
 
-async function apriSchermataClassifica(giornata = ACTIVE_MATCHDAY) {
+async function apriSchermataClassifica(giornata) {
+    if (giornata === undefined || giornata === null) {
+        giornata = getUltimaGiornataConVoti();
+    }
     currentSelectedMatchday = giornata;
 
     document.getElementById("welcome-screen").style.display = "none";
@@ -2734,8 +2744,9 @@ async function apriProfiloUtente(targetUserId) {
         });
 
         let ori = 0, argenti = 0, bronzi = 0;
+        const ultimaGiornataVoti = getUltimaGiornataConVoti();
         
-        for (let g = 1; g <= ACTIVE_MATCHDAY; g++) {
+        for (let g = 1; g <= ultimaGiornataVoti; g++) {
             const snapAll = await db.collection("utenti").get();
             let listaGiornata = [];
             snapAll.forEach(docU => {
@@ -2795,7 +2806,8 @@ function renderMatchdayPills(selectedDay) {
     const container = document.getElementById("matchdays-pills-container");
     container.innerHTML = "";
 
-    for (let g = 1; g <= ACTIVE_MATCHDAY; g++) {
+    const ultimaGiornataVoti = getUltimaGiornataConVoti();
+    for (let g = 1; g <= ultimaGiornataVoti; g++) {
         const btn = document.createElement("button");
         btn.className = `btn-matchday-pill ${g === selectedDay ? 'active' : ''}`;
         btn.innerText = `Giornata ${g}`;
@@ -3624,7 +3636,8 @@ function parseColumnVal(row, colNames) {
 // CALCOLO AUTOMATICO IN BACKGROUND E GESTIONE DINAMICA DEL BANNER STATO (FILE DINAMICO: voti_okX.xlsx)
 async function verificaECalcolaVotiAutomaticamente() {
     try {
-        const fileName = `voti_ok${ACTIVE_MATCHDAY}.xlsx`;
+        const ultimaGiornataVoti = getUltimaGiornataConVoti();
+        const fileName = `voti_ok${ultimaGiornataVoti}.xlsx`;
         const response = await fetch(fileName, { method: "HEAD" });
         if (!response.ok) {
             isVotiOkAvailable = false;
@@ -3650,7 +3663,7 @@ async function verificaECalcolaVotiAutomaticamente() {
 
             squadreArr.forEach(sq => {
                 let giornataSquadra = sq.giornata !== undefined ? sq.giornata : 8;
-                if (giornataSquadra === ACTIVE_MATCHDAY && (sq.punteggioTotale === undefined || sq.punteggioTotale === null)) {
+                if (giornataSquadra === ultimaGiornataVoti && (sq.punteggioTotale === undefined || sq.punteggioTotale === null)) {
                     let votiObj = {};
                     let totaleSquadra = 0;
                     let riserveGiaSubentrate = new Set();
