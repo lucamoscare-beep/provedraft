@@ -19,10 +19,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
-
-
-
-
 <style>
 :root {
     --bg-dark: #0f172a;
@@ -1654,36 +1650,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     transform: translateY(-1px);
     box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
 }
-
-/* STILI PER IL MARQUEE DI SCORRIMENTO CONTINUO */
-.marquee-container {
-    overflow: hidden;
-    white-space: nowrap;
-    display: block;
-    width: 100%;
-    position: relative;
-}
-
-.marquee-container.inline {
-    display: inline-block;
-    vertical-align: middle;
-}
-
-.marquee-text {
-    display: inline-block;
-    white-space: nowrap;
-}
-
-.marquee-text.scroll-active {
-    animation: marqueeScroll linear infinite alternate;
-}
-
-@keyframes marqueeScroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(var(--scroll-distance, -50px)); }
-}
-
-
 </style>
 </head>
 <body>
@@ -2162,9 +2128,6 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
         </div>
     </div>
 </div>
-
-
-
 
 <script>
 const firebaseConfig = {
@@ -3932,36 +3895,6 @@ function mostraTabellinoVoti(sq) {
 
     container.innerHTML = html;
 }
-
-// --- FUNZIONE PER LO SCORRIMENTO CONTINUO (MARQUEE) ---
-function initMarqueeEffects() {
-    document.querySelectorAll('.marquee-container').forEach(container => {
-        const text = container.querySelector('.marquee-text');
-        if (!text) return;
-
-        if (text.scrollWidth > container.clientWidth) {
-            const distance = container.clientWidth - text.scrollWidth;
-            text.style.setProperty('--scroll-distance', `${distance}px`);
-            const duration = Math.max(3, Math.abs(distance) * 0.04);
-            text.style.animationDuration = `${duration}s`;
-            text.classList.add('scroll-active');
-        } else {
-            text.classList.remove('scroll-active');
-        }
-    });
-// --- OSSERVATORE AUTOMATICO (NON DEVI RICHIAMARLO DA NESSUNA PARTE) ---
-const observer = new MutationObserver(() => {
-    initMarqueeEffects();
-});
-
-// Controlla automaticamente se la pagina si aggiorna o compaiono nuovi nomi
-observer.observe(document.body, { childList: true, subtree: true });
-}
-
-window.addEventListener('load', initMarqueeEffects);
-window.addEventListener('resize', initMarqueeEffects);
-
-
 </script>
 </body>
 </html>
