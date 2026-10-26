@@ -375,7 +375,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 
 .rules-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 15px;
     margin: 20px 0;
 }
@@ -384,8 +384,11 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     background: rgba(15, 23, 42, 0.7);
     border: 1px solid var(--card-border);
     border-radius: 12px;
-    padding: 15px;
+    padding: 16px;
     text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
 
 .rule-box i { font-size: 24px; color: var(--accent-gold); margin-bottom: 10px; }
@@ -1819,25 +1822,31 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 
     <div class="welcome-card">
         <div class="welcome-title" id="welcome-greeting">Benvenuto nel Fantacalcio Draft!</div>
-        <p style="color:var(--text-muted); font-size:13px; line-height:1.6;">
+        <p style="color:var(--text-muted); font-size:13px; line-height:1.6; margin-bottom:15px;">
             Sfida gli altri fantallenatori nella prossima giornata di campionato! Costruisci le tue rose tramite il sistema di Draft live, seleziona il modulo tattico e schiera i tuoi titolari prima del fischio d'inizio.
         </p>
 
+        <!-- NUOVA GRIGLIA REGOLE FONDAMENTALI (4 PUNTI) -->
         <div class="rules-grid">
             <div class="rule-box">
                 <i class="fa-solid fa-ticket"></i>
-                <h4 style="color:#fff; font-size:14px; margin-bottom:4px;">3 Gettoni Settimanali</h4>
-                <p style="color:var(--text-muted); font-size:11px; margin:0;">Ogni settimana hai 3 gettoni per schierare fino a 3 squadre differenti con nomi diversi.</p>
+                <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">3 Gettoni Settimanali</h4>
+                <p style="color:var(--text-muted); font-size:11px; margin:0;">Utilizzabili per schierare fino a 3 rose differenti a turno.</p>
             </div>
             <div class="rule-box">
-                <i class="fa-solid fa-coins"></i>
-                <h4 style="color:#fff; font-size:14px; margin-bottom:4px;">Regola Spartiacque</h4>
-                <p style="color:var(--text-muted); font-size:11px; margin:0;">A parità di punteggio totale in classifica, la posizione superiore viene assegnata in base al <strong>Budget Residuo</strong> più alto.</p>
+                <i class="fa-solid fa-rotate"></i>
+                <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">Draft Infiniti</h4>
+                <p style="color:var(--text-muted); font-size:11px; margin:0;">Puoi rifare il draft quante volte vuoi prima della convalida e scelta della formazione ideale.</p>
             </div>
             <div class="rule-box">
-                <i class="fa-solid fa-lock"></i>
-                <h4 style="color:#fff; font-size:14px; margin-bottom:4px;">Salvataggio Definitivo</h4>
-                <p style="color:var(--text-muted); font-size:11px; margin:0;">Una volta convalidata la formazione, la squadra è salvata ed entrerà officially in gara.</p>
+                <i class="fa-solid fa-sack-dollar"></i>
+                <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">600 Crediti</h4>
+                <p style="color:var(--text-muted); font-size:11px; margin:0;">Il budget fisso a disposizione per la realizzazione e l'asta delle rose.</p>
+            </div>
+            <div class="rule-box">
+                <i class="fa-solid fa-ranking-star"></i>
+                <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">Classifiche e Pari Merito</h4>
+                <p style="color:var(--text-muted); font-size:11px; margin:0;">Classifiche di ogni giornata con regola spartiacque basata sul budget residuo in caso di ex aequo.</p>
             </div>
         </div>
 
