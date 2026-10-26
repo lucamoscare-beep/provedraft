@@ -2129,10 +2129,11 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 // ----------------------------------------------------
-// CONFIGURAZIONE GIORNATA DI CAMPIONATO IN CORSO
+// CONFIGURAZIONE DINAMICA DELLA GIORNATA CORRENTE
 // ----------------------------------------------------
-const ACTIVE_MATCHDAY = 9; // Numero della giornata attiva attuale
-const CURRENT_MATCHDAY_DEADLINE = new Date("2026-10-30T20:45:00"); // Data e ora d'inizio della 1a partita della Giornata 9
+const ACTIVE_MATCHDAY = 9; 
+// Scadenza esatta della 9ª giornata: inizio della prima partita (Sassuolo-Lazio, 27 ottobre 2026 alle 18:30)
+const CURRENT_MATCHDAY_DEADLINE = new Date("2026-10-27T18:30:00"); 
 
 let currentUser = null;
 let customPlayersList = [];
@@ -2458,7 +2459,6 @@ function renderWelcomeScreen() {
     document.getElementById("classifica-screen").style.display = "none";
     document.getElementById("profilo-screen").style.display = "none";
 
-    // Squadre dell'utente per la giornata corrente
     const squadreGiornataCorrente = userSquadre.filter(sq => (sq.giornata !== undefined ? sq.giornata : 8) === ACTIVE_MATCHDAY);
 
     let gettoniRimasti = 3 - squadreGiornataCorrente.length;
@@ -3745,7 +3745,7 @@ function mostraTabellinoVoti(sq) {
     html += `</tbody></table>
     <div class="totale-punteggio">🏆 Totale Squadra: ${sq.punteggioTotale !== null ? sq.punteggioTotale : totale} Punti</div>`;
 
-    container.innerHTML = html;
+    container.html = html;
 }
 </script>
 </body>
