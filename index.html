@@ -1922,12 +1922,11 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
                     <th>Nome Squadra</th>
                     <th>Punti Totali</th>
                     <th>Budget Rimanente</th>
-                    <th>Modulo</th>
-                    <th style="text-align:right;">Voti</th>
+                    <th style="text-align:right;">Squadre</th>
                 </tr>
             </thead>
             <tbody id="classifica-table-body">
-                <tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Caricamento classifica...</td></tr>
+                <tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Caricamento classifica...</td></tr>
             </tbody>
         </table>
     </div>
@@ -2622,7 +2621,7 @@ async function apriSchermataClassifica(giornata) {
     const podiumArea = document.getElementById("podium-area");
     const tableBody = document.getElementById("classifica-table-body");
     podiumArea.innerHTML = "";
-    tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Caricamento dati classifica in corso...</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Caricamento dati classifica in corso...</td></tr>`;
 
     try {
         const snapshot = await db.collection("utenti").get();
@@ -2661,7 +2660,7 @@ async function apriSchermataClassifica(giornata) {
         });
 
         if (tutteSquadreLega.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Nessuna squadra iscritta per la giornata n°${giornata}.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Nessuna squadra iscritta per la giornata n°${giornata}.</td></tr>`;
             return;
         }
 
@@ -2707,8 +2706,8 @@ async function apriSchermataClassifica(giornata) {
                         <div style="font-size:10px; color:var(--text-muted); margin-bottom:4px;">Modulo: ${leaderCard.modulo} | Budget: ${leaderCard.budgetResiduo} cr</div>
                         <div class="podium-score">${leaderCard.punteggio} pt</div>
                         ${subtextHtml}
-                        <button onclick="visualizzaSquadraGenerica('${leaderCard.userId}', '${leaderCard.nomeSquadra.replace(/'/g, "\\'")}', ${giornata})" class="btn-action-primary" style="padding:4px 10px; font-size:10px; margin-top:8px;">
-                            <i class="fa-solid fa-eye"></i> Voti squadra
+                        <button onclick="visualizzaSquadraGenerica('${leaderCard.userId}', '${leaderCard.nomeSquadra.replace(/'/g, "\\'")}', ${giornata})" class="btn-action-primary" style="padding:4px 10px; font-size:10px; margin-top:8px;" title="Vedi Formazione">
+                            <i class="fa-solid fa-eye"></i>
                         </button>
                     `;
                     podiumArea.appendChild(card);
@@ -2735,10 +2734,9 @@ async function apriSchermataClassifica(giornata) {
                 <td style="font-weight:800; color:#fff;">${item.nomeSquadra}</td>
                 <td style="font-weight:900; color:var(--accent-neon-green); font-size:13px;">${item.punteggio} pt</td>
                 <td style="color:var(--accent-gold); font-weight:700;">${item.budgetResiduo} cr</td>
-                <td style="color:var(--text-muted);">${item.modulo}</td>
                 <td style="text-align:right;">
-                    <button onclick="visualizzaSquadraGenerica('${item.userId}', '${item.nomeSquadra.replace(/'/g, "\\'")}', ${giornata})" class="btn-action-primary" style="padding:4px 8px; font-size:10px;">
-                        <i class="fa-solid fa-eye"></i> Voti squadra
+                    <button onclick="visualizzaSquadraGenerica('${item.userId}', '${item.nomeSquadra.replace(/'/g, "\\'")}', ${giornata})" class="btn-action-primary" style="padding:6px 12px; font-size:11px;" title="Vedi Formazione">
+                        <i class="fa-solid fa-eye"></i>
                     </button>
                 </td>
             `;
@@ -2746,7 +2744,7 @@ async function apriSchermataClassifica(giornata) {
         });
 
     } catch (err) {
-        tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--accent-red);">Errore durante il caricamento della classifica.</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--accent-red);">Errore durante il caricamento della classifica.</td></tr>`;
     }
 }
 
