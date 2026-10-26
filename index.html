@@ -506,6 +506,42 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 
 .btn-home-test:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6); }
 
+/* HOME STATUS BANNER (SOSTITUISCE IL VECCHIO PULSANTE VOTI) */
+.home-status-banner {
+    background: rgba(15, 23, 42, 0.9);
+    border: 1.5px solid var(--card-border);
+    border-radius: 14px;
+    padding: 16px 20px;
+    text-align: center;
+    margin-top: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+}
+
+.home-status-banner.waiting {
+    border-color: var(--accent-gold);
+    color: var(--accent-gold);
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(15, 23, 42, 0.9));
+}
+
+.home-status-banner.ready {
+    border-color: var(--accent-neon-green);
+    color: var(--accent-neon-green);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(15, 23, 42, 0.9));
+    cursor: pointer;
+}
+
+.home-status-banner.ready:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+}
+
 /* MAIN DRAFT APP LAYOUT */
 #main-app {
     display: none;
@@ -1820,10 +1856,12 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             </div>
         </div>
 
-        <div id="home-voti-section" class="home-voti-area" style="display:none;">
-            <button id="btn-calc-home-voti" class="btn-home-voti" disabled onclick="calcolaVotiTutteSquadre()">
-                <i class="fa-solid fa-hourglass-half"></i> <span id="btn-home-voti-text">Torna quando i voti saranno disponibili</span>
-            </button>
+        <!-- NUOVO BANNER DINAMICO STATO VOTI -->
+        <div id="home-status-banner-container" style="display:none;">
+            <div id="home-status-banner" class="home-status-banner" onclick="apriSchermataClassifica(currentSelectedMatchday)">
+                <i id="home-status-icon" class="fa-solid fa-hourglass-half"></i>
+                <span id="home-status-text">In attesa dei voti della giornata 8</span>
+            </div>
         </div>
 
         <div style="margin-top:25px;">
@@ -2181,7 +2219,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     initCountdown();
     await caricaGiocatoriDaExcel();
     await verificaDisponibilitaVotiOk();
-    await verificaECalcolaVotiAutomaticamente(); // 👈 Calcolo automatico in background per tutte le squadre della giornata
+    await verificaECalcolaVotiAutomaticamente(); 
 });
 
 function togglePasswordVisibility(inputId, iconElement) {
@@ -2371,32 +2409,39 @@ async function ottieniNomiSquadreGlobaliGiornata(giornata) {
 
 function verificaDisponibilitaVotiOk() {
     fetch("voti_ok.xlsx", { method: "HEAD" })
-        .then(res => { isVotiOkAvailable = res.ok; updateHomeVotiButtonState(); })
-        .catch(() => { isVotiOkAvailable = false; updateHomeVotiButtonState(); });
+        .then(res => { 
+            isVotiOkAvailable = res.ok; 
+            updateHomeStatusBannerState(); 
+        })
+        .catch(() => { 
+            isVotiOkAvailable = false; 
+            updateHomeStatusBannerState(); 
+        });
 }
 
-function updateHomeVotiButtonState() {
-    const section = document.getElementById("home-voti-section");
-    const btn = document.getElementById("btn-calc-home-voti");
-    const txt = document.getElementById("btn-home-voti-text");
+function updateHomeStatusBannerState() {
+    const container = document.getElementById("home-status-banner-container");
+    const banner = document.getElementById("home-status-banner");
+    const icon = document.getElementById("home-status-icon");
+    const text = document.getElementById("home-status-text");
 
-    if (userSquadre.length === 0) {
-        section.style.display = "none";
+    if (userSquadre.length === 0 && !isVotiOkAvailable) {
+        container.style.display = "none";
         return;
     }
 
-    section.style.display = "block";
+    container.style.display = "block";
 
     if (!isVotiOkAvailable) {
-        btn.disabled = true;
-        btn.style.cursor = "not-allowed";
-        btn.style.background = "rgba(51, 65, 85, 0.6)";
-        txt.innerText = "Torna quando i voti saranno disponibili";
+        // In attesa dei voti della giornata in corso
+        banner.className = "home-status-banner waiting";
+        icon.className = "fa-solid fa-hourglass-half";
+        text.innerText = `In attesa dei voti della giornata ${currentSelectedMatchday}`;
     } else {
-        btn.disabled = false;
-        btn.style.cursor = "pointer";
-        btn.style.background = "linear-gradient(135deg, #2563eb, #1d4ed8)";
-        txt.innerText = userSquadre.length > 1 ? "Voti disponibili! Calcola il punteggio delle tue squadre" : "Calcola il voto della tua squadra";
+        // Voti aggiornati e caricati dopo l'ultima partita
+        banner.className = "home-status-banner ready";
+        icon.className = "fa-solid fa-trophy";
+        text.innerText = `Voti aggiornati per la giornata ${currentSelectedMatchday}! Guarda i risultati delle tue squadre`;
     }
 }
 
@@ -2418,7 +2463,7 @@ function renderWelcomeScreen() {
         document.getElementById("tokens-exhausted-msg").style.display = "none";
     }
 
-    updateHomeVotiButtonState();
+    updateHomeStatusBannerState();
 
     const container = document.getElementById("created-teams-container");
     container.innerHTML = "";
@@ -3480,13 +3525,19 @@ function parseColumnVal(row, colNames) {
     return 0;
 }
 
-// CALCOLO AUTOMATICO IN BACKGROUND PER TUTTE LE SQUADRE DELLA LEGA
+// CALCOLO AUTOMATICO IN BACKGROUND E GESTIONE DINAMICA DEL BANNER STATO
 async function verificaECalcolaVotiAutomaticamente() {
     try {
         const response = await fetch("voti_ok.xlsx", { method: "HEAD" });
-        if (!response.ok) return; // File non disponibile
+        if (!response.ok) {
+            isVotiOkAvailable = false;
+            updateHomeStatusBannerState();
+            return; 
+        }
 
-        // Legge tutti gli utenti e calcola i punteggi per le squadre della giornata in corso
+        isVotiOkAvailable = true;
+        updateHomeStatusBannerState();
+
         const snapshot = await db.collection("utenti").get();
         let fileResponse = await fetch("voti_ok.xlsx");
         let arrayBuffer = await fileResponse.arrayBuffer();
@@ -3502,7 +3553,6 @@ async function verificaECalcolaVotiAutomaticamente() {
 
             squadreArr.forEach(sq => {
                 let giornataSquadra = sq.giornata !== undefined ? sq.giornata : 8;
-                // Calcola solo se manca il punteggio o se è la giornata corrente
                 if (giornataSquadra === currentSelectedMatchday && (sq.punteggioTotale === undefined || sq.punteggioTotale === null)) {
                     let votiObj = {};
                     let totaleSquadra = 0;
@@ -3583,19 +3633,12 @@ async function verificaECalcolaVotiAutomaticamente() {
             }
         }
 
-        // Ricarica i dati dell'utente corrente se loggato
         if (currentUser) {
             await caricaDatiUtenteCloud();
         }
-        console.log("✅ Ricalcolo automatico di tutte le squadre completato con successo!");
     } catch (err) {
         console.log("Errore durante il calcolo automatico in background:", err);
     }
-}
-
-async function calcolaVotiTutteSquadre() {
-    await verificaECalcolaVotiAutomaticamente();
-    alert("🎉 Punteggi calcolati con successo per tutte le squadre della giornata!");
 }
 
 function generaIconeBonusMalus(vInfo) {
