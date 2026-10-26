@@ -506,7 +506,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 
 .btn-home-test:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6); }
 
-/* HOME STATUS BANNER (SOSTITUISCE IL VECCHIO PULSANTE VOTI) */
+/* BANNER DINAMICO STATO VOTI IN HOMEPAGE */
 .home-status-banner {
     background: rgba(15, 23, 42, 0.9);
     border: 1.5px solid var(--card-border);
@@ -1767,7 +1767,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     <div class="deadline-banner">
         <div class="deadline-info">
             <i class="fa-solid fa-stopwatch"></i>
-            <span id="welcome-deadline-text">Iscrivi la tua squadra alla prossima giornata, entro:</span>
+            <span id="welcome-deadline-text">Iscrivi le tue squadre alla prossima giornata entro:</span>
         </div>
         <div class="countdown-timer">
             <div class="countdown-box"><div class="countdown-number" id="w-cd-days">00</div><div class="countdown-label">Giorni</div></div>
@@ -1797,7 +1797,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             <div style="display:flex; align-items:center; gap:12px;">
                 <i class="fa-solid fa-shield-halved"></i>
                 <div class="top-info-text">
-                    <div class="title-text">Squadre Iscritte (Giornata 8)</div>
+                    <div class="title-text" id="global-teams-card-title">Squadre Iscritte (Giornata 9)</div>
                     <div class="sub-text">Totale di tutta la lega</div>
                 </div>
             </div>
@@ -1856,23 +1856,23 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             </div>
         </div>
 
-        <!-- NUOVO BANNER DINAMICO STATO VOTI -->
+        <!-- BANNER DINAMICO STATO VOTI -->
         <div id="home-status-banner-container" style="display:none;">
-            <div id="home-status-banner" class="home-status-banner" onclick="apriSchermataClassifica(currentSelectedMatchday)">
+            <div id="home-status-banner" class="home-status-banner" onclick="apriSchermataClassifica(ACTIVE_MATCHDAY)">
                 <i id="home-status-icon" class="fa-solid fa-hourglass-half"></i>
-                <span id="home-status-text">In attesa dei voti della giornata 8</span>
+                <span id="home-status-text">In attesa dei voti della giornata</span>
             </div>
         </div>
 
         <div style="margin-top:25px;">
-            <h3 style="font-size:15px; color:#fff; border-bottom:1px solid var(--card-border); padding-bottom:6px;">Le tue Squadre create per la giornata di campionato n°8</h3>
+            <h3 style="font-size:15px; color:#fff; border-bottom:1px solid var(--card-border); padding-bottom:6px;" id="user-created-teams-title">Le tue Squadre create per la giornata di campionato in corso</h3>
             <div id="created-teams-container" class="created-teams-list">
                 <p style="color:var(--text-muted); font-size:12px;">Nessuna squadra ancora creata per questo turno.</p>
             </div>
         </div>
 
         <div class="home-nav-buttons">
-            <button onclick="apriSchermataClassifica(8)" class="btn-home-classifica">
+            <button onclick="apriSchermataClassifica(ACTIVE_MATCHDAY)" class="btn-home-classifica">
                 <i class="fa-solid fa-ranking-star"></i> Vedi classifica di giornata
             </button>
             <button onclick="avviaTestDraft()" class="btn-home-test">
@@ -1887,7 +1887,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     <div class="classifica-header">
         <div class="classifica-title-main">
             <i class="fa-solid fa-trophy"></i>
-            <span id="classifica-heading-text">Classifica della giornata n°8</span>
+            <span id="classifica-heading-text">Classifica della giornata</span>
         </div>
         <button onclick="tornaAllaHome()" class="btn-action-primary" style="padding:8px 16px; font-size:12px;">
             <i class="fa-solid fa-house"></i> Torna alla Home
@@ -2128,6 +2128,12 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+// ----------------------------------------------------
+// CONFIGURAZIONE GIORNATA DI CAMPIONATO IN CORSO
+// ----------------------------------------------------
+const ACTIVE_MATCHDAY = 9; // Numero della giornata attiva attuale
+const CURRENT_MATCHDAY_DEADLINE = new Date("2026-10-30T20:45:00"); // Data e ora d'inizio della 1a partita della Giornata 9
+
 let currentUser = null;
 let customPlayersList = [];
 let availablePlayers = [];
@@ -2151,7 +2157,7 @@ const roleColors = {
 let userSquadre = []; 
 let activeTeamIndex = -1; 
 let isVotiOkAvailable = false;
-let currentSelectedMatchday = 8; 
+let currentSelectedMatchday = ACTIVE_MATCHDAY; 
 
 let tempNomeSquadra = "";
 let isTestMode = false;
@@ -2161,8 +2167,6 @@ let riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Atta
 
 let turno = 0;
 let moduloSelezionato = "";
-
-const MATCHDAY_DEADLINE = new Date("2026-10-23T20:45:00"); 
 
 function getRealUsername(uData, defaultAuthUser) {
     if (uData && uData.username && uData.username.trim() !== "") {
@@ -2189,14 +2193,18 @@ function getRealUsername(uData, defaultAuthUser) {
     return "Utente";
 }
 
+function isMarketOpen() {
+    return new Date() < CURRENT_MATCHDAY_DEADLINE;
+}
+
 function initCountdown() {
     function updateTimer() {
         const now = new Date();
-        const diff = MATCHDAY_DEADLINE - now;
+        const diff = CURRENT_MATCHDAY_DEADLINE - now;
 
         if (diff <= 0) {
             document.querySelectorAll(".countdown-timer").forEach(el => el.innerHTML = "<span style='color:var(--accent-red); font-size:18px; font-weight:900;'>❌ MERCATO CHIUSO</span>");
-            document.getElementById("welcome-deadline-text").innerText = "Iscrizione e modifiche bloccate per questa giornata.";
+            document.getElementById("welcome-deadline-text").innerText = `Iscrizione e modifiche bloccate per la giornata ${ACTIVE_MATCHDAY}.`;
             return;
         }
 
@@ -2355,14 +2363,14 @@ async function caricaDatiUtenteCloud() {
         } else {
             userSquadre = [];
         }
-        await calcolaEVisualizzaTotaleSquadreGlobali();
+        await calcolaEVisualizzaTotaleSquadreGlobali(ACTIVE_MATCHDAY);
         renderWelcomeScreen();
     } catch (err) {
         console.error("Errore caricamento dati utente:", err);
     }
 }
 
-async function calcolaEVisualizzaTotaleSquadreGlobali(giornataCorrente = 8) {
+async function calcolaEVisualizzaTotaleSquadreGlobali(giornataCorrente = ACTIVE_MATCHDAY) {
     try {
         const snapshot = await db.collection("utenti").get();
         let conteggioTotale = 0;
@@ -2378,6 +2386,9 @@ async function calcolaEVisualizzaTotaleSquadreGlobali(giornataCorrente = 8) {
 
         const badgeEl = document.getElementById("total-global-teams-count");
         if (badgeEl) badgeEl.innerText = conteggioTotale;
+        
+        const titleEl = document.getElementById("global-teams-card-title");
+        if (titleEl) titleEl.innerText = `Squadre Iscritte (Giornata ${giornataCorrente})`;
     } catch (err) {
         console.error("Errore calcolo squadre globali:", err);
         const badgeEl = document.getElementById("total-global-teams-count");
@@ -2407,8 +2418,10 @@ async function ottieniNomiSquadreGlobaliGiornata(giornata) {
     }
 }
 
+// Cerca il file con la nomenclatura specifica voti_okX.xlsx (es. voti_ok9.xlsx)
 function verificaDisponibilitaVotiOk() {
-    fetch("voti_ok.xlsx", { method: "HEAD" })
+    const fileName = `voti_ok${ACTIVE_MATCHDAY}.xlsx`;
+    fetch(fileName, { method: "HEAD" })
         .then(res => { 
             isVotiOkAvailable = res.ok; 
             updateHomeStatusBannerState(); 
@@ -2425,23 +2438,16 @@ function updateHomeStatusBannerState() {
     const icon = document.getElementById("home-status-icon");
     const text = document.getElementById("home-status-text");
 
-    if (userSquadre.length === 0 && !isVotiOkAvailable) {
-        container.style.display = "none";
-        return;
-    }
-
     container.style.display = "block";
 
     if (!isVotiOkAvailable) {
-        // In attesa dei voti della giornata in corso
         banner.className = "home-status-banner waiting";
         icon.className = "fa-solid fa-hourglass-half";
-        text.innerText = `In attesa dei voti della giornata ${currentSelectedMatchday}`;
+        text.innerText = `In attesa dei voti della giornata ${ACTIVE_MATCHDAY}`;
     } else {
-        // Voti aggiornati e caricati dopo l'ultima partita
         banner.className = "home-status-banner ready";
         icon.className = "fa-solid fa-trophy";
-        text.innerText = `Voti aggiornati per la giornata ${currentSelectedMatchday}! Guarda i risultati delle tue squadre`;
+        text.innerText = `Voti aggiornati per la giornata ${ACTIVE_MATCHDAY}! Guarda i risultati delle tue squadre`;
     }
 }
 
@@ -2452,12 +2458,20 @@ function renderWelcomeScreen() {
     document.getElementById("classifica-screen").style.display = "none";
     document.getElementById("profilo-screen").style.display = "none";
 
-    let gettoniRimasti = 3 - userSquadre.length;
+    // Squadre dell'utente per la giornata corrente
+    const squadreGiornataCorrente = userSquadre.filter(sq => (sq.giornata !== undefined ? sq.giornata : 8) === ACTIVE_MATCHDAY);
+
+    let gettoniRimasti = 3 - squadreGiornataCorrente.length;
     document.getElementById("tokens-count-display-inline").innerText = `${gettoniRimasti} / 3`;
 
-    if (gettoniRimasti <= 0) {
+    if (!isMarketOpen()) {
         document.getElementById("new-team-creation-area").style.display = "none";
         document.getElementById("tokens-exhausted-msg").style.display = "block";
+        document.getElementById("tokens-exhausted-msg").innerText = "🔒 Il mercato è chiuso. Non è più possibile creare o modificare rose per questo turno.";
+    } else if (gettoniRimasti <= 0) {
+        document.getElementById("new-team-creation-area").style.display = "none";
+        document.getElementById("tokens-exhausted-msg").style.display = "block";
+        document.getElementById("tokens-exhausted-msg").innerText = "⚠️ Hai utilizzato tutti i 3 gettoni a disposizione per questa giornata!";
     } else {
         document.getElementById("new-team-creation-area").style.display = "block";
         document.getElementById("tokens-exhausted-msg").style.display = "none";
@@ -2465,15 +2479,17 @@ function renderWelcomeScreen() {
 
     updateHomeStatusBannerState();
 
+    document.getElementById("user-created-teams-title").innerText = `Le tue Squadre create per la giornata di campionato n°${ACTIVE_MATCHDAY}`;
+
     const container = document.getElementById("created-teams-container");
     container.innerHTML = "";
 
-    if (userSquadre.length === 0) {
-        container.innerHTML = `<p style="color:var(--text-muted); font-size:12px;">Nessuna squadra ancora creata per questo turno.</p>`;
+    if (squadreGiornataCorrente.length === 0) {
+        container.innerHTML = `<p style="color:var(--text-muted); font-size:12px;">Nessuna squadra ancora creata per la giornata ${ACTIVE_MATCHDAY}.</p>`;
         return;
     }
 
-    userSquadre.forEach((sq, idx) => {
+    squadreGiornataCorrente.forEach((sq) => {
         const item = document.createElement("div");
         item.className = "team-card-item";
         
@@ -2482,13 +2498,15 @@ function renderWelcomeScreen() {
             punteggioHtml = `<div style="font-size:11px; font-weight:900; color:var(--accent-gold); margin-top:2px;">🏆 Punteggio: ${sq.punteggioTotale} pt</div>`;
         }
 
+        const realIndex = userSquadre.indexOf(sq);
+
         item.innerHTML = `
             <div class="team-card-info">
                 <span class="team-card-name" title="${sq.nomeSquadra}">${sq.nomeSquadra}</span>
                 <div style="font-size:10px; color:var(--text-muted);">Modulo: ${sq.moduloSelezionato}</div>
                 ${punteggioHtml}
             </div>
-            <button onclick="apriRecapSquadraUtenteCorrente(${idx})" class="btn-small-recap">
+            <button onclick="apriRecapSquadraUtenteCorrente(${realIndex})" class="btn-small-recap">
                 <i class="fa-solid fa-eye"></i> Vedi Squadra
             </button>
         `;
@@ -2496,7 +2514,7 @@ function renderWelcomeScreen() {
     });
 }
 
-async function apriSchermataClassifica(giornata = 8) {
+async function apriSchermataClassifica(giornata = ACTIVE_MATCHDAY) {
     currentSelectedMatchday = giornata;
 
     document.getElementById("welcome-screen").style.display = "none";
@@ -2601,7 +2619,6 @@ async function apriSchermataClassifica(giornata = 8) {
     }
 }
 
-// GESTIONE PAGINA PROFILO / STATISTICHE UTENTE
 async function apriProfiloUtente(targetUserId) {
     if (!targetUserId && currentUser) targetUserId = currentUser.uid;
     if (!targetUserId) return;
@@ -2641,7 +2658,7 @@ async function apriProfiloUtente(targetUserId) {
 
         let ori = 0, argenti = 0, bronzi = 0;
         
-        for (let g = 1; g <= 8; g++) {
+        for (let g = 1; g <= ACTIVE_MATCHDAY; g++) {
             const snapAll = await db.collection("utenti").get();
             let listaGiornata = [];
             snapAll.forEach(docU => {
@@ -2701,7 +2718,7 @@ function renderMatchdayPills(selectedDay) {
     const container = document.getElementById("matchdays-pills-container");
     container.innerHTML = "";
 
-    for (let g = 1; g <= 8; g++) {
+    for (let g = 1; g <= ACTIVE_MATCHDAY; g++) {
         const btn = document.createElement("button");
         btn.className = `btn-matchday-pill ${g === selectedDay ? 'active' : ''}`;
         btn.innerText = `Giornata ${g}`;
@@ -2719,8 +2736,8 @@ async function visualizzaSquadraGenerica(userId, nomeSquadra, giornata) {
         const username = getRealUsername(uData, null);
         const squadreArr = uData.squadre || [];
 
-        const sq = squadreArr.find(s => s.nomeSquadra.toLowerCase() === nomeSquadra.toLowerCase());
-        if (!sq) return alert("Squadra non trovata.");
+        const sq = squadreArr.find(s => s.nomeSquadra.toLowerCase() === nomeSquadra.toLowerCase() && (s.giornata !== undefined ? s.giornata : 8) === giornata);
+        if (!sq) return alert("Squadra non trovata per questa giornata.");
 
         renderRecapScreenReadOnly(sq, username, true);
     } catch (err) {
@@ -2770,7 +2787,7 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false) {
         recapBadge.style.background = "rgba(16, 185, 129, 0.2)";
         recapBadge.style.borderColor = "var(--accent-neon-green)";
         recapBadge.style.color = "var(--accent-neon-green)";
-        recapBadge.innerText = "🔒 SQUADRA SALVATA";
+        recapBadge.innerText = `🔒 SQUADRA SALVATA (GIORNATA ${sq.giornata || 8})`;
     }
 
     const recapCampo = document.getElementById("recap-campo");
@@ -2846,13 +2863,14 @@ function avviaTestDraft() {
 }
 
 async function preparaEAvviaDraft() {
-    if (new Date() >= MATCHDAY_DEADLINE) {
-        alert("⚠️ Tempo scaduto! L'iscrizione per questa giornata è chiusa.");
+    if (!isMarketOpen()) {
+        alert(`⚠️ Il mercato è chiuso per la Giornata ${ACTIVE_MATCHDAY}.`);
         return;
     }
 
-    if (userSquadre.length >= 3) {
-        alert("Hai già utilizzato tutti i 3 gettoni disponibili per questa giornata!");
+    const squadreGiornataCorrente = userSquadre.filter(sq => (sq.giornata !== undefined ? sq.giornata : 8) === ACTIVE_MATCHDAY);
+    if (squadreGiornataCorrente.length >= 3) {
+        alert(`Hai già utilizzato tutti i 3 gettoni disponibili per la Giornata ${ACTIVE_MATCHDAY}!`);
         return;
     }
 
@@ -2862,9 +2880,9 @@ async function preparaEAvviaDraft() {
         return;
     }
 
-    const nomiEsistentiLega = await ottieniNomiSquadreGlobaliGiornata(currentSelectedMatchday);
+    const nomiEsistentiLega = await ottieniNomiSquadreGlobaliGiornata(ACTIVE_MATCHDAY);
     if (nomiEsistentiLega.includes(inputName.toLowerCase())) {
-        alert(`❌ Il nome "${inputName}" è già stato scelto da un utente per la Giornata ${currentSelectedMatchday}! Scegli un nome differente.`);
+        alert(`❌ Il nome "${inputName}" è già stato scelto da un utente per la Giornata ${ACTIVE_MATCHDAY}! Scegli un nome differente.`);
         return;
     }
 
@@ -2894,7 +2912,7 @@ async function preparaEAvviaDraft() {
 
     document.getElementById("welcome-screen").style.display = "none";
     document.getElementById("main-app").style.display = "flex";
-    document.getElementById("current-draft-team-title").innerText = `Rosa: ${tempNomeSquadra}`;
+    document.getElementById("current-draft-team-title").innerText = `Rosa: ${tempNomeSquadra} (Giornata ${ACTIVE_MATCHDAY})`;
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
     nextPick();
@@ -3096,7 +3114,7 @@ function renderPlayers() {
 }
 
 function draft(nome) {
-    if (!isTestMode && new Date() >= MATCHDAY_DEADLINE) {
+    if (!isTestMode && !isMarketOpen()) {
         alert("⚠️ Tempo scaduto! Il mercato è chiuso per questa giornata.");
         return;
     }
@@ -3158,7 +3176,7 @@ function renderSlots() {
 }
 
 function schieraGiocatoreDaLista(playerObj, ruolo) {
-    if (!isTestMode && new Date() >= MATCHDAY_DEADLINE) return;
+    if (!isTestMode && !isMarketOpen()) return;
     if (!moduloSelezionato) {
         alert("Scegli prima il modulo tattico");
         return;
@@ -3193,7 +3211,7 @@ function schieraGiocatoreDaLista(playerObj, ruolo) {
 }
 
 function apriModaleScelta(ruolo, targetType) {
-    if (!isTestMode && new Date() >= MATCHDAY_DEADLINE) return;
+    if (!isTestMode && !isMarketOpen()) return;
     if (!moduloSelezionato) {
         alert("Scegli prima il modulo tattico");
         return;
@@ -3322,7 +3340,7 @@ function showModuloSelection() {
 }
 
 function setModulo() {
-    if (!isTestMode && new Date() >= MATCHDAY_DEADLINE) {
+    if (!isTestMode && !isMarketOpen()) {
         alert("⚠️ Tempo scaduto! Impossibile impostare la formazione.");
         return;
     }
@@ -3432,6 +3450,7 @@ async function confermaFormazioneDefinitiva() {
 
     if (isTestMode) {
         const squadraTestObj = {
+            giornata: ACTIVE_MATCHDAY,
             nomeSquadra: tempNomeSquadra,
             moduloSelezionato: moduloSelezionato,
             schierati: JSON.parse(JSON.stringify(schierati)),
@@ -3454,16 +3473,16 @@ async function confermaFormazioneDefinitiva() {
         return;
     }
 
-    if (new Date() >= MATCHDAY_DEADLINE) {
+    if (!isMarketOpen()) {
         alert("⚠️ Tempo scaduto! Non è più possibile confermare la formazione.");
         return;
     }
 
-    if (confirm(`Confermi la squadra "${tempNomeSquadra}"? Questa operazione scalerà 1 Gettone ed è definitiva.`)) {
+    if (confirm(`Confermi la squadra "${tempNomeSquadra}" per la Giornata ${ACTIVE_MATCHDAY}? Questa operazione scalerà 1 Gettone ed è definitiva.`)) {
         try {
-            const nomiEsistentiLega = await ottieniNomiSquadreGlobaliGiornata(currentSelectedMatchday);
+            const nomiEsistentiLega = await ottieniNomiSquadreGlobaliGiornata(ACTIVE_MATCHDAY);
             if (nomiEsistentiLega.includes(tempNomeSquadra.toLowerCase().trim())) {
-                alert(`❌ Un altro utente ha già registrato una squadra chiamata "${tempNomeSquadra}" per la Giornata ${currentSelectedMatchday}! Scegli un nome differente.`);
+                alert(`❌ Un altro utente ha già registrato una squadra chiamata "${tempNomeSquadra}" per la Giornata ${ACTIVE_MATCHDAY}! Scegli un nome differente.`);
                 return;
             }
 
@@ -3475,14 +3494,14 @@ async function confermaFormazioneDefinitiva() {
                 squadreEsistenti = docSnapshot.data().squadre;
             }
 
-            const squadreGiornataCorrente = squadreEsistenti.filter(s => (s.giornata !== undefined ? s.giornata : 8) === currentSelectedMatchday);
+            const squadreGiornataCorrente = squadreEsistenti.filter(s => (s.giornata !== undefined ? s.giornata : 8) === ACTIVE_MATCHDAY);
             if (squadreGiornataCorrente.length >= 3) {
-                alert("⚠️ Hai già utilizzato tutti i 3 gettoni disponibili per questa giornata!");
+                alert(`⚠️ Hai già utilizzato tutti i 3 gettoni disponibili per la Giornata ${ACTIVE_MATCHDAY}!`);
                 return;
             }
 
             const nuovaSquadra = {
-                giornata: currentSelectedMatchday,
+                giornata: ACTIVE_MATCHDAY,
                 nomeSquadra: tempNomeSquadra,
                 rosa: JSON.parse(JSON.stringify(rosa)),
                 schierati: JSON.parse(JSON.stringify(schierati)),
@@ -3502,9 +3521,9 @@ async function confermaFormazioneDefinitiva() {
                 squadre: userSquadre
             }, { merge: true });
 
-            alert(`🎉 Squadra "${tempNomeSquadra}" convalidata e salvata con successo per la Giornata ${currentSelectedMatchday}!`);
+            alert(`🎉 Squadra "${tempNomeSquadra}" convalidata e salvata con successo per la Giornata ${ACTIVE_MATCHDAY}!`);
             document.getElementById("new-team-name-input").value = "";
-            await calcolaEVisualizzaTotaleSquadreGlobali(currentSelectedMatchday);
+            await calcolaEVisualizzaTotaleSquadreGlobali(ACTIVE_MATCHDAY);
             renderWelcomeScreen();
 
         } catch (err) {
@@ -3525,10 +3544,11 @@ function parseColumnVal(row, colNames) {
     return 0;
 }
 
-// CALCOLO AUTOMATICO IN BACKGROUND E GESTIONE DINAMICA DEL BANNER STATO
+// CALCOLO AUTOMATICO IN BACKGROUND E GESTIONE DINAMICA DEL BANNER STATO (FILE DINAMICO: voti_okX.xlsx)
 async function verificaECalcolaVotiAutomaticamente() {
     try {
-        const response = await fetch("voti_ok.xlsx", { method: "HEAD" });
+        const fileName = `voti_ok${ACTIVE_MATCHDAY}.xlsx`;
+        const response = await fetch(fileName, { method: "HEAD" });
         if (!response.ok) {
             isVotiOkAvailable = false;
             updateHomeStatusBannerState();
@@ -3539,7 +3559,7 @@ async function verificaECalcolaVotiAutomaticamente() {
         updateHomeStatusBannerState();
 
         const snapshot = await db.collection("utenti").get();
-        let fileResponse = await fetch("voti_ok.xlsx");
+        let fileResponse = await fetch(fileName);
         let arrayBuffer = await fileResponse.arrayBuffer();
         let workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
 
@@ -3553,7 +3573,7 @@ async function verificaECalcolaVotiAutomaticamente() {
 
             squadreArr.forEach(sq => {
                 let giornataSquadra = sq.giornata !== undefined ? sq.giornata : 8;
-                if (giornataSquadra === currentSelectedMatchday && (sq.punteggioTotale === undefined || sq.punteggioTotale === null)) {
+                if (giornataSquadra === ACTIVE_MATCHDAY && (sq.punteggioTotale === undefined || sq.punteggioTotale === null)) {
                     let votiObj = {};
                     let totaleSquadra = 0;
                     let riserveGiaSubentrate = new Set();
