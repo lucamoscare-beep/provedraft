@@ -1826,17 +1826,17 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
             Sfida gli altri fantallenatori nella prossima giornata di campionato! Costruisci le tue rose tramite il sistema di Draft live, seleziona il modulo tattico e schiera i tuoi titolari prima del fischio d'inizio.
         </p>
 
-        <!-- NUOVA GRIGLIA REGOLE FONDAMENTALI (4 PUNTI) -->
+        <!-- GRIGLIA REGOLE FONDAMENTALI (4 PUNTI) -->
         <div class="rules-grid">
             <div class="rule-box">
-                <i class="fa-solid fa-ticket"></i>
+                <i class="fa-solid fa-coins"></i>
                 <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">3 Gettoni Settimanali</h4>
                 <p style="color:var(--text-muted); font-size:11px; margin:0;">Utilizzabili per schierare fino a 3 rose differenti a turno.</p>
             </div>
             <div class="rule-box">
                 <i class="fa-solid fa-rotate"></i>
                 <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">Draft Infiniti</h4>
-                <p style="color:var(--text-muted); font-size:11px; margin:0;">Puoi rifare il draft quante volte vuoi prima della convalida e scelta della formazione ideale.</p>
+                <p style="color:var(--text-muted); font-size:11px; margin:0;">Puoi rifare il draft quante vuoi prima della convalida e scelta della formazione ideale.</p>
             </div>
             <div class="rule-box">
                 <i class="fa-solid fa-sack-dollar"></i>
@@ -2665,7 +2665,6 @@ async function apriSchermataClassifica(giornata) {
             return;
         }
 
-        // Assegnazione rigorosa dei ranghi progressivi (1, 2, 3, 4...) grazie allo spartiacque del budget
         let classificaConRango = [];
         for (let i = 0; i < tutteSquadreLega.length; i++) {
             classificaConRango.push({
@@ -2674,29 +2673,23 @@ async function apriSchermataClassifica(giornata) {
             });
         }
 
-        // Creazione del Podio (1°, 2°, 3° posto) con conteggio esatto di chi ha lo stesso punteggio
         const topTre = classificaConRango.filter(item => item.rank <= 3);
 
         if (topTre.length > 0) {
-            // Raggruppiamo per posizione sul podio (1, 2, 3)
             const gruppiPodio = { 1: [], 2: [], 3: [] };
             topTre.forEach(item => {
                 if (gruppiPodio[item.rank]) gruppiPodio[item.rank].push(item);
             });
 
-            // Struttura visiva: Argento (2) a sinistra, Oro (1) al centro, Bronzo (3) a destra
             [2, 1, 3].forEach(targetRank => {
                 const listaGruppo = gruppiPodio[targetRank];
                 if (listaGruppo && listaGruppo.length > 0) {
                     const classes = { 1: "gold", 2: "silver", 3: "bronze" };
                     const trophyImages = { 1: "icone/coppa1.png", 2: "icone/coppa2.png", 3: "icone/coppa3.png" };
                     
-                    // Il primo classificato in quel gradino è il "protagonista" della card
                     const leaderCard = listaGruppo[0];
-                    // Quanti altri hanno esattamente lo stesso punteggio?
                     const puntiLeader = leaderCard.punteggio;
                     
-                    // Contiamo quanti nella lega totale hanno lo stesso identico punteggio di questo gruppo
                     const quantiConStessoPunteggio = tutteSquadreLega.filter(x => x.punteggio === puntiLeader).length;
                     const altriPariPunti = quantiConStessoPunteggio - 1;
 
@@ -2794,7 +2787,6 @@ async function apriProfiloUtente(targetUserId) {
             if (pts > migliorPunteggio) migliorPunteggio = pts;
         });
 
-        // Calcolo bacheca coppe basato sulla classifica ordinata (con spartiacque budget)
         let ori = 0, argenti = 0, bronzi = 0;
         const ultimaGiornataVoti = getUltimaGiornataConVoti();
         
@@ -2818,7 +2810,6 @@ async function apriProfiloUtente(targetUserId) {
 
             if (listaGiornata.length === 0) continue;
 
-            // Ordinamento identico alla classifica ufficiale
             listaGiornata.sort((a, b) => {
                 if (b.punteggio !== a.punteggio) return b.punteggio - a.punteggio;
                 return b.budgetResiduo - a.budgetResiduo;
@@ -3199,7 +3190,17 @@ function renderPlayers() {
     let giocatoriMancanti = 24 - totalAcquistati;
     let maxCostAllowed = budget - (giocatoriMancanti - 1);
 
-    let candidates = availablePlayers.filter(p => rosa[p.ruolo].length < limits[p.ruolo] && p.valore <= maxCostAllowed);
+    // FIX DI SICUREZZA: Se manca l'ultimo giocatore e abbiamo esaurito il budget extra, 
+    // forziamo la ricerca esclusivamente sui giocatori che costano esattamente quanto il budget residuo (es. 1 credito).
+    let candidates = [];
+    if (giocatoriMancanti === 1) {
+        candidates = availablePlayers.filter(p => rosa[p.ruolo].length < limits[p.ruolo] && p.valore === budget);
+    }
+
+    if (candidates.length === 0) {
+        candidates = availablePlayers.filter(p => rosa[p.ruolo].length < limits[p.ruolo] && p.valore <= maxCostAllowed);
+    }
+
     if (candidates.length === 0) {
         candidates = availablePlayers.filter(p => rosa[p.ruolo].length < limits[p.ruolo]);
     }
