@@ -439,6 +439,7 @@ async function calcolaEVisualizzaTotaleSquadreGlobali(giornataCorrente = ACTIVE_
             });
         });
 
+        // Al click apre direttamente la schermata della classifica della giornata corrente
         const badgeEl = document.getElementById("total-global-teams-count");
         if (badgeEl) {
             badgeEl.innerText = conteggioTotale;
@@ -508,6 +509,8 @@ function updateHomeStatusBannerState() {
     const ultimaGiornataVoti = getUltimaGiornataConVoti();
 
     container.style.display = "block";
+
+    // Cliccando sul banner si apre sempre la classifica della giornata dei voti (es. la 8)
     banner.style.cursor = "pointer";
     banner.onclick = () => apriSchermataClassifica(ultimaGiornataVoti);
 
@@ -760,65 +763,12 @@ async function apriProfiloUtente(targetUserId) {
         let squadreCreateCount = squadre.length;
         let puntiTotali = 0;
         let migliorPunteggio = 0;
-        let totaleCreditiSpesi = 0;
-        let moduliCount = {};
-        let giocatoriCount = {};
 
         squadre.forEach(sq => {
             let pts = sq.punteggioTotale !== undefined && sq.punteggioTotale !== null ? sq.punteggioTotale : 0;
             puntiTotali += pts;
             if (pts > migliorPunteggio) migliorPunteggio = pts;
-
-            // Crediti spesi per squadra (600 - budget residuo)
-            let bRes = sq.budget !== undefined && sq.budget !== null ? sq.budget : 600;
-            totaleCreditiSpesi += Math.max(0, 600 - bRes);
-
-            // Modulo preferito
-            let mod = sq.moduloSelezionato;
-            if (mod) {
-                moduliCount[mod] = (moduliCount[mod] || 0) + 1;
-            }
-
-            // Calciatore più acquistato (analizziamo la rosa o schierati)
-            let rosaObj = sq.rosa || {};
-            Object.values(rosaObj).forEach(listaRuolo => {
-                listaRuolo.forEach(p => {
-                    if (p && p.nome) {
-                        giocatoriCount[p.nome] = (giocatoriCount[p.nome] || 0) + 1;
-                    }
-                });
-            });
         });
-
-        // Storico presenze (giornate uniche in cui l'utente ha creato almeno una squadra)
-        let giornateUniche = new Set();
-        squadre.forEach(sq => {
-            let g = sq.giornata !== undefined ? sq.giornata : 8;
-            giornateUniche.add(g);
-        });
-        let storicoPresenzeCount = giornateUniche.size;
-
-        // Modulo preferito con %
-        let moduloPreferitoStr = "N/D";
-        if (squadreCreateCount > 0 && Object.keys(moduliCount).length > 0) {
-            let sortedMods = Object.entries(moduliCount).sort((a, b) => b[1] - a[1]);
-            let topMod = sortedMods[0];
-            let pctMod = Math.round((topMod[1] / squadreCreateCount) * 100);
-            moduloPreferitoStr = `${topMod[0]} (${pctMod}%)`;
-        }
-
-        // Calciatore più acquistato (gestione pareggi multipli)
-        let calciatorePiuAcquistatoStr = "Nessuno";
-        if (Object.keys(giocatoriCount).length > 0) {
-            let maxAcquisti = Math.max(...Object.values(giocatoriCount));
-            let topGiocatori = Object.entries(giocatoriCount)
-                .filter(([nome, count]) => count === maxAcquisti)
-                .map(([nome]) => nome);
-
-            if (topGiocatori.length > 0) {
-                calciatorePiuAcquistatoStr = `${topGiocatori.join(", ")} (${maxAcquisti}v.)`;
-            }
-        }
 
         let ori = 0, argenti = 0, bronzi = 0;
         const ultimaGiornataVoti = getUltimaGiornataConVoti();
@@ -858,119 +808,19 @@ async function apriProfiloUtente(targetUserId) {
             });
         }
 
-        // Assegnazione dati base ed estesi al DOM
         document.getElementById("stat-squadre-create").innerText = squadreCreateCount;
         document.getElementById("stat-draft-tentati").innerText = draftTentati;
         document.getElementById("stat-miglior-punteggio").innerText = `${migliorPunteggio.toFixed(1)} pt`;
         document.getElementById("stat-punti-totali").innerText = `${puntiTotali.toFixed(1)} pt`;
 
-        // Nuove statistiche avanzate
-        const elCrediti = document.getElementById("stat-crediti-spesi");
-        if (elCrediti) elCrediti.innerText = `${totaleCreditiSpesi} cr`;
-
-        const elPresenze = document.getElementById("stat-storico-presenze");
-        if (elPresenze) elPresenze.innerText = `${storicoPresenzeCount} Gionate`;
-
-        const elModulo = document.getElementById("stat-modulo-preferito");
-        if (elModulo) elModulo.innerText = moduloPreferitoStr;
-
-        const elTopPlayer = document.getElementById("stat-top-player");
-        if (elTopPlayer) elTopPlayer.innerText = calciatorePiuAcquistatoStr;
-
         document.getElementById("stat-podi-oro").innerText = ori;
         document.getElementById("stat-podi-argento").innerText = argenti;
         document.getElementById("stat-podi-bronzo").innerText = bronzi;
-
-        // Renderizza Badge e Achievement dinamici nel profilo
-        renderProfileBadgesAndAchievements(draftTentati, squadreCreateCount, ori, argenti, bronzi, puntiTotali);
 
     } catch (err) {
         alert("Errore nel caricamento delle statistiche utente.");
         tornaAllaHome();
     }
-}
-
-function renderProfileBadgesAndAchievements(draftTentati, squadreCreateCount, ori, argenti, bronzi, puntiTotali) {
-    const container = document.getElementById("profile-badges-container");
-    if (!container) return;
-
-    // Definizione dei badge / achievement
-    const achievements = [
-        {
-            titolo: "Primo Calcio d'Inizio",
-            desc: "Crea la tua prima squadra in assoluto",
-            icon: "fa-solid fa-shoe-prints",
-            unlocked: squadreCreateCount > 0,
-            progress: squadreCreateCount > 0 ? "Completato" : "0/1"
-        },
-        {
-            titolo: "Veterano del Mercato",
-            desc: "Raggiungi 100 tentativi di Draft",
-            icon: "fa-solid fa-star",
-            unlocked: draftTentati >= 100,
-            progress: `${Math.min(draftTentati, 100)} / 100`
-        },
-        {
-            titolo: "Mago dei Crediti",
-            desc: "Crea almeno una squadra con oltre 100 crediti residui",
-            icon: "fa-solid fa-sack-dollar",
-            unlocked: userSquadre.some(sq => (sq.budget || 0) >= 100),
-            progress: userSquadre.some(sq => (sq.budget || 0) >= 100) ? "Completato" : "In attesa"
-        },
-        {
-            titolo: "Gradino Più Alto",
-            desc: "Ottieni almeno un 1° posto di giornata (Oro)",
-            icon: "fa-solid fa-trophy",
-            unlocked: ori > 0,
-            progress: `${ori} Ori vinti`
-        },
-        {
-            titolo: "Collezionista di Medaglie",
-            desc: "Ottieni almeno 5 podi complessivi (Oro, Argento, Bronzo)",
-            icon: "fa-solid fa-medal",
-            unlocked: (ori + argenti + bronzi) >= 5,
-            progress: `${ori + argenti + bronzi} / 5 Podi`
-        },
-        {
-            titolo: "Bomber di Lega",
-            desc: "Supera i 300 punti totali accumulati",
-            icon: "fa-solid fa-fire",
-            unlocked: puntiTotali >= 300,
-            progress: `${puntiTotali.toFixed(0)} / 300 pt`
-        }
-    ];
-
-    container.innerHTML = "";
-    achievements.forEach(ach => {
-        const card = document.createElement("div");
-        card.className = `achievement-card ${ach.unlocked ? 'unlocked' : 'locked'}`;
-        card.style.cssText = `
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            background: rgba(30, 41, 59, 0.7);
-            border: 1px solid ${ach.unlocked ? 'var(--accent-neon-green)' : 'rgba(255,255,255,0.1)'};
-            border-radius: 10px;
-            opacity: ${ach.unlocked ? '1' : '0.65'};
-        `;
-
-        card.innerHTML = `
-            <div style="font-size: 22px; color: ${ach.unlocked ? 'var(--accent-gold)' : 'var(--text-muted)'}; width: 36px; text-align: center;">
-                <i class="${ach.icon}"></i>
-            </div>
-            <div style="flex: 1; min-width: 0;">
-                <div style="font-size: 13px; font-weight: bold; color: #fff; margin-bottom: 2px;">${ach.titolo}</div>
-                <div style="font-size: 11px; color: var(--text-muted);">${ach.desc}</div>
-            </div>
-            <div style="text-align: right; flex-shrink: 0;">
-                <span style="font-size: 10px; font-weight: bold; padding: 3px 8px; border-radius: 6px; background: ${ach.unlocked ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.08)'}; color: ${ach.unlocked ? 'var(--accent-neon-green)' : 'var(--text-muted)'};">
-                    ${ach.progress}
-                </span>
-            </div>
-        `;
-        container.appendChild(card);
-    });
 }
 
 async function incrementaDraftTentatiCloud() {
@@ -992,6 +842,7 @@ function renderMatchdayPills(selectedDay) {
     const container = document.getElementById("matchdays-pills-container");
     container.innerHTML = "";
 
+    // Genera le pillole fino alla giornata attiva (incluso il turno in corso)
     for (let g = 1; g <= ACTIVE_MATCHDAY; g++) {
         const btn = document.createElement("button");
         btn.className = `btn-matchday-pill ${g === selectedDay ? 'active' : ''}`;
