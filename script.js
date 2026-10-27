@@ -439,114 +439,31 @@ async function calcolaEVisualizzaTotaleSquadreGlobali(giornataCorrente = ACTIVE_
             });
         });
 
+        // Al click apre direttamente la schermata della classifica della giornata corrente
         const badgeEl = document.getElementById("total-global-teams-count");
         if (badgeEl) {
             badgeEl.innerText = conteggioTotale;
             badgeEl.style.cursor = "pointer";
-            badgeEl.onclick = () => apriModaleSquadreIscritte(giornataCorrente);
+            badgeEl.onclick = () => apriSchermataClassifica(giornataCorrente);
         }
         
         const titleEl = document.getElementById("global-teams-card-title");
         if (titleEl) {
             titleEl.innerText = `Squadre Iscritte (Giornata ${giornataCorrente})`;
             titleEl.style.cursor = "pointer";
-            titleEl.onclick = () => apriModaleSquadreIscritte(giornataCorrente);
+            titleEl.onclick = () => apriSchermataClassifica(giornataCorrente);
         }
 
         const globalCardBox = document.querySelector(".global-teams-card") || (badgeEl ? badgeEl.parentElement : null);
         if (globalCardBox) {
             globalCardBox.style.cursor = "pointer";
-            globalCardBox.onclick = () => apriModaleSquadreIscritte(giornataCorrente);
+            globalCardBox.onclick = () => apriSchermataClassifica(giornataCorrente);
         }
 
     } catch (err) {
         const badgeEl = document.getElementById("total-global-teams-count");
         if (badgeEl) badgeEl.innerText = "0";
     }
-}
-
-async function apriModaleSquadreIscritte(giornata = ACTIVE_MATCHDAY) {
-    const overlay = document.createElement("div");
-    overlay.className = "custom-modal-overlay";
-    overlay.id = "global-teams-modal";
-
-    let modalHtml = `
-        <div class="custom-modal-card" style="border: 2px solid var(--accent-blue); max-width: 480px; width: 92%;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <h3 style="color:var(--accent-blue); font-size:16px; margin:0;"><i class="fa-solid fa-users"></i> Squadre Iscritte - Giornata ${giornata}</h3>
-                <button onclick="chiudiModaleGlobalTeams()" style="background:none; border:none; color:var(--text-muted); font-size:18px; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div id="global-teams-modal-body" style="max-height: 320px; overflow-y: auto; text-align: left; margin-bottom: 12px; display:flex; flex-direction:column; gap:8px;">
-                <div style="text-align:center; color:var(--text-muted); padding:15px; font-size:12px;">Caricamento squadre in corso...</div>
-            </div>
-            <button onclick="chiudiModaleGlobalTeams()" class="btn-action-primary" style="width:100%; padding:8px; font-size:11px; background:rgba(51, 65, 85, 0.9);">Chiudi</button>
-        </div>
-    `;
-
-    overlay.innerHTML = modalHtml;
-    document.body.appendChild(overlay);
-
-    const bodyContainer = document.getElementById("global-teams-modal-body");
-
-    try {
-        const snapshot = await db.collection("utenti").get();
-        let listaSquadreIscritte = [];
-
-        snapshot.forEach(doc => {
-            const uData = doc.data();
-            const username = getRealUsername(uData, null);
-            const squadreArr = uData.squadre || [];
-
-            squadreArr.forEach(sq => {
-                let g = sq.giornata !== undefined ? sq.giornata : 8;
-                if (g === giornata) {
-                    listaSquadreIscritte.push({
-                        userId: doc.id,
-                        username: username,
-                        nomeSquadra: sq.nomeSquadra,
-                        modulo: sq.moduloSelezionato,
-                        squadraObj: sq
-                    });
-                }
-            });
-        });
-
-        if (listaSquadreIscritte.length === 0) {
-            bodyContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:15px; font-size:12px;">Nessuna squadra ancora iscritta per la giornata ${giornata}.</div>`;
-            return;
-        }
-
-        bodyContainer.innerHTML = "";
-        listaSquadreIscritte.forEach(item => {
-            const isCurrentUser = currentUser && item.userId === currentUser.uid;
-            const borderStyle = isCurrentUser ? "border-left: 3px solid var(--accent-neon-green);" : "border-left: 3px solid var(--accent-blue);";
-            
-            const cardItem = document.createElement("div");
-            cardItem.className = "modal-player-item";
-            cardItem.style.cssText = `${borderStyle} display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:rgba(30, 41, 59, 0.7); border-radius:8px;`;
-
-            cardItem.innerHTML = `
-                <div style="flex:1; min-width:0; padding-right:8px;">
-                    <div class="marquee-container" style="max-width:180px;"><span class="marquee-text" style="color:#fff; font-size:13px; font-weight:bold;">${item.nomeSquadra}</span></div>
-                    <div style="font-size:10px; color:var(--accent-blue);"><i class="fa-solid fa-user"></i> ${item.username} <span style="color:var(--text-muted); margin-left:6px;">Modulo: ${item.modulo}</span></div>
-                </div>
-                <button onclick="chiudiModaleGlobalTeams(); visualizzaSquadraGenerica('${item.userId}', '${item.nomeSquadra.replace(/'/g, "\\'")}', ${giornata})" class="btn-action-primary" style="padding:6px 12px; font-size:11px; flex-shrink:0;">
-                    <i class="fa-solid fa-eye"></i> Vedi
-                </button>
-            `;
-            bodyContainer.appendChild(cardItem);
-        });
-
-        refreshAllMarquees();
-
-    } catch (err) {
-        bodyContainer.innerHTML = `<div style="text-align:center; color:var(--accent-red); padding:15px; font-size:12px;">Errore durante il caricamento delle squadre.</div>`;
-    }
-}
-
-function chiudiModaleGlobalTeams() {
-    const modal = document.getElementById("global-teams-modal");
-    if (modal) modal.remove();
 }
 
 async function ottieniNomiSquadreGlobaliGiornata(giornata) {
@@ -670,7 +587,7 @@ function renderWelcomeScreen() {
 
 async function apriSchermataClassifica(giornata) {
     if (giornata === undefined || giornata === null) {
-        giornata = getUltimaGiornataConVoti();
+        giornata = ACTIVE_MATCHDAY;
     }
     currentSelectedMatchday = giornata;
 
@@ -921,8 +838,8 @@ function renderMatchdayPills(selectedDay) {
     const container = document.getElementById("matchdays-pills-container");
     container.innerHTML = "";
 
-    const ultimaGiornataVoti = getUltimaGiornataConVoti();
-    for (let g = 1; g <= ultimaGiornataVoti; g++) {
+    // Genera le pillole fino alla giornata attiva (incluso il turno in corso)
+    for (let g = 1; g <= ACTIVE_MATCHDAY; g++) {
         const btn = document.createElement("button");
         btn.className = `btn-matchday-pill ${g === selectedDay ? 'active' : ''}`;
         btn.innerText = `Giornata ${g}`;
