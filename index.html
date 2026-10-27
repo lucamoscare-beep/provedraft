@@ -1,493 +1,505 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Draft Serie A - FantaDraft</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Draft Serie A – Ultimate Edition</title>
 
-    <!-- FontAwesome per le icone -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<!-- Google Fonts: Poppins -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
 
-    <!-- Foglio di Stile -->
-    <link rel="stylesheet" href="style.css">
+<!-- SheetJS (Excel Parser) -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
-    <!-- XLSX per lettura Excel dei giocatori e voti -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- FontAwesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- Firebase SDK (v8) -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<!-- Collegamento al file CSS esterno -->
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- BARRA DI NAVIGAZIONE SUPERIORE GLOBALE -->
-    <header id="global-header-bar" class="global-header" style="display: none;">
-        <div class="header-brand" onclick="tornaAllaHome()">
-            <i class="fa-solid fa-trophy header-logo-icon"></i>
-            <span class="header-title">Draft Serie A</span>
+<!-- HEADER GLOBALE -->
+<header id="global-header-bar" class="global-header" style="display: none;">
+    <div class="logo-area" onclick="tornaAllaHome()">
+        <i class="fa-solid fa-trophy" style="color: var(--accent-gold);"></i>
+        <span>Draft Serie A</span>
+    </div>
+    <div class="user-area">
+        <div class="user-badge" onclick="apriProfiloUtente(currentUser.uid)" title="Il tuo Profilo e Statistiche">
+            <i class="fa-solid fa-user"></i>
+            <span id="user-display-name">-</span>
         </div>
+        <button class="btn-logout" onclick="logout()" title="Disconnettiti">
+            <i class="fa-solid fa-right-from-bracket"></i> Esci
+        </button>
+    </div>
+</header>
 
-        <div class="header-user-actions">
-            <button onclick="apriProfiloUtente()" class="btn-header-profile">
-                <i class="fa-solid fa-circle-user"></i>
-                <span id="user-display-name">Utente</span>
-            </button>
-            <button onclick="logout()" class="btn-header-logout" title="Disconnetti">
-                <i class="fa-solid fa-right-from-bracket"></i>
-            </button>
+<!-- MODALE AUTENTICAZIONE -->
+<div id="auth-modal" class="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-tabs" id="auth-tabs-header">
+      <button id="tab-login-btn" class="active" onclick="switchAuthTab('login')">Accedi</button>
+      <button id="tab-register-btn" onclick="switchAuthTab('register')">Registrati</button>
+    </div>
+
+    <!-- FORM ACCEDI -->
+    <form id="login-form" onsubmit="handleLogin(event)">
+      <h2>Accedi al Fantacalcio</h2>
+      <div class="input-group">
+        <label>Email</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-envelope input-icon"></i>
+          <input type="email" id="login-email" required placeholder="La tua email">
         </div>
-    </header>
+      </div>
+      <div class="input-group password-wrapper">
+        <label>Password</label>
+        <div class="password-input-container">
+          <div class="input-wrapper" style="width: 100%;">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" id="login-password" required placeholder="••••••••">
+          </div>
+          <i class="fa-solid fa-eye toggle-password" onclick="togglePasswordVisibility('login-password', this)"></i>
+        </div>
+        <span class="forgot-password-link" onclick="switchAuthTab('forgot')">Password dimenticata?</span>
+      </div>
+      <button type="submit" class="btn-auth">ACCEDI</button>
+    </form>
 
-    <!-- MODALE AUTENTICAZIONE (LOGIN / REGISTRAZIONE / RESET) -->
-    <div id="auth-modal" class="auth-modal-overlay">
-        <div class="auth-modal-card">
-            <div class="auth-header">
-                <i class="fa-solid fa-trophy auth-logo"></i>
-                <h2>Draft Serie A</h2>
-                <p>Crea la tua squadra, accumula punti e scala la classifica!</p>
-            </div>
+    <!-- FORM REGISTRAZIONE -->
+    <form id="register-form" style="display: none;" onsubmit="handleRegister(event)">
+      <h2>Crea il tuo Account</h2>
+      <div class="input-group">
+        <label>Nome Utente (Username)</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-user-ninja input-icon"></i>
+          <input type="text" id="reg-username" required placeholder="es. Bomber99">
+        </div>
+      </div>
+      <div class="input-group">
+        <label>Nome</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-id-card input-icon"></i>
+          <input type="text" id="reg-nome" required placeholder="Mario">
+        </div>
+      </div>
+      <div class="input-group">
+        <label>Cognome</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-id-card input-icon"></i>
+          <input type="text" id="reg-cognome" required placeholder="Rossi">
+        </div>
+      </div>
+      <div class="input-group">
+        <label>Email</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-envelope input-icon"></i>
+          <input type="email" id="reg-email" required placeholder="mario.rossi@email.com">
+        </div>
+      </div>
+      <div class="input-group password-wrapper">
+        <label>Password</label>
+        <div class="password-input-container">
+          <div class="input-wrapper" style="width: 100%;">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" id="reg-password" required minlength="6" placeholder="Minimo 6 caratteri">
+          </div>
+          <i class="fa-solid fa-eye toggle-password" onclick="togglePasswordVisibility('reg-password', this)"></i>
+        </div>
+      </div>
+      <button type="submit" class="btn-auth">REGISTRATI</button>
+    </form>
 
-            <div id="auth-tabs-header" class="auth-tabs">
-                <button id="tab-login-btn" class="active" onclick="switchAuthTab('login')">Accedi</button>
-                <button id="tab-register-btn" onclick="switchAuthTab('register')">Registrati</button>
-            </div>
+    <!-- FORM RECUPERO PASSWORD -->
+    <form id="forgot-form" style="display: none;" onsubmit="handleForgotPassword(event)">
+      <h2>Recupera Password</h2>
+      <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">Inserisci la tua email registrata. Ti invieremo un link per impostare una nuova password.</p>
+      <div class="input-group">
+        <label>Email di registrazione</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-envelope input-icon"></i>
+          <input type="email" id="forgot-email" required placeholder="es. mario.rossi@email.com">
+        </div>
+      </div>
+      <button type="submit" class="btn-auth" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">INVIA LINK DI RECUPERO</button>
+      <div style="text-align: center; margin-top: 12px;">
+        <span class="forgot-password-link" onclick="switchAuthTab('login')">← Torna al Login</span>
+      </div>
+    </form>
+  </div>
+</div>
 
-            <!-- FORM LOGIN -->
-            <form id="login-form" onsubmit="handleLogin(event)">
-                <div class="input-group">
-                    <label><i class="fa-solid fa-envelope"></i> Email</label>
-                    <input type="email" id="login-email" class="styled-input" placeholder="latua@email.com" required>
-                </div>
-                <div class="input-group">
-                    <label><i class="fa-solid fa-key"></i> Password</label>
-                    <div class="password-wrapper">
-                        <input type="password" id="login-password" class="styled-input" placeholder="••••••••" required>
-                        <i class="fa-solid fa-eye password-toggle-icon" onclick="togglePasswordVisibility('login-password', this)"></i>
-                    </div>
-                </div>
-                <div style="text-align: right; margin-bottom: 15px;">
-                    <a href="#" onclick="switchAuthTab('forgot')" style="font-size: 11px; color: var(--accent-blue); text-decoration: none;">Password dimenticata?</a>
-                </div>
-                <button type="submit" class="btn-action-primary" style="width:100%; padding: 12px;">Accedi ora</button>
-            </form>
-
-            <!-- FORM REGISTRAZIONE -->
-            <form id="register-form" onsubmit="handleRegister(event)" style="display: none;">
-                <div class="input-group">
-                    <label><i class="fa-solid fa-user-ninja"></i> Username Fantallenatore</label>
-                    <input type="text" id="reg-username" class="styled-input" placeholder="Es. Bomber99" required>
-                </div>
-                <div style="display: flex; gap: 8px;">
-                    <div class="input-group" style="flex:1;">
-                        <label>Nome</label>
-                        <input type="text" id="reg-nome" class="styled-input" placeholder="Mario">
-                    </div>
-                    <div class="input-group" style="flex:1;">
-                        <label>Cognome</label>
-                        <input type="text" id="reg-cognome" class="styled-input" placeholder="Rossi">
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label><i class="fa-solid fa-envelope"></i> Email</label>
-                    <input type="email" id="reg-email" class="styled-input" placeholder="latua@email.com" required>
-                </div>
-                <div class="input-group">
-                    <label><i class="fa-solid fa-key"></i> Password</label>
-                    <div class="password-wrapper">
-                        <input type="password" id="reg-password" class="styled-input" placeholder="••••••••" required>
-                        <i class="fa-solid fa-eye password-toggle-icon" onclick="togglePasswordVisibility('reg-password', this)"></i>
-                    </div>
-                </div>
-                <button type="submit" class="btn-action-primary" style="width:100%; padding: 12px;">Crea Account</button>
-            </form>
-
-            <!-- FORM PASSWORD DIMENTICATA -->
-            <form id="forgot-form" onsubmit="handleForgotPassword(event)" style="display: none;">
-                <h3 style="font-size:14px; margin-bottom: 10px;">Recupera la tua password</h3>
-                <p style="font-size:11px; color:var(--text-muted); margin-bottom: 15px;">Inserisci la tua email. Ti invieremo un link per impostare una nuova password.</p>
-                <div class="input-group">
-                    <label><i class="fa-solid fa-envelope"></i> Email</label>
-                    <input type="email" id="forgot-email" class="styled-input" placeholder="latua@email.com" required>
-                </div>
-                <button type="submit" class="btn-action-primary" style="width:100%; padding: 12px; margin-bottom: 10px;">Invia link di reset</button>
-                <button type="button" class="btn-action-primary" onclick="switchAuthTab('login')" style="width:100%; padding: 8px; background: transparent; border:1px solid rgba(255,255,255,0.2);">Torna al Login</button>
-            </form>
+<!-- LANDING PAGE -->
+<div id="welcome-screen">
+    <div class="deadline-banner">
+        <div class="deadline-info">
+            <i class="fa-solid fa-stopwatch"></i>
+            <span id="welcome-deadline-text">Iscrivi le tue squadre alla prossima giornata entro:</span>
+        </div>
+        <div class="countdown-timer">
+            <div class="countdown-box"><div class="countdown-number" id="w-cd-days">00</div><div class="countdown-label">Giorni</div></div>
+            <div class="countdown-dots">:</div>
+            <div class="countdown-box"><div class="countdown-number" id="w-cd-hours">00</div><div class="countdown-label">Ore</div></div>
+            <div class="countdown-dots">:</div>
+            <div class="countdown-box"><div class="countdown-number" id="w-cd-mins">00</div><div class="countdown-label">Minuti</div></div>
+            <div class="countdown-dots">:</div>
+            <div class="countdown-box"><div class="countdown-number" id="w-cd-secs">00</div><div class="countdown-label">Secondi</div></div>
         </div>
     </div>
 
+    <!-- BOX WIDGET ACCESSO RAPIDO PROFILO -->
+    <div class="home-profile-banner" onclick="apriProfiloUtente(currentUser.uid)">
+        <div class="home-profile-left">
+            <div class="home-profile-icon"><i class="fa-solid fa-id-badge"></i></div>
+            <div class="home-profile-text">
+                <div class="title">Il Mio Profilo & Statistiche di Gioco</div>
+                <div class="subtitle">Visualizza podi, record personali, draft fatti e storico squadre</div>
+            </div>
+        </div>
+        <button class="home-profile-btn">Visualizza <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
 
-    <!-- 1. HOMEPAGE / WELCOME SCREEN -->
-    <main id="welcome-screen" class="container" style="display: none;">
-        <div class="welcome-header-card">
-            <h1 id="welcome-greeting">Bentornato!</h1>
-            <p id="welcome-subtitle">Schiera le tue squadre per vincere la giornata di Fantacalcio.</p>
-            
-            <!-- BANNER DI STATO VOTI IN HOMEPAGE -->
-            <div id="home-status-banner-container" style="display: none; margin-top: 15px;">
-                <div id="home-status-banner" class="home-status-banner">
-                    <i id="home-status-icon" class="fa-solid fa-circle-info"></i>
-                    <span id="home-status-text">Caricamento stato giornata...</span>
+    <div class="top-info-row">
+        <div class="top-info-card global-teams-box">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <i class="fa-solid fa-shield-halved"></i>
+                <div class="top-info-text">
+                    <div class="title-text" id="global-teams-card-title">Squadre Iscritte</div>
+                    <div class="sub-text">Totale di tutta la lega</div>
                 </div>
             </div>
+            <div class="global-teams-badge-number" id="total-global-teams-count">...</div>
         </div>
 
-        <!-- DASHBOARD DEADLINE E COUNTER GETTONI -->
-        <div class="home-grid-dashboard">
-            <div class="card-dash countdown-card">
-                <div class="dash-card-header">
-                    <i class="fa-solid fa-stopwatch card-icon"></i>
-                    <span>Chiusura Mercato</span>
-                </div>
-                <p id="welcome-deadline-text" class="dash-subtext">Calcolo tempo rimanente per schierare le formazioni:</p>
-                <div class="countdown-timer">
-                    <div class="time-block"><span id="w-cd-days">00</span><label>GIORNI</label></div>
-                    <div class="time-separator">:</div>
-                    <div class="time-block"><span id="w-cd-hours">00</span><label>ORE</label></div>
-                    <div class="time-separator">:</div>
-                    <div class="time-block"><span id="w-cd-mins">00</span><label>MIN</label></div>
-                    <div class="time-separator">:</div>
-                    <div class="time-block"><span id="w-cd-secs">00</span><label>SEC</label></div>
-                </div>
-            </div>
-
-            <div class="card-dash tokens-card">
-                <div class="dash-card-header">
-                    <i class="fa-solid fa-ticket card-icon"></i>
-                    <span>Gettoni Giornata</span>
-                </div>
-                <div class="tokens-badge" id="tokens-count-display-inline">3 / 3</div>
-                <p class="dash-subtext">Puoi creare fino a 3 squadre differenti per ogni singola giornata.</p>
-            </div>
-
-            <!-- SCHEDA TOTALE SQUADRE ISCRITTE IN LEGA -->
-            <div class="card-dash global-teams-card">
-                <div class="dash-card-header">
-                    <i class="fa-solid fa-shield-halved card-icon"></i>
-                    <span id="global-teams-card-title">Squadre Iscritte</span>
-                </div>
-                <div class="global-count-badge" id="total-global-teams-count">0</div>
-                <p class="dash-subtext">Squadre create da tutti i fantallenatori della lega per questa giornata. Clicca per la classifica!</p>
-            </div>
-        </div>
-
-        <!-- CREAZIONE NUOVA SQUADRA -->
-        <div id="new-team-creation-area" class="card-section">
-            <h2><i class="fa-solid fa-plus-circle"></i> Crea Nuova Squadra</h2>
-            <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">Dai un nome alla tua squadra e avvia il draft per acquistare i giocatori.</p>
-            <div class="team-creation-input-row">
-                <input type="text" id="new-team-name-input" class="styled-input" placeholder="Es. Real Madrink" maxlength="28">
-                <button onclick="preparaEAvviaDraft()" class="btn-action-primary">
-                    <i class="fa-solid fa-bolt"></i> Avvia Draft
-                </button>
-            </div>
-            <div style="margin-top: 10px; text-align: center;">
-                <button onclick="avviaTestDraft()" class="btn-action-secondary" style="font-size: 11px; padding: 6px 12px;">
-                    <i class="fa-solid fa-vials"></i> Vuoi fare una prova? Fai un Test Draft illimitato
-                </button>
-            </div>
-        </div>
-
-        <div id="tokens-exhausted-msg" class="tokens-exhausted-banner" style="display: none;"></div>
-
-        <!-- LE TUE SQUADRE CREATE -->
-        <div class="card-section">
-            <h2 id="user-created-teams-title"><i class="fa-solid fa-list-check"></i> Le tue Squadre create</h2>
-            <div id="created-teams-container" class="teams-list-grid"></div>
-        </div>
-    </main>
-
-
-    <!-- 2. APPLICAZIONE DRAFT PRINCIPALE -->
-    <div id="main-app" class="container" style="display: none;">
-        
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <button onclick="tornaAllaHome()" class="btn-action-secondary" style="padding: 6px 12px; font-size: 11px;">
-                <i class="fa-solid fa-arrow-left"></i> Torna alla Dashboard
-            </button>
-            <h3 id="current-draft-team-title" style="font-size: 14px; color: var(--accent-gold); margin:0;"></h3>
-        </div>
-
-        <!-- PROGRESS BAR -->
-        <div class="progress-container">
-            <div id="progress-bar" class="progress-bar"></div>
-        </div>
-
-        <!-- CONTEXT DASHBOARD DEL DRAFT -->
-        <div class="draft-dashboard-bar">
-            <div id="budget-card-row" class="dash-item high-credits">
+        <div class="top-info-card tokens-box-inline">
+            <div style="display:flex; align-items:center; gap:12px;">
                 <i class="fa-solid fa-coins"></i>
-                <div>
-                    <span class="dash-val" id="budget-display">600</span>
-                    <span class="dash-lbl">Crediti Residui</span>
+                <div class="top-info-text">
+                    <div class="title-text">Gettoni Rimasti</div>
+                    <div class="sub-text">Disponibili per te</div>
                 </div>
             </div>
-
-            <div class="dash-item">
-                <i class="fa-solid fa-hand" style="color:var(--role-por);"></i>
-                <div>
-                    <span class="dash-val" id="count-box-Portiere">0/3</span>
-                    <span class="dash-lbl">Portieri</span>
-                </div>
-            </div>
-
-            <div class="dash-item">
-                <i class="fa-solid fa-shield-halved" style="color:var(--role-dif);"></i>
-                <div>
-                    <span class="dash-val" id="count-box-Difensore">0/7</span>
-                    <span class="dash-lbl">Difensori</span>
-                </div>
-            </div>
-
-            <div class="dash-item">
-                <i class="fa-solid fa-person-running" style="color:var(--role-cen);"></i>
-                <div>
-                    <span class="dash-val" id="count-box-Centrocampista">0/8</span>
-                    <span class="dash-lbl">Centrocampisti</span>
-                </div>
-            </div>
-
-            <div class="dash-item">
-                <i class="fa-solid fa-futbol" style="color:var(--role-att);"></i>
-                <div>
-                    <span class="dash-val" id="count-box-Attaccante">0/6</span>
-                    <span class="dash-lbl">Attaccanti</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- PANNELLO SCELTA GIOCATORI -->
-        <div id="draft-panel" class="card-section">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                <div>
-                    <h2>Scegli il tuo giocatore</h2>
-                    <span style="font-size:11px; color:var(--accent-blue); font-weight:600;">👇 Tocca la scheda per acquistarlo</span>
-                </div>
-                <button onclick="annullaERicominciaDraft()" class="btn-action-danger" style="padding:6px 12px; font-size:11px;"><i class="fa-solid fa-arrow-rotate-left"></i> Ricomincia Draft</button>
-            </div>
-            <div id="players" class="players-container"></div>
-        </div>
-
-        <!-- SCHIERAMENTO CAMPO TATICO -->
-        <div id="campo-panel-container" class="card-section" style="display: none;">
-            <h2><i class="fa-solid fa-futbol"></i> Formazione in Campo</h2>
-            <div id="campo" class="campo-grafico"></div>
-        </div>
-
-        <!-- PANCHINA GRAFICA -->
-        <div id="panchina-panel-container" class="card-section" style="display: none;">
-            <h2><i class="fa-solid fa-chair"></i> Panchina Ordinata</h2>
-            <div id="panchina-grafica" class="panchina-grid"></div>
-        </div>
-
-        <!-- BOTTONE DI CONFERMA SQUADRA -->
-        <div id="conferma-container" style="display: none; justify-content: center; margin: 20px 0;">
-            <button id="btn-conferma-formazione" onclick="confermaFormazioneDefinitiva()" class="btn-action-primary" style="padding: 14px 28px; font-size: 15px;">
-                <i class="fa-solid fa-lock"></i> Conferma e Salva Squadra
-            </button>
-        </div>
-
-        <!-- RIEPILOGO ROSA ACQUISTATA -->
-        <div class="section-rosa card-section">
-            <h2>La Tua Rosa</h2>
-            
-            <div class="rosa-grid">
-                <div>
-                    <h3>Portieri (<span id="count-rosa-Portiere">0</span>/3)</h3>
-                    <div id="slot-Portiere"></div>
-                </div>
-                <div>
-                    <h3>Difensori (<span id="count-rosa-Difensore">0</span>/7)</h3>
-                    <div id="slot-Difensore"></div>
-                </div>
-                <div>
-                    <h3>Centrocampisti (<span id="count-rosa-Centrocampista">0</span>/8)</h3>
-                    <div id="slot-Centrocampista"></div>
-                </div>
-                <div>
-                    <h3>Attaccanti (<span id="count-rosa-Attaccante">0</span>/6)</h3>
-                    <div id="slot-Attaccante"></div>
-                </div>
-            </div>
+            <div class="tokens-badge-number" id="tokens-count-display-inline">3 / 3</div>
         </div>
     </div>
 
+    <div class="welcome-card">
+        <div class="welcome-title" id="welcome-greeting">Benvenuto nel Fantacalcio Draft!</div>
+        <p style="color:var(--text-muted); font-size:13px; line-height:1.6; margin-bottom:15px;">
+            Sfida gli altri fantallenatori nella prossima giornata di campionato! Costruisci le tue rose tramite il sistema di Draft live, seleziona il modulo tattico e schiera i tuoi titolari prima del fischio d'inizio.
+        </p>
 
-    <!-- 3. SCHERMATA CLASSIFICA LEGA -->
-    <main id="classifica-screen" class="container" style="display: none;">
-        <div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
-            <button onclick="tornaAllaHome()" class="btn-action-secondary">
-                <i class="fa-solid fa-house"></i> Home
-            </button>
-            <h2 id="classifica-heading-text" style="font-size: 16px; margin:0;">Classifica di Lega</h2>
-        </div>
-
-        <!-- PILLOLE SELEZIONE GIORNATE -->
-        <div id="matchdays-pills-container" class="matchday-pills-scroll"></div>
-
-        <!-- PODIO TOP 3 -->
-        <div id="podium-area" class="podium-container"></div>
-
-        <!-- TABELLA CLASSIFICA COMPLETA -->
-        <div class="card-section" style="padding: 10px; overflow-x: auto;">
-            <table class="classifica-table">
-                <thead>
-                    <tr>
-                        <th style="width: 40px;">Pos</th>
-                        <th>Utente</th>
-                        <th>Squadra</th>
-                        <th>Punti</th>
-                        <th>Budget</th>
-                        <th style="text-align: right;">Azione</th>
-                    </tr>
-                </thead>
-                <tbody id="classifica-table-body"></tbody>
-            </table>
-        </div>
-    </main>
-
-
-    <!-- 4. SCHERMATA RECAP / SCHEDA SQUADRA READ-ONLY -->
-    <main id="recap-screen" class="container" style="display: none;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <button onclick="tornaAllaHome()" class="btn-action-secondary">
-                <i class="fa-solid fa-house"></i> Home
-            </button>
-            <button id="btn-recap-back-classifica" onclick="apriSchermataClassifica(currentSelectedMatchday)" class="btn-action-secondary" style="display: none;">
-                <i class="fa-solid fa-trophy"></i> Torna alla Classifica
-            </button>
-        </div>
-
-        <div class="card-section" style="text-align: center;">
-            <div id="recap-badge-status" class="recap-status-badge">ROSA CONVALIDATA</div>
-            <h1 id="recap-nome-squadra" style="font-size: 22px; color: #fff; margin-top: 5px;">Nome Squadra</h1>
-            <p id="recap-utente-owner" style="font-size: 12px; color: var(--accent-blue);"></p>
-            <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Modulo Tattico: <strong id="recap-modulo-title" style="color:#fff;">4-3-3</strong></p>
-        </div>
-
-        <!-- RECAP CAMPO -->
-        <div class="card-section">
-            <h2><i class="fa-solid fa-shirt"></i> Titolari in Campo</h2>
-            <div id="recap-campo" class="campo-grafico"></div>
-        </div>
-
-        <!-- RECAP PANCHINA -->
-        <div class="card-section">
-            <h2><i class="fa-solid fa-chair"></i> Panchina</h2>
-            <div id="recap-panchina" class="recap-bench-list"></div>
-        </div>
-
-        <!-- TABELLINO VOTI E BONU/MALUS -->
-        <div class="card-section">
-            <h2><i class="fa-solid fa-square-poll-vertical"></i> Tabellino Voti e Fantavoti</h2>
-            <div id="tabellino-container"></div>
-        </div>
-    </main>
-
-
-    <!-- 5. SCHERMATA PROFILO UTENTE E STATISTICHE -->
-    <main id="profilo-screen" class="container" style="display: none;">
-        <div style="margin-bottom: 15px;">
-            <button onclick="tornaAllaHome()" class="btn-action-secondary">
-                <i class="fa-solid fa-house"></i> Home
-            </button>
-        </div>
-
-        <div class="card-section" style="text-align: center; padding: 20px 10px;">
-            <i class="fa-solid fa-circle-user" style="font-size: 48px; color: var(--accent-blue); margin-bottom: 10px;"></i>
-            <h1 id="profilo-username-title" style="font-size: 20px; color: #fff; margin: 0;">Profilo Utente</h1>
-            <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Pannello carriera e statistiche personali di Lega</p>
-        </div>
-
-        <!-- GRIGLIA UNIFORME STATISTICHE PROFILO UTENTE -->
-        <div class="profilo-stats-grid">
-            
-            <!-- Squadre Salvate -->
-            <div class="stat-card">
-                <i class="fa-solid fa-users-viewfinder stat-icon" style="color: var(--accent-blue);"></i>
-                <div class="stat-value" id="stat-squadre-create">0</div>
-                <div class="stat-label">Squadre Salvate</div>
+        <!-- GRIGLIA REGOLE FONDAMENTALI (4 PUNTI) -->
+        <div class="rules-grid">
+            <div class="rule-box">
+                <i class="fa-solid fa-coins"></i>
+                <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">3 Gettoni Settimanali</h4>
+                <p style="color:var(--text-muted); font-size:11px; margin:0;">Utilizzabili per schierare fino a 3 rose differenti a turno.</p>
             </div>
-
-            <!-- Draft Tentati -->
-            <div class="stat-card">
-                <i class="fa-solid fa-dice stat-icon" style="color: #a78bfa;"></i>
-                <div class="stat-value" id="stat-draft-tentati">0</div>
-                <div class="stat-label">Draft Tentati</div>
+            <div class="rule-box">
+                <i class="fa-solid fa-rotate"></i>
+                <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">Draft Infiniti</h4>
+                <p style="color:var(--text-muted); font-size:11px; margin:0;">Puoi rifare il draft quante vuoi prima della convalida e scelta della formazione ideale.</p>
             </div>
-
-            <!-- Miglior Punteggio -->
-            <div class="stat-card">
-                <i class="fa-solid fa-bolt stat-icon" style="color: var(--accent-neon-green);"></i>
-                <div class="stat-value" id="stat-miglior-punteggio">0 pt</div>
-                <div class="stat-label">Miglior Punteggio</div>
+            <div class="rule-box">
+                <i class="fa-solid fa-sack-dollar"></i>
+                <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">600 Crediti</h4>
+                <p style="color:var(--text-muted); font-size:11px; margin:0;">Il budget fisso a disposizione per la realizzazione e l'asta delle rose.</p>
             </div>
-
-            <!-- Punti Totali -->
-            <div class="stat-card">
-                <i class="fa-solid fa-chart-line stat-icon" style="color: var(--accent-gold);"></i>
-                <div class="stat-value" id="stat-punti-totali">0 pt</div>
-                <div class="stat-label">Punti Totali Lega</div>
+            <div class="rule-box">
+                <i class="fa-solid fa-ranking-star"></i>
+                <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">Classifiche e Pari Merito</h4>
+                <p style="color:var(--text-muted); font-size:11px; margin:0;">Classifiche di ogni giornata con regola spartiacque basata sul budget residuo in caso di ex aequo.</p>
             </div>
-
-            <!-- Totale Crediti Spesi -->
-            <div class="stat-card">
-                <i class="fa-solid fa-coins stat-icon" style="color: #f59e0b;"></i>
-                <div class="stat-value" id="stat-soldi-spesi">0 cr</div>
-                <div class="stat-label">Crediti Spesi Totali</div>
-            </div>
-
-            <!-- Giornate Partecipate -->
-            <div class="stat-card">
-                <i class="fa-solid fa-calendar-check stat-icon" style="color: #38bdf8;"></i>
-                <div class="stat-value" id="stat-storico-presenze">0</div>
-                <div class="stat-label">Giornate Giocate</div>
-            </div>
-
-            <!-- Modulo Preferito + % -->
-            <div class="stat-card">
-                <i class="fa-solid fa-chess-board stat-icon" style="color: #ec4899;"></i>
-                <div class="stat-value" id="stat-modulo-preferito">N/D</div>
-                <div class="stat-label">Modulo Preferito</div>
-            </div>
-
-            <!-- Calciatore Talismano -->
-            <div class="stat-card">
-                <i class="fa-solid fa-star stat-icon" style="color: #f43f5e;"></i>
-                <div class="stat-value" id="stat-calciatore-top">N/D</div>
-                <div class="stat-label">Calciatore Talismano</div>
-            </div>
-
         </div>
 
-        <!-- MEDAGLIERE PODI -->
-        <div class="card-section">
-            <h2><i class="fa-solid fa-medal"></i> Medagliere Podi di Giornata</h2>
-            <div class="podi-summary-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; text-align: center;">
-                <div class="podium-badge-box gold">
-                    <img src="icone/coppa1.png" class="fanta-trophy-img" alt="Primo Posto">
-                    <div style="font-size: 16px; font-weight: 800; color: #fff;" id="stat-podi-oro">0</div>
-                    <div style="font-size: 10px; color: var(--accent-gold); font-weight: 700;">1° Posti</div>
-                </div>
-                <div class="podium-badge-box silver">
-                    <img src="icone/coppa2.png" class="fanta-trophy-img" alt="Secondo Posto">
-                    <div style="font-size: 16px; font-weight: 800; color: #fff;" id="stat-podi-argento">0</div>
-                    <div style="font-size: 10px; color: #cbd5e1; font-weight: 700;">2° Posti</div>
-                </div>
-                <div class="podium-badge-box bronze">
-                    <img src="icone/coppa3.png" class="fanta-trophy-img" alt="Terzo Posto">
-                    <div style="font-size: 16px; font-weight: 800; color: #fff;" id="stat-podi-bronzo">0</div>
-                    <div style="font-size: 10px; color: #f97316; font-weight: 700;">3° Posti</div>
+        <div class="tokens-status-box">
+            <div id="new-team-creation-area">
+                <p style="font-size:12px; color:#fff; font-weight:700; margin-bottom:10px;">Inserisci il nome della tua nuova squadra per iniziare un draft:</p>
+                <div style="display:flex; justify-content:center; gap:10px; max-width:450px; margin:0 auto; flex-wrap:wrap;">
+                    <div class="input-wrapper" style="flex:1; min-width:200px;">
+                        <i class="fa-solid fa-shirt input-icon"></i>
+                        <input type="text" id="new-team-name-input" class="styled-input" placeholder="es. Real Fanta 1" style="padding-left: 36px;">
+                    </div>
+                    <button onclick="preparaEAvviaDraft()" class="btn-action-primary"><i class="fa-solid fa-play"></i> INIZIA DRAFT</button>
                 </div>
             </div>
+            <div id="tokens-exhausted-msg" style="display:none; color:var(--accent-gold); font-weight:700; font-size:13px; margin-top:10px;">
+                ⚠️ Hai utilizzato tutti i 3 gettoni a disposizione per questa giornata!
+            </div>
         </div>
-    </main>
 
-    <!-- JS Logica di Gioco e Integrazione Firebase -->
-    <script src="script.js"></script>
+        <!-- BANNER DINAMICO STATO VOTI -->
+        <div id="home-status-banner-container" style="display:none;">
+            <div id="home-status-banner" class="home-status-banner" onclick="apriSchermataClassifica()">
+                <i id="home-status-icon" class="fa-solid fa-hourglass-half"></i>
+                <span id="home-status-text">In attesa dei voti della giornata</span>
+            </div>
+        </div>
+
+        <div style="margin-top:25px;">
+            <h3 style="font-size:15px; color:#fff; border-bottom:1px solid var(--card-border); padding-bottom:6px;" id="user-created-teams-title">Le tue Squadre create per la giornata di campionato in corso</h3>
+            <div id="created-teams-container" class="created-teams-list">
+                <p style="color:var(--text-muted); font-size:12px;">Nessuna squadra ancora creata per questo turno.</p>
+            </div>
+        </div>
+
+        <div class="home-nav-buttons">
+            <button onclick="apriSchermataClassifica()" class="btn-home-classifica">
+                <i class="fa-solid fa-ranking-star"></i> Vedi classifica di giornata
+            </button>
+            <button onclick="avviaTestDraft()" class="btn-home-test">
+                <i class="fa-solid fa-vials"></i> Test Draft (No Firebase)
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- PAGINA CLASSIFICA -->
+<div id="classifica-screen">
+    <div class="classifica-header">
+        <div class="classifica-title-main">
+            <i class="fa-solid fa-trophy"></i>
+            <span id="classifica-heading-text">Classifica della giornata</span>
+        </div>
+        <button onclick="tornaAllaHome()" class="btn-action-primary" style="padding:8px 16px; font-size:12px;">
+            <i class="fa-solid fa-house"></i> Torna alla Home
+        </button>
+    </div>
+
+    <!-- NOTA INFORMATIVA SPARTIACQUE BUDGET -->
+    <div style="background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); padding: 10px 14px; border-radius: 10px; margin-bottom: 20px; font-size: 12px; color: var(--accent-gold); display: flex; align-items: center; gap: 10px;">
+        <i class="fa-solid fa-circle-info" style="font-size: 16px;"></i>
+        <span><strong>Regola di Parità:</strong> A parità di punteggio totale, la classifica e i piazzamenti sul podio premiano la squadra con il <strong>Budget Residuo</strong> più alto.</span>
+    </div>
+
+    <div id="podium-area" class="podium-container"></div>
+
+    <h3>Tutti i Partecipanti</h3>
+    <div class="classifica-table-container">
+        <table class="classifica-table">
+            <thead>
+                <tr>
+                    <th style="text-align:center;">Posizione</th>
+                    <th>Username</th>
+                    <th>Nome Squadra</th>
+                    <th>Punti Totali</th>
+                    <th>Budget Rimanente</th>
+                    <th style="text-align:right;">Squadre</th>
+                </tr>
+            </thead>
+            <tbody id="classifica-table-body">
+                <tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Caricamento classifica...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="matchday-selector-section">
+        <h4 style="color:#fff; font-size:14px; margin-bottom:6px;"><i class="fa-solid fa-calendar-days"></i> Giornate di Campionato</h4>
+        <p style="color:var(--text-muted); font-size:12px; margin-bottom:10px;">Seleziona una giornata per visualizzare la relativa classifica e i punteggi:</p>
+        <div id="matchdays-pills-container" class="matchday-grid"></div>
+    </div>
+</div>
+
+<!-- PAGINA PROFILO E STATISTICHE UTENTE -->
+<div id="profilo-screen">
+    <div class="profilo-header">
+        <div class="profilo-title">
+            <i class="fa-solid fa-id-badge"></i>
+            <span id="profilo-username-title">Profilo Fantallenatore</span>
+        </div>
+        <button onclick="tornaAllaHome()" class="btn-action-primary" style="padding:8px 16px; font-size:12px;">
+            <i class="fa-solid fa-house"></i> Torna alla Home
+        </button>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-box">
+            <i class="fa-solid fa-shield-halved" style="color:var(--accent-neon-green);"></i>
+            <div class="stat-lbl">Squadre Create</div>
+            <div class="stat-val" id="stat-squadre-create">0</div>
+        </div>
+        <div class="stat-box">
+            <i class="fa-solid fa-arrows-rotate" style="color:var(--accent-blue);"></i>
+            <div class="stat-lbl">Draft Totali Tentati</div>
+            <div class="stat-val" id="stat-draft-tentati">0</div>
+        </div>
+        <div class="stat-box">
+            <i class="fa-solid fa-star" style="color:var(--accent-gold);"></i>
+            <div class="stat-lbl">Miglior Punteggio</div>
+            <div class="stat-val" id="stat-miglior-punteggio">0 pt</div>
+        </div>
+        <div class="stat-box">
+            <i class="fa-solid fa-calculator" style="color:#a78bfa;"></i>
+            <div class="stat-lbl">Punti Totali Lega</div>
+            <div class="stat-val" id="stat-punti-totali">0 pt</div>
+        </div>
+    </div>
+
+    <h3 style="color:var(--accent-gold); font-size:16px; margin-bottom:15px;"><i class="fa-solid fa-trophy"></i> Bacheca Podi & Piazzamenti</h3>
+    <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="stat-box" style="border: 2px solid #fbbf24;">
+            <img src="icone/coppa1.png" style="height:32px; margin-bottom:4px;" alt="1° Posto">
+            <div class="stat-lbl">1° Posto (Ori)</div>
+            <div class="stat-val" id="stat-podi-oro">0</div>
+        </div>
+        <div class="stat-box" style="border: 2px solid #94a3b8;">
+            <img src="icone/coppa2.png" style="height:32px; margin-bottom:4px;" alt="2° Posto">
+            <div class="stat-lbl">2° Posto (Argenti)</div>
+            <div class="stat-val" id="stat-podi-argento">0</div>
+        </div>
+        <div class="stat-box" style="border: 2px solid #d97706;">
+            <img src="icone/coppa3.png" style="height:32px; margin-bottom:4px;" alt="3° Posto">
+            <div class="stat-lbl">3° Posto (Bronzi)</div>
+            <div class="stat-val" id="stat-podi-bronzo">0</div>
+        </div>
+    </div>
+</div>
+
+<!-- PAGINA PRINCIPALE DEL DRAFT -->
+<div id="main-app">
+    <div class="desktop-layout-grid">
+        <!-- COLONNA SINISTRA (Crediti, Ruoli e Scelta Giocatori) -->
+        <div class="desktop-col-left">
+            <div class="dashboard-header">
+                <div class="dash-card-row budget high-credits" id="budget-card-row">
+                    <div class="dash-card-left">
+                        <i class="fa-solid fa-coins"></i>
+                        <div>
+                            <div class="title-text">Crediti Residui</div>
+                            <div class="sub-text">Budget disponibile per l'asta</div>
+                        </div>
+                    </div>
+                    <div class="dash-card-badge" id="budget-display">600</div>
+                </div>
+
+                <div class="roles-grid-container">
+                    <div class="role-square-box role-por">
+                        <div class="role-name-txt">Portieri</div>
+                        <div class="role-count-txt" id="count-box-Portiere">0/3</div>
+                    </div>
+                    <div class="role-square-box role-dif">
+                        <div class="role-name-txt">Difensori</div>
+                        <div class="role-count-txt" id="count-box-Difensore">0/7</div>
+                    </div>
+                    <div class="role-square-box role-cen">
+                        <div class="role-name-txt">Centroc.</div>
+                        <div class="role-count-txt" id="count-box-Centrocampista">0/8</div>
+                    </div>
+                    <div class="role-square-box role-att">
+                        <div class="role-name-txt">Attaccanti</div>
+                        <div class="role-count-txt" id="count-box-Attaccante">0/6</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progress-bar"></div>
+            </div>
+
+            <div class="panel" id="draft-panel" style="display:block;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <div>
+                        <h2 id="draft-main-heading" style="margin:0;">Scegli il tuo giocatore</h2>
+                        <span style="font-size:11px; color:var(--accent-blue); font-weight:600;">👇 Tocca la scheda per acquistarlo</span>
+                    </div>
+                    <button onclick="annullaERicominciaDraft()" class="btn-action-danger" style="padding:6px 12px; font-size:11px;"><i class="fa-solid fa-arrow-rotate-left"></i> Ricomincia</button>
+                </div>
+                <div id="players" class="players-container"></div>
+            </div>
+        </div>
+
+        <!-- COLONNA DESTRA (Campo e Panchina) -->
+        <div class="desktop-col-right">
+            <div class="panel" id="campo-panel-container" style="display: none;">
+                <h2>Schieramento Titolari <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca sulle caselle)</span></h2>
+                <div id="campo" class="campo-style"></div>
+            </div>
+
+            <div class="panel section-panchina" id="panchina-panel-container" style="display: none;">
+                <h2><i class="fa-solid fa-couch" style="color: var(--accent-gold);"></i> Panchina Ufficiale <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(2 Riserve per Ruolo)</span></h2>
+                <div id="panchina-grafica" class="panchina-container"></div>
+            </div>
+        </div>
+
+        <!-- LA TUA ROSA -->
+        <div class="panel section-rosa">
+            <h2 id="current-draft-team-title">La Tua Rosa <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca per schierare)</span></h2>
+
+            <div class="rosa-columns-container">
+                <div class="rosa-role-column Portiere">
+                    <div class="rosa-col-title"><i class="fa-solid fa-hand"></i> <span>Portieri (<span id="count-rosa-Portiere">0</span>/3)</span></div>
+                    <div class="rosa-col-items" id="slot-Portiere"></div>
+                </div>
+                <div class="rosa-role-column Difensore">
+                    <div class="rosa-col-title"><i class="fa-solid fa-shield-halved"></i> <span>Difensori (<span id="count-rosa-Difensore">0</span>/7)</span></div>
+                    <div class="rosa-col-items" id="slot-Difensore"></div>
+                </div>
+                <div class="rosa-role-column Centrocampista">
+                    <div class="rosa-col-title"><i class="fa-solid fa-person-running"></i> <span>Centroc. (<span id="count-rosa-Centrocampista">0</span>/8)</span></div>
+                    <div class="rosa-col-items" id="slot-Centrocampista"></div>
+                </div>
+                <div class="rosa-role-column Attaccante">
+                    <div class="rosa-col-title"><i class="fa-solid fa-futbol"></i> <span>Attaccanti (<span id="count-rosa-Attaccante">0</span>/6)</span></div>
+                    <div class="rosa-col-items" id="slot-Attaccante"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PULSANTI FINALI IN BASSO -->
+        <div id="conferma-container" class="bottom-actions-container" style="display: none;">
+            <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-trash-can"></i> Cancella tutto e ricomincia il draft</button>
+            <button id="btn-conferma-formazione" class="btn-action-primary" onclick="confermaFormazioneDefinitiva()"><i class="fa-solid fa-lock"></i> Conferma e salva la tua formazione</button>
+        </div>
+    </div>
+</div>
+
+<!-- SCHERMATA RECAP -->
+<div id="recap-screen">
+    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(15,23,42,0.6); padding:12px; border-radius:12px; border:1px solid var(--card-border); margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+        <div>
+            <span id="recap-badge-status" style="background:rgba(16, 185, 129, 0.2); border:1px solid var(--accent-neon-green); color:var(--accent-neon-green); padding:3px 10px; border-radius:16px; font-size:10px; font-weight:800;">🔒 SQUADRA SALVATA</span>
+            <h2 id="recap-nome-squadra" style="margin:4px 0 0 0; color:#fff;">-</h2>
+            <div id="recap-utente-owner" style="font-size:11px; color:var(--accent-blue); font-weight:700;">-</div>
+        </div>
+        <div style="display:flex; gap:8px;">
+            <button id="btn-recap-back-classifica" onclick="apriSchermataClassifica()" class="btn-action-primary" style="background:linear-gradient(135deg, #f59e0b, #d97706); padding:8px 14px; font-size:12px; display:none;"><i class="fa-solid fa-ranking-star"></i> Vedi classifica di giornata</button>
+            <button onclick="tornaAllaHome()" class="btn-action-primary" style="padding:8px 14px; font-size:12px;"><i class="fa-solid fa-house"></i> Home Page</button>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-bottom: 15px;">
+        <p style="color: var(--text-muted); font-size:12px;">Modulo Tattico: <strong id="recap-modulo-title" style="color: #fff;">-</strong></p>
+    </div>
+
+    <div class="recap-content">
+        <div class="recap-left">
+            <h3>Titolari in Campo</h3>
+            <div id="recap-campo" class="campo-style"></div>
+        </div>
+
+        <div class="recap-right">
+            <h3>Panchina Ordinata</h3>
+            <div id="recap-panchina"></div>
+        </div>
+    </div>
+
+    <div class="voti-box">
+        <h2 style="text-align: center; font-size:16px; color:var(--accent-gold);">📊 Tabellino Voti di Giornata</h2>
+        <div id="tabellino-container">
+            <p style="text-align:center; color:var(--text-muted); font-size:12px;">I voti per questa squadra non sono ancora stati calcolati.</p>
+        </div>
+    </div>
+</div>
+
+<!-- SDK Firebase (Andrebbero prima del tuo script JS) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<!-- Collegamento al file JavaScript esterno -->
+<script src="script.js"></script>
 </body>
 </html>
