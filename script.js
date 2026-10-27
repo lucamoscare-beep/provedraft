@@ -510,7 +510,7 @@ function updateHomeStatusBannerState() {
 
     container.style.display = "block";
 
-    // Cliccando sul banner si apre sempre la classifica della giornata dei voti (es. la 8)
+    // Cliccando sul banner si apre la classifica della giornata dei voti (es. 8)
     banner.style.cursor = "pointer";
     banner.onclick = () => apriSchermataClassifica(ultimaGiornataVoti);
 
@@ -763,12 +763,75 @@ async function apriProfiloUtente(targetUserId) {
         let squadreCreateCount = squadre.length;
         let puntiTotali = 0;
         let migliorPunteggio = 0;
+        let creditiSpesiTotali = 0;
+
+        let moduliCount = {};
+        let giocatoriCount = {};
+        let giornateSet = new Set();
 
         squadre.forEach(sq => {
             let pts = sq.punteggioTotale !== undefined && sq.punteggioTotale !== null ? sq.punteggioTotale : 0;
             puntiTotali += pts;
             if (pts > migliorPunteggio) migliorPunteggio = pts;
+
+            // Calcolo crediti spesi (600 - budget residuo)
+            let budgetResiduo = sq.budget !== undefined && sq.budget !== null ? sq.budget : 600;
+            creditiSpesiTotali += (600 - budgetResiduo);
+
+            // Storico presenze (giornate uniche)
+            let g = sq.giornata !== undefined ? sq.giornata : 8;
+            giornateSet.add(g);
+
+            // Modulo preferito
+            let mod = sq.moduloSelezionato;
+            if (mod) {
+                moduliCount[mod] = (moduliCount[mod] || 0) + 1;
+            }
+
+            // Calciatore più acquistato (rosa oppure schierati + riserve)
+            let rosaObj = sq.rosa || {};
+            let playersInTeam = [];
+            Object.values(rosaObj).forEach(rList => {
+                if (Array.isArray(rList)) {
+                    rList.forEach(p => playersInTeam.push(p.nome));
+                }
+            });
+            if (playersInTeam.length === 0) {
+                (sq.schierati || []).forEach(p => playersInTeam.push(p.nome));
+                Object.values(sq.riserveSelezionate || {}).forEach(rList => {
+                    if (Array.isArray(rList)) {
+                        rList.forEach(p => playersInTeam.push(p.nome));
+                    }
+                });
+            }
+
+            // Conta il giocatore una volta sola per squadra
+            [...new Set(playersInTeam)].forEach(nomeP => {
+                giocatoriCount[nomeP] = (giocatoriCount[nomeP] || 0) + 1;
+            });
         });
+
+        // Calcolo Modulo Preferito + %
+        let moduloPreferitoStr = "N/D";
+        if (squadre.length > 0 && Object.keys(moduliCount).length > 0) {
+            let topMod = Object.keys(moduliCount).reduce((a, b) => moduliCount[a] > moduliCount[b] ? a : b);
+            let pct = Math.round((moduliCount[topMod] / squadre.length) * 100);
+            moduloPreferitoStr = `${topMod} (${pct}%)`;
+        }
+
+        // Calcolo Calciatore Talismano (gestione pari merito)
+        let calciatoreTopStr = "N/D";
+        if (Object.keys(giocatoriCount).length > 0) {
+            let maxAcquisti = Math.max(...Object.values(giocatoriCount));
+            let topPlayers = Object.keys(giocatoriCount).filter(p => giocatoriCount[p] === maxAcquisti);
+            if (topPlayers.length === 1) {
+                calciatoreTopStr = `${topPlayers[0]} (${maxAcquisti}v)`;
+            } else if (topPlayers.length === 2) {
+                calciatoreTopStr = `${topPlayers.join(", ")} (${maxAcquisti}v)`;
+            } else {
+                calciatoreTopStr = `${topPlayers.slice(0, 2).join(", ")} e altri (${maxAcquisti}v)`;
+            }
+        }
 
         let ori = 0, argenti = 0, bronzi = 0;
         const ultimaGiornataVoti = getUltimaGiornataConVoti();
@@ -808,10 +871,24 @@ async function apriProfiloUtente(targetUserId) {
             });
         }
 
+        // Assegnazione valori nell'interfaccia
         document.getElementById("stat-squadre-create").innerText = squadreCreateCount;
         document.getElementById("stat-draft-tentati").innerText = draftTentati;
         document.getElementById("stat-miglior-punteggio").innerText = `${migliorPunteggio.toFixed(1)} pt`;
         document.getElementById("stat-punti-totali").innerText = `${puntiTotali.toFixed(1)} pt`;
+
+        // Nuove metriche profilazione
+        const elSpesi = document.getElementById("stat-soldi-spesi");
+        if (elSpesi) elSpesi.innerText = `${creditiSpesiTotali} cr`;
+
+        const elPresenze = document.getElementById("stat-storico-presenze");
+        if (elPresenze) elPresenze.innerText = giornateSet.size;
+
+        const elModulo = document.getElementById("stat-modulo-preferito");
+        if (elModulo) elModulo.innerText = moduloPreferitoStr;
+
+        const elTalismano = document.getElementById("stat-calciatore-top");
+        if (elTalismano) elTalismano.innerText = calciatoreTopStr;
 
         document.getElementById("stat-podi-oro").innerText = ori;
         document.getElementById("stat-podi-argento").innerText = argenti;
