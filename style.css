@@ -1384,29 +1384,31 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 
 .classifica-table-container {
     width: 100%;
-    overflow-x: auto;
     border-radius: 12px;
     border: 1px solid var(--card-border);
     background: rgba(15, 23, 42, 0.8);
+    overflow-x: auto; /* Permette lo scroll solo se lo schermo è davvero piccolissimo */
+    -webkit-overflow-scrolling: touch;
 }
 
 .classifica-table {
     width: 100%;
     border-collapse: collapse;
     text-align: left;
+    white-space: nowrap; /* Evita che il testo vada a capo in modo disordinato */
 }
 
 .classifica-table th, .classifica-table td {
-    padding: 12px 14px;
+    padding: 10px 8px; /* Padding ridotto per occupare meno spazio */
     border-bottom: 1px solid var(--card-border);
-    font-size: 12px;
+    font-size: 11px; /* Font leggermente più compatto */
 }
 
 .classifica-table th {
     background: rgba(30, 41, 59, 0.95);
     color: var(--text-muted);
     text-transform: uppercase;
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 800;
     letter-spacing: 0.5px;
 }
@@ -1417,6 +1419,29 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 .classifica-table tr.current-user-row {
     background: rgba(16, 185, 129, 0.15) !important;
     border-left: 3px solid var(--accent-neon-green);
+}
+
+/* Riduciamo in modo mirato la colonna della posizione */
+.rank-cell { 
+    font-weight: 900; 
+    font-size: 12px; 
+    width: 40px; 
+    text-align: center; 
+}
+
+/* Su desktop diamo un po' più di respiro ai padding */
+@media (min-width: 768px) {
+    .classifica-table th, .classifica-table td {
+        padding: 12px 14px;
+        font-size: 12px;
+    }
+    .classifica-table th {
+        font-size: 10px;
+    }
+    .rank-cell {
+        width: 60px;
+        font-size: 14px;
+    }
 }
 
 .rank-cell { font-weight: 900; font-size: 14px; width: 50px; text-align: center; }
