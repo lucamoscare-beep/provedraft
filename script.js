@@ -765,10 +765,14 @@ async function apriProfiloUtente(targetUserId) {
         let migliorPunteggio = 0;
 	let budgetSpesoTotale = 0; // <--- AGGIUNGI QUESTA VARIABILE
 
+	// Conteggio dei moduli per calcolare il più utilizzato
+        let conteggioModuli = {};
+
         squadre.forEach(sq => {
             let pts = sq.punteggioTotale !== undefined && sq.punteggioTotale !== null ? sq.punteggioTotale : 0;
             puntiTotali += pts;
             if (pts > migliorPunteggio) migliorPunteggio = pts;
+
 	// --- CALCOLO DEL BUDGET SPESO ---
             // Il budget iniziale di ogni draft è 600. Il budget residuo è sq.budget.
             // Di conseguenza, i crediti spesi in questa squadra sono (600 - budget residuo).
@@ -777,8 +781,27 @@ async function apriProfiloUtente(targetUserId) {
             if (spesoPerQuestaSquadra < 0) spesoPerQuestaSquadra = 0;
             budgetSpesoTotale += spesoPerQuestaSquadra;
 	
+	// Conteggio moduli
+            if (sq.moduloSelezionato) {
+                let mod = sq.moduloSelezionato;
+                conteggioModuli[mod] = (conteggioModuli[mod] || 0) + 1;
 		
         });
+
+	// Determinazione del modulo più usato e della relativa percentuale
+        let moduloPreferitoTxt = "N/D";
+        if (squadreCreateCount > 0 && Object.keys(conteggioModuli).length > 0) {
+            let maxUsi = 0;
+            let modTop = "";
+            for (let [mod, count] of Object.entries(conteggioModuli)) {
+                if (count > maxUsi) {
+                    maxUsi = count;
+                    modTop = mod;
+                }
+            }
+            let percentuale = ((maxUsi / squadreCreateCount) * 100).toFixed(1);
+            moduloPreferitoTxt = `${modTop} (${percentuale}%)`;
+        }
 
         let ori = 0, argenti = 0, bronzi = 0;
         const ultimaGiornataVoti = getUltimaGiornataConVoti();
@@ -824,6 +847,11 @@ async function apriProfiloUtente(targetUserId) {
         document.getElementById("stat-punti-totali").innerText = `${puntiTotali.toFixed(1)} pt`;
 	// --- AGGIUNGI QUESTA RIGA PER IL BUDGET SPESO ---
         document.getElementById("stat-budget-speso").innerText = `${budgetSpesoTotale} cr`;
+
+	// Popolamento del Modulo Preferito
+        if (document.getElementById("stat-modulo-preferito")) {
+            document.getElementById("stat-modulo-preferito").innerText = moduloPreferitoTxt;
+        }
 
         document.getElementById("stat-podi-oro").innerText = ori;
         document.getElementById("stat-podi-argento").innerText = argenti;
