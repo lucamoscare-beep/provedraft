@@ -1009,33 +1009,13 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 .slot-tag {
     font-size: 8px;
     font-weight: 800;
-    padding: 1px 5px;
+    padding: 1px 4px;
     border-radius: 3px;
     text-transform: uppercase;
 }
 
-.slot-tag.titolare { background: rgba(16, 185, 129, 0.25); color: var(--accent-neon-green); border: 1px solid var(--accent-green); }
-.slot-tag.riserva { background: rgba(251, 191, 36, 0.25); color: var(--accent-gold); border: 1px solid var(--accent-gold); }
-
-/* LEGENDA ROSA */
-.rosa-legenda {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px solid var(--card-border);
-    padding: 6px 12px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    font-size: 11px;
-}
-
-.legenda-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--text-muted);
-}
+.slot-tag.campo { background: rgba(16, 185, 129, 0.25); color: var(--accent-neon-green); border: 1px solid var(--accent-green); }
+.slot-tag.panchina { background: rgba(251, 191, 36, 0.25); color: var(--accent-gold); border: 1px solid var(--accent-gold); }
 
 .campo-style {
     width: 100%;
@@ -1404,100 +1384,42 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 
 .classifica-table-container {
     width: 100%;
+    overflow-x: auto;
     border-radius: 12px;
     border: 1px solid var(--card-border);
     background: rgba(15, 23, 42, 0.8);
-    overflow: hidden;
 }
 
-/* Su mobile trasformiamo la tabella in una visualizzazione a card compatte senza scroll */
-@media (max-width: 768px) {
-    .classifica-table, .classifica-table thead, .classifica-table tbody, .classifica-table th, .classifica-table td, .classifica-table tr {
-        display: block;
-        width: 100%;
-    }
-    
-    .classifica-table thead {
-        display: none; /* Nascondiamo l'intestazione su mobile */
-    }
-
-    .classifica-table tr {
-        background: rgba(30, 41, 59, 0.6);
-        border-bottom: 1px solid var(--card-border);
-        padding: 10px 12px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-    }
-
-    .classifica-table tr.current-user-row {
-        background: rgba(16, 185, 129, 0.2) !important;
-        border-left: 4px solid var(--accent-neon-green);
-    }
-
-    .classifica-table td {
-        border: none;
-        padding: 0;
-        font-size: 11px;
-    }
-
-    /* Riduciamo lo spazio della posizione su mobile */
-    .classifica-table td.rank-cell {
-        width: 35px;
-        flex-shrink: 0;
-        text-align: center;
-        font-size: 13px;
-    }
-
-    .classifica-table td.user-info-cell {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .classifica-table td.score-cell {
-        text-align: right;
-        flex-shrink: 0;
-    }
-
-    .classifica-table td.action-cell {
-        flex-shrink: 0;
-        text-align: right;
-    }
+.classifica-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
 }
 
-/* Su desktop manteniamo la tabella classica ordinata */
-@media (min-width: 769px) {
-    .classifica-table-container {
-        overflow-x: auto;
-    }
-    .classifica-table {
-        width: 100%;
-        border-collapse: collapse;
-        text-align: left;
-    }
-    .classifica-table th, .classifica-table td {
-        padding: 12px 14px;
-        border-bottom: 1px solid var(--card-border);
-        font-size: 12px;
-    }
-    .classifica-table th {
-        background: rgba(30, 41, 59, 0.95);
-        color: var(--text-muted);
-        text-transform: uppercase;
-        font-size: 10px;
-        font-weight: 800;
-        letter-spacing: 0.5px;
-    }
-    .classifica-table tbody tr:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
-    .classifica-table tr:hover { background: rgba(255, 255, 255, 0.05); }
-    .classifica-table tr.current-user-row {
-        background: rgba(16, 185, 129, 0.15) !important;
-        border-left: 3px solid var(--accent-neon-green);
-    }
-    .rank-cell { font-weight: 900; font-size: 14px; width: 60px; text-align: center; }
+.classifica-table th, .classifica-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--card-border);
+    font-size: 12px;
 }
 
+.classifica-table th {
+    background: rgba(30, 41, 59, 0.95);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.classifica-table tbody tr:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
+.classifica-table tr:hover { background: rgba(255, 255, 255, 0.05); }
+
+.classifica-table tr.current-user-row {
+    background: rgba(16, 185, 129, 0.15) !important;
+    border-left: 3px solid var(--accent-neon-green);
+}
+
+.rank-cell { font-weight: 900; font-size: 14px; width: 50px; text-align: center; }
 
 .matchday-selector-section {
     margin-top: 30px;

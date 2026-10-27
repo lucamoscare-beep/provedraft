@@ -629,16 +629,12 @@ async function apriSchermataClassifica(giornata) {
 
             tr.innerHTML = `
                 <td class="rank-cell">${rankDisplay}</td>
-                <td class="user-info-cell" style="font-weight:700;">
-                    <div style="color:#fff; font-size:12px; font-weight:800;" class="marquee-container" style="max-width: 140px;"><span class="marquee-text">${item.nomeSquadra}</span></div>
-                    <div style="font-size:10px; color:var(--accent-blue); cursor:pointer;" onclick="apriProfiloUtente('${item.userId}')"><i class="fa-solid fa-user"></i> ${item.username}</div>
-                </td>
-                <td class="score-cell" style="font-weight:900; color:var(--accent-neon-green); font-size:13px;">
-                    ${item.punteggio} pt
-                    <div style="font-size:9px; color:var(--accent-gold); font-weight:700;">Bud: ${item.budgetResiduo} cr</div>
-                </td>
-                <td class="action-cell" style="text-align:right;">
-                    <button onclick="visualizzaSquadraGenerica('${item.userId}', '${item.nomeSquadra.replace(/'/g, "\\'")}', ${giornata})" class="btn-action-primary" style="padding:6px 10px; font-size:10px;" title="Vedi Formazione">
+                <td style="font-weight:700; color:var(--accent-blue); cursor:pointer;" onclick="apriProfiloUtente('${item.userId}')"><div class="marquee-container" style="max-width: 120px;"><span class="marquee-text"><i class="fa-solid fa-user"></i> ${item.username}</span></div></td>
+                <td style="font-weight:800; color:#fff;"><div class="marquee-container" style="max-width: 150px;"><span class="marquee-text">${item.nomeSquadra}</span></div></td>
+                <td style="font-weight:900; color:var(--accent-neon-green); font-size:13px;">${item.punteggio} pt</td>
+                <td style="color:var(--accent-gold); font-weight:700;">${item.budgetResiduo} cr</td>
+                <td style="text-align:right;">
+                    <button onclick="visualizzaSquadraGenerica('${item.userId}', '${item.nomeSquadra.replace(/'/g, "\\'")}', ${giornata})" class="btn-action-primary" style="padding:6px 12px; font-size:11px;" title="Vedi Formazione">
                         <i class="fa-solid fa-eye"></i>
                     </button>
                 </td>
