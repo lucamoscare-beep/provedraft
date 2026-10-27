@@ -510,6 +510,10 @@ function updateHomeStatusBannerState() {
 
     container.style.display = "block";
 
+    // Cliccando sul banner si apre sempre la classifica della giornata dei voti (es. la 8)
+    banner.style.cursor = "pointer";
+    banner.onclick = () => apriSchermataClassifica(ultimaGiornataVoti);
+
     if (!isVotiOkAvailable) {
         banner.className = "home-status-banner waiting";
         icon.className = "fa-solid fa-hourglass-half";
