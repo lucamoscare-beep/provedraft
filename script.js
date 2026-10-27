@@ -1342,7 +1342,7 @@ function apriModaleScelta(ruolo, targetType, indexTitolare = null) {
     cardHtml += `
             </div>
             <div style="display:flex; gap:8px;">
-                <button onclick="rimuoviSlotSelezionato('${ruolo}', '${targetType}', ${indexTitolare})" class="btn-action-danger" style="flex:1; padding:8px; font-size:11px;">Rimuovi / Svuota</button>
+                <button onclick="rimuoviSlotSelezionato('${ruolo}', '${targetType}', ${indexTitolare})" class="btn-action-danger" style="flex:1; padding:8px; font-size:11px;">Rimuovi giocatore</button>
                 <button onclick="chiudiModale()" class="btn-action-primary" style="flex:1; padding:8px; font-size:11px; background:rgba(51, 65, 85, 0.9);">Chiudi</button>
             </div>
         </div>
@@ -1400,13 +1400,10 @@ function rimuoviSlotSelezionato(ruolo, targetType, indexTitolare = null) {
         let titolariRuolo = schierati.filter(s => s.ruolo === ruolo);
         if (idx !== null && !isNaN(idx) && titolariRuolo[idx]) {
             schierati = schierati.filter(s => s.nome !== titolariRuolo[idx].nome);
-        } else if (titolariRuolo.length > 0) {
-            const daRimuovere = titolariRuolo[titolariRuolo.length - 1];
-            schierati = schierati.filter(s => s.nome !== daRimuovere.nome);
         }
     } else {
         let index = parseInt(targetType);
-        if (riserveSelezionate[ruolo][index]) {
+        if (!isNaN(index) && riserveSelezionate[ruolo][index]) {
             riserveSelezionate[ruolo].splice(index, 1);
         }
     }
