@@ -16,15 +16,16 @@ const db = firebase.firestore();
 // CALENDARIO DI SICUREZZA (FALLBACK IN CASO DI RETE ASSENTE)
 // ----------------------------------------------------
 const CALENDARIO_FALLBACK = {
-    8: new Date("2026-10-20T18:30:00"),
-    9: new Date("2026-10-27T18:30:00"),
-    10: new Date("2026-11-03T18:30:00"),
-    11: new Date("2026-11-10T18:30:00"),
-    12: new Date("2026-11-24T18:30:00")
+    8: { inizio: new Date("2026-10-20T18:30:00"), fine: new Date("2026-10-22T23:00:00") },
+    9: { inizio: new Date("2026-10-27T18:30:00"), fine: new Date("2026-10-29T23:00:00") },
+    10: { inizio: new Date("2026-11-03T18:30:00"), fine: new Date("2026-11-05T23:00:00") },
+    11: { inizio: new Date("2026-11-10T18:30:00"), fine: new Date("2026-11-12T23:00:00") },
+    12: { inizio: new Date("2026-11-24T18:30:00"), fine: new Date("2026-11-26T23:00:00") }
 };
 
 let ACTIVE_MATCHDAY = 9; 
-let CURRENT_MATCHDAY_DEADLINE = new Date("2026-10-27T18:30:00"); 
+let CURRENT_MATCHDAY_START = null;
+let CURRENT_MATCHDAY_END = null;
 
 let currentUser = null;
 let customPlayersList = [];
@@ -100,7 +101,7 @@ async function inizializzaGiornataEDeadlineDinamica() {
     const keyCache = "draft_seriea_matchday_info";
     const keyTime = "draft_seriea_matchday_time";
     const oraAttuale = new Date().getTime();
-    const durataCache = 2 * 60 * 60 * 1000;
+    const durataCache = 30 * 60 * 1000; // 30 minuti
 
     const cacheSalvata = localStorage.getItem(keyCache);
     const timeSalvato = localStorage.getItem(keyTime);
@@ -108,49 +109,81 @@ async function inizializzaGiornataEDeadlineDinamica() {
     if (cacheSalvata && timeSalvato && (oraAttuale - parseInt(timeSalvato) < durataCache)) {
         try {
             const parsed = JSON.parse(cacheSalvata);
-            const deadlineCache = new Date(parsed.deadline);
-            if (deadlineCache > new Date()) {
+            const startCache = new Date(parsed.start);
+            const endCache = new Date(parsed.end);
+            
+            if (endCache > new Date()) {
                 ACTIVE_MATCHDAY = parsed.giornata;
-                CURRENT_MATCHDAY_DEADLINE = deadlineCache;
-                currentSelectedMatchday = getUltimaGiornataConVoti();
+                CURRENT_MATCHDAY_START = startCache;
+                CURRENT_MATCHDAY_END = endCache;
+                currentSelectedMatchday = Math.max(1, ACTIVE_MATCHDAY - 1);
                 return;
             }
         } catch(e) {}
     }
 
     try {
-        const response = await fetch("https://api.football-data.org/v4/competitions/SA/matches?status=SCHEDULED", {
+        const response = await fetch("https://api.football-data.org/v4/competitions/SA/matches?status=SCHEDULED,LIVE,IN_PLAY", {
             headers: { "X-Auth-Token": "1803bfcd108f4c2cb2ee7663a7d45761" }
         });
 
         if (response.ok) {
             const data = await response.json();
             if (data && data.matches && data.matches.length > 0) {
-                const primoMatch = data.matches[0];
-                ACTIVE_MATCHDAY = primoMatch.matchday;
-                CURRENT_MATCHDAY_DEADLINE = new Date(primoMatch.utcDate);
-                currentSelectedMatchday = getUltimaGiornataConVoti();
+                let giornataCorrente = data.matches[0].matchday;
 
-                localStorage.setItem(keyCache, JSON.stringify({
-                    giornata: ACTIVE_MATCHDAY,
-                    deadline: CURRENT_MATCHDAY_DEADLINE.toISOString()
-                }));
-                localStorage.setItem(keyTime, oraAttuale.toString());
-                return;
+                const resMatchday = await fetch(`https://api.football-data.org/v4/competitions/SA/matches?matchday=${giornataCorrente}`, {
+                    headers: { "X-Auth-Token": "1803bfcd108f4c2cb2ee7663a7d45761" }
+                });
+
+                if (resMatchday.ok) {
+                    const dataMatchday = await resMatchday.json();
+                    const matches = dataMatchday.matches;
+
+                    if (matches && matches.length > 0) {
+                        matches.sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate));
+
+                        const primaPartita = matches[0];
+                        const ultimaPartita = matches[matches.length - 1];
+
+                        CURRENT_MATCHDAY_START = new Date(primaPartita.utcDate);
+                        CURRENT_MATCHDAY_END = new Date(new Date(ultimaPartita.utcDate).getTime() + (2.5 * 60 * 60 * 1000));
+
+                        if (new Date() > CURRENT_MATCHDAY_END) {
+                            ACTIVE_MATCHDAY = giornataCorrente + 1;
+                            await inizializzaGiornataEDeadlineDinamica();
+                            return;
+                        }
+
+                        ACTIVE_MATCHDAY = giornataCorrente;
+                        currentSelectedMatchday = Math.max(1, ACTIVE_MATCHDAY - 1);
+
+                        localStorage.setItem(keyCache, JSON.stringify({
+                            giornata: ACTIVE_MATCHDAY,
+                            start: CURRENT_MATCHDAY_START.toISOString(),
+                            end: CURRENT_MATCHDAY_END.toISOString()
+                        }));
+                        localStorage.setItem(keyTime, oraAttuale.toString());
+                        return;
+                    }
+                }
             }
         }
     } catch (err) {}
 
+    // Fallback di sicurezza
     const adesso = new Date();
     let trovata = 9;
-    for (let [giornata, deadline] of Object.entries(CALENDARIO_FALLBACK)) {
-        if (adesso < deadline) {
+    for (let [giornata, info] of Object.entries(CALENDARIO_FALLBACK)) {
+        if (adesso < info.fine) {
             trovata = parseInt(giornata);
             break;
         }
     }
     ACTIVE_MATCHDAY = trovata;
-    CURRENT_MATCHDAY_DEADLINE = CALENDARIO_FALLBACK[ACTIVE_MATCHDAY] || new Date("2026-10-27T18:30:00");
+    const fallbackInfo = CALENDARIO_FALLBACK[ACTIVE_MATCHDAY] || CALENDARIO_FALLBACK[9];
+    CURRENT_MATCHDAY_START = fallbackInfo.inizio;
+    CURRENT_MATCHDAY_END = fallbackInfo.fine;
     currentSelectedMatchday = getUltimaGiornataConVoti();
 }
 
@@ -184,17 +217,45 @@ function getRealUsername(uData, defaultAuthUser) {
 }
 
 function isMarketOpen() {
-    return new Date() < CURRENT_MATCHDAY_DEADLINE;
+    if (isTestMode) return true;
+    const adesso = new Date();
+    if (!CURRENT_MATCHDAY_START || !CURRENT_MATCHDAY_END) return true;
+
+    // Bloccato dall'inizio della prima partita fino alla fine dell'ultima
+    if (adesso >= CURRENT_MATCHDAY_START && adesso <= CURRENT_MATCHDAY_END) {
+        return false;
+    }
+
+    if (adesso > CURRENT_MATCHDAY_END) {
+        inizializzaGiornataEDeadlineDinamica();
+        return true;
+    }
+
+    return true;
 }
 
 function initCountdown() {
     function updateTimer() {
         const now = new Date();
-        const diff = CURRENT_MATCHDAY_DEADLINE - now;
+        if (!CURRENT_MATCHDAY_START || !CURRENT_MATCHDAY_END) return;
 
+        const adesso = new Date();
+
+        if (adesso >= CURRENT_MATCHDAY_START && adesso <= CURRENT_MATCHDAY_END) {
+            document.querySelectorAll(".countdown-timer").forEach(el => el.innerHTML = `<span style='color:var(--accent-red); font-size:15px; font-weight:900;'>🔒 G${ACTIVE_MATCHDAY} IN CORSO (BLOCCATO)</span>`);
+            const textEl = document.getElementById("welcome-deadline-text");
+            if (textEl) textEl.innerText = `Le partite della giornata ${ACTIVE_MATCHDAY} sono in corso. Il mercato riaprirà al termine dell'ultimo match.`;
+            return;
+        }
+
+        if (adesso > CURRENT_MATCHDAY_END) {
+            inizializzaGiornataEDeadlineDinamica();
+            return;
+        }
+
+        const diff = CURRENT_MATCHDAY_START - now;
         if (diff <= 0) {
-            document.querySelectorAll(".countdown-timer").forEach(el => el.innerHTML = "<span style='color:var(--accent-red); font-size:18px; font-weight:900;'>❌ MERCATO CHIUSO</span>");
-            document.getElementById("welcome-deadline-text").innerText = `Iscrizione e modifiche bloccate per la giornata ${ACTIVE_MATCHDAY}.`;
+            inizializzaGiornataEDeadlineDinamica();
             return;
         }
 
@@ -207,6 +268,9 @@ function initCountdown() {
         ["w-cd-hours"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(hours).padStart(2, '0'); });
         ["w-cd-mins"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(mins).padStart(2, '0'); });
         ["w-cd-secs"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(secs).padStart(2, '0'); });
+        
+        const textEl = document.getElementById("welcome-deadline-text");
+        if (textEl) textEl.innerText = `Iscrivi le tue squadre alla giornata ${ACTIVE_MATCHDAY} entro l'inizio della prima partita:`;
     }
 
     updateTimer();
@@ -841,7 +905,7 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false) {
     creaRepartoCampo(recapCampo, "Centrocampista", sq.schierati.filter(p => p.ruolo === "Centrocampista"), true);
     creaRepartoCampo(recapCampo, "Attaccante", sq.schierati.filter(p => p.ruolo === "Attaccante"), true);
 
-  const panchinaDiv = document.getElementById("recap-panchina");
+    const panchinaDiv = document.getElementById("recap-panchina");
     panchinaDiv.innerHTML = "";
 
     ["Portiere", "Difensore", "Centrocampista", "Attaccante"].forEach(ruolo => {
@@ -1094,16 +1158,10 @@ function renderPlayers() {
     let totalAcquistati = Object.values(rosa).reduce((acc, curr) => acc + curr.length, 0);
     let giocatoriMancanti = 24 - totalAcquistati;
 
-    // Filtriamo inizialmente solo i ruoli che non hanno ancora raggiunto il limite
     let ruoliDisponibili = availablePlayers.filter(p => rosa[p.ruolo].length < limits[p.ruolo]);
-
-    // Calcoliamo il costo minimo obbligatorio per gli altri giocatori che mancano (1 credito per ciascuno escluso quello attuale)
     let maxCostAllowed = budget - (giocatoriMancanti - 1);
-
-    // Selezioniamo solo i giocatori che possiamo realmente permetterci senza rimanere bloccati
     let candidates = ruoliDisponibili.filter(p => p.valore <= maxCostAllowed);
 
-    // Fallback di sicurezza estrema nel caso in cui le combinazioni stringano troppo il cerchio
     if (candidates.length === 0) {
         candidates = ruoliDisponibili.filter(p => p.valore <= budget);
     }
@@ -1200,7 +1258,6 @@ function draft(nome) {
 }
 
 function renderSlots() {
-    // Assicuriamoci che l'intestazione della sezione Rosa contenga la legenda
     const titleContainer = document.querySelector(".section-rosa h2");
     if (titleContainer && !document.getElementById("rosa-legenda-box")) {
         titleContainer.innerHTML = `La Tua Rosa <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca per schierare)</span>`;
@@ -1355,14 +1412,13 @@ function apriModaleScelta(ruolo, targetType, indexTitolare = null) {
 }
 
 function apriModaleRimuoviGiocatore(ruolo) {
-    chiudiModale(); // Chiudiamo la prima modale
+    chiudiModale();
 
     const colorRuolo = roleColors[ruolo];
     const overlay = document.createElement("div");
     overlay.className = "custom-modal-overlay";
     overlay.id = "selection-modal";
 
-    // Raccogliamo tutti i giocatori di quel ruolo attualmente schierati (in campo o in panchina)
     const titolariRuolo = schierati.filter(s => s.ruolo === ruolo);
     const riserveRuolo = riserveSelezionate[ruolo] || [];
 
@@ -1415,7 +1471,6 @@ function apriModaleRimuoviGiocatore(ruolo) {
 }
 
 function eseguiRimozioneGiocatore(nomeGiocatore, ruolo) {
-    // Rimuoviamo sia dai titolari che dalle riserve di quel ruolo
     schierati = schierati.filter(s => s.nome !== nomeGiocatore);
     if (riserveSelezionate[ruolo]) {
         riserveSelezionate[ruolo] = riserveSelezionate[ruolo].filter(r => r.nome !== nomeGiocatore);
@@ -1426,6 +1481,7 @@ function eseguiRimozioneGiocatore(nomeGiocatore, ruolo) {
     renderSlots();
     renderPanchinaGrafica();
 }
+
 function chiudiModale() {
     const modal = document.getElementById("selection-modal");
     if (modal) modal.remove();
@@ -1444,7 +1500,6 @@ function assegnaGiocatoreDaModale(nomeGiocatore, ruolo, targetType) {
         let indexTitolare = parseInt(targetType.replace("campo_indice_", ""));
         let titolariRuolo = schierati.filter(s => s.ruolo === ruolo);
         
-        // Rimuoviamo il vecchio titolare in quella posizione se esisteva
         if (titolariRuolo[indexTitolare]) {
             schierati = schierati.filter(s => s.nome !== titolariRuolo[indexTitolare].nome);
         }
