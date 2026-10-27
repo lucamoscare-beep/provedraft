@@ -95,69 +95,147 @@ function refreshAllMarquees() {
 window.addEventListener('resize', () => {
     refreshAllMarquees();
 });
+let CURRENT_MATCHDAY_START = null;
+let CURRENT_MATCHDAY_END = null;
 
 async function inizializzaGiornataEDeadlineDinamica() {
     const keyCache = "draft_seriea_matchday_info";
     const keyTime = "draft_seriea_matchday_time";
     const oraAttuale = new Date().getTime();
-    const durataCache = 2 * 60 * 60 * 1000;
+    const durataCache = 30 * 60 * 1000; // Aggiorna la cache ogni 30 minuti
 
     const cacheSalvata = localStorage.getItem(keyCache);
     const timeSalvato = localStorage.getItem(keyTime);
 
     if (cacheSalvata && timeSalvato && (oraAttuale - parseInt(timeSalvato) < durataCache)) {
-        try {
-            const parsed = JSON.parse(cacheSalvata);
-            const deadlineCache = new Date(parsed.deadline);
-            if (deadlineCache > new Date()) {
-                ACTIVE_MATCHDAY = parsed.giornata;
-                CURRENT_MATCHDAY_DEADLINE = deadlineCache;
-                currentSelectedMatchday = getUltimaGiornataConVoti();
-                return;
-            }
-        } catch(e) {}
-    }
-
-    try {
-        const response = await fetch("https://api.football-data.org/v4/competitions/SA/matches?status=SCHEDULED", {
+try {
+        // 1. Troviamo la giornata attiva tramite le partite programmate o in corso online
+        const response = await fetch("https://api.football-data.org/v4/competitions/SA/matches?status=SCHEDULED,LIVE,IN_PLAY", {
             headers: { "X-Auth-Token": "1803bfcd108f4c2cb2ee7663a7d45761" }
         });
 
         if (response.ok) {
             const data = await response.json();
             if (data && data.matches && data.matches.length > 0) {
-                const primoMatch = data.matches[0];
-                ACTIVE_MATCHDAY = primoMatch.matchday;
-                CURRENT_MATCHDAY_DEADLINE = new Date(primoMatch.utcDate);
-                currentSelectedMatchday = getUltimaGiornataConVoti();
+                let giornataCorrente = data.matches[0].matchday;
 
-                localStorage.setItem(keyCache, JSON.stringify({
-                    giornata: ACTIVE_MATCHDAY,
-                    deadline: CURRENT_MATCHDAY_DEADLINE.toISOString()
-                }));
-                localStorage.setItem(keyTime, oraAttuale.toString());
-                return;
+                // 2. Scarichiamo TUTTI i match di questa specifica giornata per trovare inizio e fine esatti
+                const resMatchday = await fetch(`https://api.football-data.org/v4/competitions/SA/matches?matchday=${giornataCorrente}`, {
+                    headers: { "X-Auth-Token": "1803bfcd108f4c2cb2ee7663a7d45761" }
+                });
+
+                if (resMatchday.ok) {
+                    const dataMatchday = await resMatchday.json();
+                    const matches = dataMatchday.matches;
+
+                    if (matches && matches.length > 0) {
+                        matches.sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate));
+
+                        const primaPartita = matches[0];
+                        const ultimaPartita = matches[matches.length - 1];
+
+                        CURRENT_MATCHDAY_START = new Date(primaPartita.utcDate);
+                        // Aggiungiamo 2 ore e mezza di buffer all'orario dell'ultima partita per coprire i 90 min + recupero/eventuali posticipi
+                        CURRENT_MATCHDAY_END = new Date(new Date(ultimaPartita.utcDate).getTime() + (2.5 * 60 * 60 * 1000));
+
+                        // Se la giornata è già finita, passiamo alla successiva
+                        if (new Date() > CURRENT_MATCHDAY_END) {
+                            ACTIVE_MATCHDAY = giornataCorrente + 1;
+                            // Ricorsione rapida per puntare alla successiva
+                            await inizializzaGiornataEDeadlineDinamica();
+                            return;
+                        }
+
+                        ACTIVE_MATCHDAY = giornataCorrente;
+                        currentSelectedMatchday = Math.max(1, ACTIVE_MATCHDAY - 1);
+
+                        localStorage.setItem(keyCache, JSON.stringify({
+                            giornata: ACTIVE_MATCHDAY,
+                            start: CURRENT_MATCHDAY_START.toISOString(),
+                            end: CURRENT_MATCHDAY_END.toISOString()
+                        }));
+                        localStorage.setItem(keyTime, oraAttuale.toString());
+                        return;
+                    }
+                }
             }
         }
-    } catch (err) {}
-
-    const adesso = new Date();
-    let trovata = 9;
-    for (let [giornata, deadline] of Object.entries(CALENDARIO_FALLBACK)) {
-        if (adesso < deadline) {
-            trovata = parseInt(giornata);
-            break;
-        }
+    } catch (err) {
+        console.error("Errore API calendario:", err);
     }
-    ACTIVE_MATCHDAY = trovata;
-    CURRENT_MATCHDAY_DEADLINE = CALENDARIO_FALLBACK[ACTIVE_MATCHDAY] || new Date("2026-10-27T18:30:00");
+
+    // Fallback di sicurezza se la chiamata fallisce
+    ACTIVE_MATCHDAY = 9;
+    CURRENT_MATCHDAY_START = new Date("2026-10-27T18:30:00");
+    CURRENT_MATCHDAY_END = new Date("2026-10-29T23:00:00");
     currentSelectedMatchday = getUltimaGiornataConVoti();
 }
 
-function getUltimaGiornataConVoti() {
-    return Math.max(1, ACTIVE_MATCHDAY - 1);
+function isMarketOpen() {
+    if (isTestMode) return true;
+    const adesso = new Date();
+
+    if (!CURRENT_MATCHDAY_START || !CURRENT_MATCHDAY_END) return true;
+
+    // Blocco attivo: dal fischio d'inizio della prima partita fino alla fine dell'ultima
+    if (adesso >= CURRENT_MATCHDAY_START && adesso <= CURRENT_MATCHDAY_END) {
+        return false;
+    }
+
+    // Se l'ultima partita è conclusa, forziamo il ricalcolo per passare alla giornata successiva
+    if (adesso > CURRENT_MATCHDAY_END) {
+        inizializzaGiornataEDeadlineDinamica();
+        return true;
+    }
+
+    return true; // Mercato aperto prima della prima partita
 }
 
+function initCountdown() {
+    function updateTimer() {
+        const now = new Date();
+        if (!CURRENT_MATCHDAY_START || !CURRENT_MATCHDAY_END) return;
+
+        const adesso = new Date();
+
+        // Se la giornata è in corso (tra prima e ultima partita)
+        if (adesso >= CURRENT_MATCHDAY_START && adesso <= CURRENT_MATCHDAY_END) {
+            document.querySelectorAll(".countdown-timer").forEach(el => el.innerHTML = `<span style='color:var(--accent-red); font-size:15px; font-weight:900;'>🔒 G${ACTIVE_MATCHDAY} IN CORSO (BLOCCATO)</span>`);
+            const textEl = document.getElementById("welcome-deadline-text");
+            if (textEl) textEl.innerText = `Le partite della giornata ${ACTIVE_MATCHDAY} sono in corso. Il mercato riaprirà al termine dell'ultimo match.`;
+            return;
+        }
+
+        // Se la giornata è finita, aggiorniamo i dati online
+        if (adesso > CURRENT_MATCHDAY_END) {
+            inizializzaGiornataEDeadlineDinamica();
+            return;
+        }
+
+        const diff = CURRENT_MATCHDAY_START - now;
+
+        if (diff <= 0) {
+            inizializzaGiornataEDeadlineDinamica();
+            return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+        ["w-cd-days"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(days).padStart(2, '0'); });
+        ["w-cd-hours"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(hours).padStart(2, '0'); });
+        ["w-cd-mins"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(mins).padStart(2, '0'); });
+        ["w-cd-secs"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(secs).padStart(2, '0'); });
+        
+        const textEl = document.getElementById("welcome-deadline-text");
+        if (textEl) textEl.innerText = `Iscrivi le tue squadre alla giornata ${ACTIVE_MATCHDAY} entro l'inizio della prima partita:`;
+    }
+
+    updateTimer();
+    setInterval(updateTimer, 1000);
+}
 function getRealUsername(uData, defaultAuthUser) {
     if (uData && uData.username && uData.username.trim() !== "") {
         return uData.username.trim();
