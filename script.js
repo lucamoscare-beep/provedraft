@@ -1091,19 +1091,19 @@ function renderPlayers() {
 
     let totalAcquistati = Object.values(rosa).reduce((acc, curr) => acc + curr.length, 0);
     let giocatoriMancanti = 24 - totalAcquistati;
+
+    // Filtriamo inizialmente solo i ruoli che non hanno ancora raggiunto il limite
+    let ruoliDisponibili = availablePlayers.filter(p => rosa[p.ruolo].length < limits[p.ruolo]);
+
+    // Calcoliamo il costo minimo obbligatorio per gli altri giocatori che mancano (1 credito per ciascuno escluso quello attuale)
     let maxCostAllowed = budget - (giocatoriMancanti - 1);
 
-    let candidates = [];
-    if (giocatoriMancanti === 1) {
-        candidates = availablePlayers.filter(p => rosa[p.ruolo].length < limits[p.ruolo] && p.valore === budget);
-    }
+    // Selezioniamo solo i giocatori che possiamo realmente permetterci senza rimanere bloccati
+    let candidates = ruoliDisponibili.filter(p => p.valore <= maxCostAllowed);
 
+    // Fallback di sicurezza estrema nel caso in cui le combinazioni stringano troppo il cerchio
     if (candidates.length === 0) {
-        candidates = availablePlayers.filter(p => rosa[p.ruolo].length < limits[p.ruolo] && p.valore <= maxCostAllowed);
-    }
-
-    if (candidates.length === 0) {
-        candidates = availablePlayers.filter(p => rosa[p.ruolo].length < limits[p.ruolo]);
+        candidates = ruoliDisponibili.filter(p => p.valore <= budget);
     }
 
     if (candidates.length === 0) {
