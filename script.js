@@ -788,22 +788,7 @@ async function apriProfiloUtente(targetUserId) {
 		
         });
 
-	// Determinazione del modulo più usato e della relativa percentuale
-        let moduloPreferitoTxt = "N/D";
-        if (squadreCreateCount > 0 && Object.keys(conteggioModuli).length > 0) {
-            let maxUsi = 0;
-            let modTop = "";
-            for (let [mod, count] of Object.entries(conteggioModuli)) {
-                if (count > maxUsi) {
-                    maxUsi = count;
-                    modTop = mod;
-                }
-            }
-            let percentuale = ((maxUsi / squadreCreateCount) * 100).toFixed(1);
-            moduloPreferitoTxt = `${modTop} (${percentuale}%)`;
-        }
-
-        let ori = 0, argenti = 0, bronzi = 0;
+	        let ori = 0, argenti = 0, bronzi = 0;
         const ultimaGiornataVoti = getUltimaGiornataConVoti();
         
         for (let g = 1; g <= ultimaGiornataVoti; g++) {
@@ -848,11 +833,7 @@ async function apriProfiloUtente(targetUserId) {
 	// --- AGGIUNGI QUESTA RIGA PER IL BUDGET SPESO ---
         document.getElementById("stat-budget-speso").innerText = `${budgetSpesoTotale} cr`;
 
-	// Popolamento del Modulo Preferito
-        if (document.getElementById("stat-modulo-preferito")) {
-            document.getElementById("stat-modulo-preferito").innerText = moduloPreferitoTxt;
-        }
-
+	
         document.getElementById("stat-podi-oro").innerText = ori;
         document.getElementById("stat-podi-argento").innerText = argenti;
         document.getElementById("stat-podi-bronzo").innerText = bronzi;
