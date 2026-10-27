@@ -841,7 +841,7 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false) {
     creaRepartoCampo(recapCampo, "Centrocampista", sq.schierati.filter(p => p.ruolo === "Centrocampista"), true);
     creaRepartoCampo(recapCampo, "Attaccante", sq.schierati.filter(p => p.ruolo === "Attaccante"), true);
 
-    const panchinaDiv = document.getElementById("recap-panchina");
+  const panchinaDiv = document.getElementById("recap-panchina");
     panchinaDiv.innerHTML = "";
 
     ["Portiere", "Difensore", "Centrocampista", "Attaccante"].forEach(ruolo => {
@@ -851,9 +851,11 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false) {
             card.className = "recap-bench-card";
             card.innerHTML = `
                 <div>
-                    <span class="player-role"><i class="${roleIcons[ruolo]}"></i> ${ruolo} (R${i+1})</span>
-                    <div style="font-weight:700; color:#fff; margin-top:2px; font-size:12px;">
-                        <div class="marquee-container" style="max-width:200px;"><span class="marquee-text">${ris.nome}</span></div>
+                    <div class="bench-player-meta">
+                        <i class="${roleIcons[ruolo]}"></i> ${ruolo} (R${i+1})
+                    </div>
+                    <div class="bench-player-name">
+                        <div class="marquee-container" style="max-width:220px;"><span class="marquee-text">${ris.nome}</span></div>
                     </div>
                 </div>
             `;

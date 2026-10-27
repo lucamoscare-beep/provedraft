@@ -1249,11 +1249,30 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     background: rgba(255,255,255,0.03);
     border: 1px solid var(--card-border);
     border-radius: 8px;
-    padding: 8px;
+    padding: 10px 12px;
     margin-bottom: 6px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+/* Nome del giocatore grande e in evidenza */
+.recap-bench-card .bench-player-name {
+    font-weight: 800;
+    color: #fff;
+    font-size: 13px;
+    margin-top: 2px;
+}
+
+/* Ruolo e indicatore riserva più piccoli e discreti sopra */
+.recap-bench-card .bench-player-meta {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .voti-box {
