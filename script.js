@@ -763,11 +763,21 @@ async function apriProfiloUtente(targetUserId) {
         let squadreCreateCount = squadre.length;
         let puntiTotali = 0;
         let migliorPunteggio = 0;
+	let budgetSpesoTotale = 0; // Calcolo del budget totale speso
 
         squadre.forEach(sq => {
             let pts = sq.punteggioTotale !== undefined && sq.punteggioTotale !== null ? sq.punteggioTotale : 0;
             puntiTotali += pts;
             if (pts > migliorPunteggio) migliorPunteggio = pts;
+
+	// Calcolo crediti spesi per la singola squadra (600 - budget residuo)
+            let budgetResiduo = sq.budget !== undefined && sq.budget !== null ? sq.budget : 600;
+            let spesoPerQuestaSquadra = 600 - budgetResiduo;
+            if (spesoPerQuestaSquadra < 0) spesoPerQuestaSquadra = 0;
+            budgetSpesoTotale += spesoPerQuestaSquadra;
+
+
+
         });
 
         let ori = 0, argenti = 0, bronzi = 0;
@@ -812,6 +822,11 @@ async function apriProfiloUtente(targetUserId) {
         document.getElementById("stat-draft-tentati").innerText = draftTentati;
         document.getElementById("stat-miglior-punteggio").innerText = `${migliorPunteggio.toFixed(1)} pt`;
         document.getElementById("stat-punti-totali").innerText = `${puntiTotali.toFixed(1)} pt`;
+
+	// Popolamento della nuova statistica
+        if (document.getElementById("stat-budget-speso")) {
+            document.getElementById("stat-budget-speso").innerText = `${budgetSpesoTotale} cr`;
+        }
 
         document.getElementById("stat-podi-oro").innerText = ori;
         document.getElementById("stat-podi-argento").innerText = argenti;
