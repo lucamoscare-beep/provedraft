@@ -763,11 +763,21 @@ async function apriProfiloUtente(targetUserId) {
         let squadreCreateCount = squadre.length;
         let puntiTotali = 0;
         let migliorPunteggio = 0;
+	let budgetSpesoTotale = 0; // <--- AGGIUNGI QUESTA VARIABILE
 
         squadre.forEach(sq => {
             let pts = sq.punteggioTotale !== undefined && sq.punteggioTotale !== null ? sq.punteggioTotale : 0;
             puntiTotali += pts;
             if (pts > migliorPunteggio) migliorPunteggio = pts;
+	// --- CALCOLO DEL BUDGET SPESO ---
+            // Il budget iniziale di ogni draft è 600. Il budget residuo è sq.budget.
+            // Di conseguenza, i crediti spesi in questa squadra sono (600 - budget residuo).
+            let budgetResiduo = sq.budget !== undefined && sq.budget !== null ? sq.budget : 600;
+            let spesoPerQuestaSquadra = 600 - budgetResiduo;
+            if (spesoPerQuestaSquadra < 0) spesoPerQuestaSquadra = 0;
+            budgetSpesoTotale += spesoPerQuestaSquadra;
+	
+		
         });
 
         let ori = 0, argenti = 0, bronzi = 0;
@@ -812,6 +822,8 @@ async function apriProfiloUtente(targetUserId) {
         document.getElementById("stat-draft-tentati").innerText = draftTentati;
         document.getElementById("stat-miglior-punteggio").innerText = `${migliorPunteggio.toFixed(1)} pt`;
         document.getElementById("stat-punti-totali").innerText = `${puntiTotali.toFixed(1)} pt`;
+	// --- AGGIUNGI QUESTA RIGA PER IL BUDGET SPESO ---
+        document.getElementById("stat-budget-speso").innerText = `${budgetSpesoTotale} cr`;
 
         document.getElementById("stat-podi-oro").innerText = ori;
         document.getElementById("stat-podi-argento").innerText = argenti;
