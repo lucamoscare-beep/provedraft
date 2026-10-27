@@ -1301,7 +1301,6 @@ function apriModaleScelta(ruolo, targetType, indexTitolare = null) {
     }
 
     const colorRuolo = roleColors[ruolo];
-
     const overlay = document.createElement("div");
     overlay.className = "custom-modal-overlay";
     overlay.id = "selection-modal";
@@ -1342,7 +1341,7 @@ function apriModaleScelta(ruolo, targetType, indexTitolare = null) {
     cardHtml += `
             </div>
             <div style="display:flex; gap:8px;">
-                <button onclick="rimuoviSlotSelezionato('${ruolo}', '${targetType}', ${indexTitolare})" class="btn-action-danger" style="flex:1; padding:8px; font-size:11px;">Rimuovi giocatore</button>
+                <button onclick="apriModaleRimuoviGiocatore('${ruolo}')" class="btn-action-danger" style="flex:1; padding:8px; font-size:11px;">Rimuovi giocatore</button>
                 <button onclick="chiudiModale()" class="btn-action-primary" style="flex:1; padding:8px; font-size:11px; background:rgba(51, 65, 85, 0.9);">Chiudi</button>
             </div>
         </div>
@@ -1353,6 +1352,78 @@ function apriModaleScelta(ruolo, targetType, indexTitolare = null) {
     refreshAllMarquees();
 }
 
+function apriModaleRimuoviGiocatore(ruolo) {
+    chiudiModale(); // Chiudiamo la prima modale
+
+    const colorRuolo = roleColors[ruolo];
+    const overlay = document.createElement("div");
+    overlay.className = "custom-modal-overlay";
+    overlay.id = "selection-modal";
+
+    // Raccogliamo tutti i giocatori di quel ruolo attualmente schierati (in campo o in panchina)
+    const titolariRuolo = schierati.filter(s => s.ruolo === ruolo);
+    const riserveRuolo = riserveSelezionate[ruolo] || [];
+
+    let cardHtml = `
+        <div class="custom-modal-card" style="border: 2px solid ${colorRuolo};">
+            <h3 style="color:${colorRuolo}; font-size:16px; margin-bottom:4px;">Rimuovi Giocatore</h3>
+            <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Scegli il giocatore da rimuovere:</p>
+            <div style="max-height: 250px; overflow-y: auto; text-align: left; margin-bottom: 12px;">
+    `;
+
+    let totalePresenti = titolariRuolo.length + riserveRuolo.length;
+
+    if (totalePresenti === 0) {
+        cardHtml += `<div style="text-align:center; color:var(--text-muted); font-size:12px; padding:15px;">Nessun giocatore schierato in questo ruolo.</div>`;
+    } else {
+        titolariRuolo.forEach(p => {
+            cardHtml += `
+                <div class="modal-player-item" style="border-left: 3px solid var(--accent-neon-green);" onclick="eseguiRimozioneGiocatore('${p.nome.replace(/'/g, "\\'")}', '${ruolo}')">
+                    <div>
+                        <div class="marquee-container" style="max-width:200px;"><span class="marquee-text" style="color:#fff; font-size:12px; font-weight:bold;">${p.nome}</span></div>
+                        <span style="font-size:10px; color:var(--text-muted);">${p.squadra}</span>
+                    </div>
+                    <div><span style="color:var(--accent-neon-green); font-size:10px; font-weight:bold;">👤 In Campo</span></div>
+                </div>
+            `;
+        });
+
+        riserveRuolo.forEach((p, idx) => {
+            cardHtml += `
+                <div class="modal-player-item" style="border-left: 3px solid var(--accent-gold);" onclick="eseguiRimozioneGiocatore('${p.nome.replace(/'/g, "\\'")}', '${ruolo}')">
+                    <div>
+                        <div class="marquee-container" style="max-width:200px;"><span class="marquee-text" style="color:#fff; font-size:12px; font-weight:bold;">${p.nome}</span></div>
+                        <span style="font-size:10px; color:var(--text-muted);">${p.squadra}</span>
+                    </div>
+                    <div><span style="color:var(--accent-gold); font-size:10px; font-weight:bold;">🛋️ Panchina R${idx + 1}</span></div>
+                </div>
+            `;
+        });
+    }
+
+    cardHtml += `
+            </div>
+            <button onclick="chiudiModale()" class="btn-action-primary" style="width:100%; padding:8px; font-size:11px; background:rgba(51, 65, 85, 0.9);">Chiudi</button>
+        </div>
+    `;
+
+    overlay.innerHTML = cardHtml;
+    document.body.appendChild(overlay);
+    refreshAllMarquees();
+}
+
+function eseguiRimozioneGiocatore(nomeGiocatore, ruolo) {
+    // Rimuoviamo sia dai titolari che dalle riserve di quel ruolo
+    schierati = schierati.filter(s => s.nome !== nomeGiocatore);
+    if (riserveSelezionate[ruolo]) {
+        riserveSelezionate[ruolo] = riserveSelezionate[ruolo].filter(r => r.nome !== nomeGiocatore);
+    }
+
+    chiudiModale();
+    ripristinaCampoTattico();
+    renderSlots();
+    renderPanchinaGrafica();
+}
 function chiudiModale() {
     const modal = document.getElementById("selection-modal");
     if (modal) modal.remove();
