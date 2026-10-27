@@ -303,61 +303,110 @@
     </div>
 </div>
 
-<!-- PAGINA PROFILO E STATISTICHE UTENTE -->
-<div id="profilo-screen">
-    <div class="profilo-header">
-        <div class="profilo-title">
-            <i class="fa-solid fa-id-badge"></i>
-            <span id="profilo-username-title">Profilo Fantallenatore</span>
-        </div>
-        <button onclick="tornaAllaHome()" class="btn-action-primary" style="padding:8px 16px; font-size:12px;">
-            <i class="fa-solid fa-house"></i> Torna alla Home
-        </button>
+<!-- SCHERMATA PROFILO UTENTE -->
+<div id="profilo-screen" class="screen-section" style="display: none;">
+    <div class="screen-header">
+        <button onclick="tornaAllaHome()" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Home</button>
+        <h2 id="profilo-username-title" style="margin: 0; font-size: 18px; color: var(--accent-blue);">Profilo Utente</h2>
     </div>
 
-    <div class="stats-grid">
-        <div class="stat-box">
-            <i class="fa-solid fa-shield-halved" style="color:var(--accent-neon-green);"></i>
-            <div class="stat-lbl">Squadre Create</div>
-            <div class="stat-val" id="stat-squadre-create">0</div>
+    <!-- GRIGLIA STATISTICHE PROFILO -->
+    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 15px;">
+        
+        <!-- Squadre Create -->
+        <div class="stat-card">
+            <div class="stat-icon" style="color: var(--accent-blue);"><i class="fa-solid fa-shirt"></i></div>
+            <div>
+                <div class="stat-label">Squadre Create</div>
+                <div id="stat-squadre-create" class="stat-value">0</div>
+            </div>
         </div>
-        <div class="stat-box">
-            <i class="fa-solid fa-arrows-rotate" style="color:var(--accent-blue);"></i>
-            <div class="stat-lbl">Draft Totali Tentati</div>
-            <div class="stat-val" id="stat-draft-tentati">0</div>
+
+        <!-- Draft Tentati -->
+        <div class="stat-card">
+            <div class="stat-icon" style="color: var(--accent-gold);"><i class="fa-solid fa-rotate"></i></div>
+            <div>
+                <div class="stat-label">Draft Tentati</div>
+                <div id="stat-draft-tentati" class="stat-value">0</div>
+            </div>
         </div>
-        <div class="stat-box">
-            <i class="fa-solid fa-star" style="color:var(--accent-gold);"></i>
-            <div class="stat-lbl">Miglior Punteggio</div>
-            <div class="stat-val" id="stat-miglior-punteggio">0 pt</div>
+
+        <!-- Miglior Punteggio -->
+        <div class="stat-card">
+            <div class="stat-icon" style="color: var(--accent-neon-green);"><i class="fa-solid fa-bolt"></i></div>
+            <div>
+                <div class="stat-label">Miglior Punteggio</div>
+                <div id="stat-miglior-punteggio" class="stat-value">0 pt</div>
+            </div>
         </div>
-        <div class="stat-box">
-            <i class="fa-solid fa-calculator" style="color:#a78bfa;"></i>
-            <div class="stat-lbl">Punti Totali Lega</div>
-            <div class="stat-val" id="stat-punti-totali">0 pt</div>
+
+        <!-- Punti Totali -->
+        <div class="stat-card">
+            <div class="stat-icon" style="color: #f43f5e;"><i class="fa-solid fa-chart-line"></i></div>
+            <div>
+                <div class="stat-label">Punti Totali</div>
+                <div id="stat-punti-totali" class="stat-value">0 pt</div>
+            </div>
         </div>
+
+        <!-- NUOVA: Crediti Spesi Totali -->
+        <div class="stat-card">
+            <div class="stat-icon" style="color: var(--accent-gold);"><i class="fa-solid fa-coins"></i></div>
+            <div>
+                <div class="stat-label">Crediti Spesi Totali</div>
+                <div id="stat-crediti-spesi" class="stat-value">0 cr</div>
+            </div>
+        </div>
+
+        <!-- NUOVA: Storico Presenze -->
+        <div class="stat-card">
+            <div class="stat-icon" style="color: var(--accent-blue);"><i class="fa-solid fa-calendar-days"></i></div>
+            <div>
+                <div class="stat-label">Storico Presenze</div>
+                <div id="stat-storico-presenze" class="stat-value">0 Giornate</div>
+            </div>
+        </div>
+
+        <!-- NUOVA: Modulo Preferito -->
+        <div class="stat-card">
+            <div class="stat-icon" style="color: var(--accent-neon-green);"><i class="fa-solid fa-chess-board"></i></div>
+            <div>
+                <div class="stat-label">Modulo Preferito</div>
+                <div id="stat-modulo-preferito" class="stat-value">N/D</div>
+            </div>
+        </div>
+
+        <!-- NUOVA: Calciatore Talismano -->
+        <div class="stat-card">
+            <div class="stat-icon" style="color: #c084fc;"><i class="fa-solid fa-star"></i></div>
+            <div>
+                <div class="stat-label">Calciatore Talismano</div>
+                <div id="stat-calciatore-preferito" class="stat-value" style="font-size: 13px;">N/D</div>
+            </div>
+        </div>
+
     </div>
 
-    <h3 style="color:var(--accent-gold); font-size:16px; margin-bottom:15px;"><i class="fa-solid fa-trophy"></i> Bacheca Podi & Piazzamenti</h3>
-    <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
-        <div class="stat-box" style="border: 2px solid #fbbf24;">
-            <img src="icone/coppa1.png" style="height:32px; margin-bottom:4px;" alt="1° Posto">
-            <div class="stat-lbl">1° Posto (Ori)</div>
-            <div class="stat-val" id="stat-podi-oro">0</div>
+    <!-- SEZIONE PODI E MEDAGLIE -->
+    <h3 style="margin-top: 25px; margin-bottom: 12px; font-size: 15px; color: #fff;"><i class="fa-solid fa-trophy"></i> Podi Conquistati</h3>
+    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+        <div class="stat-card" style="text-align: center;">
+            <div class="stat-icon" style="margin: 0 auto; color: #ffd700;"><i class="fa-solid fa-medal"></i></div>
+            <div class="stat-label" style="margin-top: 5px;">1° Posto</div>
+            <div id="stat-podi-oro" class="stat-value">0</div>
         </div>
-        <div class="stat-box" style="border: 2px solid #94a3b8;">
-            <img src="icone/coppa2.png" style="height:32px; margin-bottom:4px;" alt="2° Posto">
-            <div class="stat-lbl">2° Posto (Argenti)</div>
-            <div class="stat-val" id="stat-podi-argento">0</div>
+        <div class="stat-card" style="text-align: center;">
+            <div class="stat-icon" style="margin: 0 auto; color: #c0c0c0;"><i class="fa-solid fa-medal"></i></div>
+            <div class="stat-label" style="margin-top: 5px;">2° Posto</div>
+            <div id="stat-podi-argento" class="stat-value">0</div>
         </div>
-        <div class="stat-box" style="border: 2px solid #d97706;">
-            <img src="icone/coppa3.png" style="height:32px; margin-bottom:4px;" alt="3° Posto">
-            <div class="stat-lbl">3° Posto (Bronzi)</div>
-            <div class="stat-val" id="stat-podi-bronzo">0</div>
+        <div class="stat-card" style="text-align: center;">
+            <div class="stat-icon" style="margin: 0 auto; color: #cd7f32;"><i class="fa-solid fa-medal"></i></div>
+            <div class="stat-label" style="margin-top: 5px;">3° Posto</div>
+            <div id="stat-podi-bronzo" class="stat-value">0</div>
         </div>
     </div>
 </div>
-
 <!-- PAGINA PRINCIPALE DEL DRAFT -->
 <div id="main-app">
     <div class="desktop-layout-grid">

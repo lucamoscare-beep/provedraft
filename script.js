@@ -764,7 +764,9 @@ async function apriProfiloUtente(targetUserId) {
         let puntiTotali = 0;
         let migliorPunteggio = 0;
         let creditiSpesiTotali = 0;
-
+        let giornateUnicheSet = new Set();
+	let conteggioModuli = {};
+        let conteggioGiocatori = {};
         let moduliCount = {};
         let giocatoriCount = {};
         let giornateSet = new Set();
@@ -779,29 +781,21 @@ async function apriProfiloUtente(targetUserId) {
             creditiSpesiTotali += (600 - budgetResiduo);
 
             // Storico presenze (giornate uniche)
-            let g = sq.giornata !== undefined ? sq.giornata : 8;
-            giornateSet.add(g);
-
-            // Modulo preferito
-            let mod = sq.moduloSelezionato;
-            if (mod) {
-                moduliCount[mod] = (moduliCount[mod] || 0) + 1;
+            if (sq.giornata !== undefined) {
+                giornateUnicheSet.add(sq.giornata);
             }
 
-            // Calciatore più acquistato (rosa oppure schierati + riserve)
-            let rosaObj = sq.rosa || {};
-            let playersInTeam = [];
-            Object.values(rosaObj).forEach(rList => {
-                if (Array.isArray(rList)) {
-                    rList.forEach(p => playersInTeam.push(p.nome));
-                }
-            });
-            if (playersInTeam.length === 0) {
-                (sq.schierati || []).forEach(p => playersInTeam.push(p.nome));
-                Object.values(sq.riserveSelezionate || {}).forEach(rList => {
-                    if (Array.isArray(rList)) {
-                        rList.forEach(p => playersInTeam.push(p.nome));
-                    }
+            // Modulo preferito
+            if (sq.moduloSelezionato) {
+                conteggioModuli[sq.moduloSelezionato] = (conteggioModuli[sq.moduloSelezionato] || 0) + 1;
+            }
+
+           // Calciatore più acquistato (analizzando titolari + riserve o rosa)
+            let tuttiGiocatoriSq = [];
+            if (sq.schierati) tuttiGiocatoriSq = tuttiGiocatoriSq.concat(sq.schierati);
+            if (sq.riserveSelezionate) {
+                Object.values(sq.riserveSelezionate).forEach(arr => {
+                    if (Array.isArray(arr)) tuttiGiocatoriSq = tuttiGiocatoriSq.concat(arr);
                 });
             }
 
@@ -871,24 +865,17 @@ async function apriProfiloUtente(targetUserId) {
             });
         }
 
-        // Assegnazione valori nell'interfaccia
+// Assegnazione ai nuovi elementi HTML nel profilo
         document.getElementById("stat-squadre-create").innerText = squadreCreateCount;
         document.getElementById("stat-draft-tentati").innerText = draftTentati;
         document.getElementById("stat-miglior-punteggio").innerText = `${migliorPunteggio.toFixed(1)} pt`;
         document.getElementById("stat-punti-totali").innerText = `${puntiTotali.toFixed(1)} pt`;
-
-        // Nuove metriche profilazione
-        const elSpesi = document.getElementById("stat-soldi-spesi");
-        if (elSpesi) elSpesi.innerText = `${creditiSpesiTotali} cr`;
-
-        const elPresenze = document.getElementById("stat-storico-presenze");
-        if (elPresenze) elPresenze.innerText = giornateSet.size;
-
-        const elModulo = document.getElementById("stat-modulo-preferito");
-        if (elModulo) elModulo.innerText = moduloPreferitoStr;
-
-        const elTalismano = document.getElementById("stat-calciatore-top");
-        if (elTalismano) elTalismano.innerText = calciatoreTopStr;
+        
+        // Nuove statistiche inserite
+        if(document.getElementById("stat-crediti-spesi")) document.getElementById("stat-crediti-spesi").innerText = `${creditiSpesiTotali} cr`;
+        if(document.getElementById("stat-storico-presenze")) document.getElementById("stat-storico-presenze").innerText = `${storicoPresenzeCount} Giornate`;
+        if(document.getElementById("stat-modulo-preferito")) document.getElementById("stat-modulo-preferito").innerText = moduloPreferitoStr;
+        if(document.getElementById("stat-calciatore-preferito")) document.getElementById("stat-calciatore-preferito").innerText = calciatorePreferitoStr;
 
         document.getElementById("stat-podi-oro").innerText = ori;
         document.getElementById("stat-podi-argento").innerText = argenti;
