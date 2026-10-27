@@ -1198,6 +1198,22 @@ function draft(nome) {
 }
 
 function renderSlots() {
+    // Assicuriamoci che l'intestazione della sezione Rosa contenga la legenda
+    const titleContainer = document.querySelector(".section-rosa h2");
+    if (titleContainer && !document.getElementById("rosa-legenda-box")) {
+        titleContainer.innerHTML = `La Tua Rosa <span style="font-size:11px; color:var(--accent-blue); font-weight:normal;">(Clicca per schierare)</span>`;
+        
+        const legendaDiv = document.createElement("div");
+        legendaDiv.className = "rosa-legenda";
+        legendaDiv.id = "rosa-legenda-box";
+        legendaDiv.innerHTML = `
+            <span style="font-weight:700; color:#fff; font-size:10px; text-transform:uppercase;">Legenda:</span>
+            <div class="legenda-item"><span class="slot-tag titolare">T</span> Titolare</div>
+            <div class="legenda-item"><span class="slot-tag riserva">R</span> Riserva</div>
+        `;
+        titleContainer.insertAdjacentElement("afterend", legendaDiv);
+    }
+
     ["Portiere","Difensore","Centrocampista","Attaccante"].forEach(ruolo => {
         const div = document.getElementById("slot-" + ruolo);
         const countSpan = document.getElementById("count-rosa-" + ruolo);
@@ -1218,8 +1234,8 @@ function renderSlots() {
             let statusClass = (isTit || isBench) ? "schierato" : "";
             
             let tagStatus = "";
-            if (isTit) tagStatus = `<span class="slot-tag campo">C</span>`;
-            else if (isBench) tagStatus = `<span class="slot-tag panchina">P</span>`;
+            if (isTit) tagStatus = `<span class="slot-tag titolare" title="Titolare in Campo">T</span>`;
+            else if (isBench) tagStatus = `<span class="slot-tag riserva" title="Riserva in Panchina">R</span>`;
 
             slot.className = `slot ${ruolo} ${statusClass}`;
             slot.innerHTML = `

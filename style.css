@@ -1009,13 +1009,33 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 .slot-tag {
     font-size: 8px;
     font-weight: 800;
-    padding: 1px 4px;
+    padding: 1px 5px;
     border-radius: 3px;
     text-transform: uppercase;
 }
 
-.slot-tag.campo { background: rgba(16, 185, 129, 0.25); color: var(--accent-neon-green); border: 1px solid var(--accent-green); }
-.slot-tag.panchina { background: rgba(251, 191, 36, 0.25); color: var(--accent-gold); border: 1px solid var(--accent-gold); }
+.slot-tag.titolare { background: rgba(16, 185, 129, 0.25); color: var(--accent-neon-green); border: 1px solid var(--accent-green); }
+.slot-tag.riserva { background: rgba(251, 191, 36, 0.25); color: var(--accent-gold); border: 1px solid var(--accent-gold); }
+
+/* LEGENDA ROSA */
+.rosa-legenda {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--card-border);
+    padding: 6px 12px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: 11px;
+}
+
+.legenda-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
+}
 
 .campo-style {
     width: 100%;
