@@ -764,6 +764,7 @@ async function apriProfiloUtente(targetUserId) {
         let puntiTotali = 0;
         let migliorPunteggio = 0;
 	let budgetSpesoTotale = 0; // Calcolo del budget totale speso
+	let conteggioSquadreSerieA = {};
 
         squadre.forEach(sq => {
             let pts = sq.punteggioTotale !== undefined && sq.punteggioTotale !== null ? sq.punteggioTotale : 0;
@@ -775,7 +776,36 @@ async function apriProfiloUtente(targetUserId) {
             let spesoPerQuestaSquadra = 600 - budgetResiduo;
             if (spesoPerQuestaSquadra < 0) spesoPerQuestaSquadra = 0;
             budgetSpesoTotale += spesoPerQuestaSquadra;
+	
+		// Raccogliamo tutti i giocatori presenti nella rosa (o nei titolari/riserve)
+            // Verifichiamo sia sq.rosa che sq.schierati per essere sicuri di trovarli tutti
+            let tuttiGiocatoriDellaSquadra = [];
+            if (sq.rosa) {
+                Object.values(sq.rosa).forEach(listaRuolo => {
+                    if (Array.isArray(listaRuolo)) tuttiGiocatoriDellaSquadra.push(...listaRuolo);
+                });
+            } else if (sq.schierati) {
+                tuttiGiocatoriDellaSquadra.push(...sq.schierati);
+            }
 
+            // Contiamo le frequenze delle squadre reali di Serie A (es. "Inter", "Juventus", ecc.)
+            tuttiGiocatoriDellaSquadra.forEach(p => {
+                if (p && p.squadra && p.squadra !== "N/D") {
+                    let nomeSquadraReale = p.squadra.trim();
+                    conteggioSquadreSerieA[nomeSquadraReale] = (conteggioSquadreSerieA[nomeSquadraReale] || 0) + 1;
+                }
+            
+        });
+
+        // Troviamo qual è la squadra di Serie A con il conteggio più alto
+        let squadraPreferita = "Nessuna";
+        let maxScelte = 0;
+        for (let [squadraReale, conteggio] of Object.entries(conteggioSquadreSerieA)) {
+            if (conteggio > maxScelte) {
+                maxScelte = conteggio;
+                squadraPreferita = squadraReale;
+            }
+        }
 
 
         });
@@ -826,7 +856,9 @@ async function apriProfiloUtente(targetUserId) {
 	// Popolamento della nuova statistica
         if (document.getElementById("stat-budget-speso")) {
             document.getElementById("stat-budget-speso").innerText = `${budgetSpesoTotale} cr`;
-        }
+	if (document.getElementById("stat-squadra-preferita")) {
+            document.getElementById("stat-squadra-preferita").innerText = squadraPreferita;
+        }       
 
         document.getElementById("stat-podi-oro").innerText = ori;
         document.getElementById("stat-podi-argento").innerText = argenti;
