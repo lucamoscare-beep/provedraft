@@ -809,7 +809,7 @@ async function apriProfiloUtente(targetUserId) {
                     conteggioSquadreSerieA[nomeSquadraReale] = (conteggioSquadreSerieA[nomeSquadraReale] || 0) + 1;
                 }
             });
-        });
+        
 
         // Troviamo qual è la squadra di Serie A con il conteggio più alto
         let squadraPreferita = "Nessuna";
