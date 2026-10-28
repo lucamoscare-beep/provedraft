@@ -780,21 +780,35 @@ async function apriProfiloUtente(targetUserId) {
 		// Raccogliamo tutti i giocatori presenti nella rosa (o nei titolari/riserve)
             // Verifichiamo sia sq.rosa che sq.schierati per essere sicuri di trovarli tutti
             let tuttiGiocatoriDellaSquadra = [];
-            if (sq.rosa) {
+            if (sq.rosa && typeof sq.rosa === 'object') {
                 Object.values(sq.rosa).forEach(listaRuolo => {
-                    if (Array.isArray(listaRuolo)) tuttiGiocatoriDellaSquadra.push(...listaRuolo);
+                    if (Array.isArray(listaRuolo)) {
+                        tuttiGiocatoriDellaSquadra.push(...listaRuolo);
+                    }
                 });
-            } else if (sq.schierati) {
+            }
+
+            // 2. Se ci sono i titolari schierati
+            if (sq.schierati && Array.isArray(sq.schierati)) {
                 tuttiGiocatoriDellaSquadra.push(...sq.schierati);
+            }
+
+            // 3. Se ci sono le riserve selezionate
+            if (sq.riserveSelezionate && typeof sq.riserveSelezionate === 'object') {
+                Object.values(sq.riserveSelezionate).forEach(listaRiserve => {
+                    if (Array.isArray(listaRiserve)) {
+                        tuttiGiocatoriDellaSquadra.push(...listaRiserve);
+                    }
+                });
             }
 
             // Contiamo le frequenze delle squadre reali di Serie A (es. "Inter", "Juventus", ecc.)
             tuttiGiocatoriDellaSquadra.forEach(p => {
-                if (p && p.squadra && p.squadra !== "N/D") {
+               if (p && p.squadra && typeof p.squadra === 'string' && p.squadra !== "N/D") {
                     let nomeSquadraReale = p.squadra.trim();
                     conteggioSquadreSerieA[nomeSquadraReale] = (conteggioSquadreSerieA[nomeSquadraReale] || 0) + 1;
                 }
-            
+            });
         });
 
         // Troviamo qual è la squadra di Serie A con il conteggio più alto
