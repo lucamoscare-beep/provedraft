@@ -779,39 +779,70 @@ async function apriProfiloUtente(targetUserId) {
 	
 		// Raccogliamo tutti i giocatori presenti nella rosa (o nei titolari/riserve)
             // Verifichiamo sia sq.rosa che sq.schierati per essere sicuri di trovarli tutti
-            let tuttiGiocatoriDellaSquadra = [];
-            if (sq.rosa && typeof sq.rosa === 'object') {
-                Object.values(sq.rosa).forEach(listaRuolo => {
-                    if (Array.isArray(listaRuolo)) {
-                        tuttiGiocatoriDellaSquadra.push(...listaRuolo);
-                    }
-                });
-            }
+           
+ let conteggioSquadreSerieA = {};
 
-            // 2. Se ci sono i titolari schierati
-            if (sq.schierati && Array.isArray(sq.schierati)) {
-                tuttiGiocatoriDellaSquadra.push(...sq.schierati);
-            }
+        squadre.forEach(sq => {
+            try {
+                let pts = (sq.punteggioTotale !== undefined && sq.punteggioTotale !== null) ? sq.punteggioTotale : 0;
+                puntiTotali += pts;
+                if (pts > migliorPunteggio) migliorPunteggio = pts;
 
-            // 3. Se ci sono le riserve selezionate
-            if (sq.riserveSelezionate && typeof sq.riserveSelezionate === 'object') {
-                Object.values(sq.riserveSelezionate).forEach(listaRiserve => {
-                    if (Array.isArray(listaRiserve)) {
-                        tuttiGiocatoriDellaSquadra.push(...listaRiserve);
-                    }
-                });
-            }
+                let budgetResiduo = (sq.budget !== undefined && sq.budget !== null) ? sq.budget : 600;
+                let spesoPerQuestaSquadra = 600 - budgetResiduo;
+                if (spesoPerQuestaSquadra < 0) spesoPerQuestaSquadra = 0;
+                budgetSpesoTotale += spesoPerQuestaSquadra;
 
-            // Contiamo le frequenze delle squadre reali di Serie A (es. "Inter", "Juventus", ecc.)
-            tuttiGiocatoriDellaSquadra.forEach(p => {
-               if (p && p.squadra && typeof p.squadra === 'string' && p.squadra !== "N/D") {
-                    let nomeSquadraReale = p.squadra.trim();
-                    conteggioSquadreSerieA[nomeSquadraReale] = (conteggioSquadreSerieA[nomeSquadraReale] || 0) + 1;
+                // Estrazione sicura dei giocatori
+                let giocatoriDaAnalizzare = [];
+
+                // Controlliamo i titolari schierati
+                if (sq.schierati && Array.isArray(sq.schierati)) {
+                    giocatoriDaAnalizzare.push(...sq.schierati);
                 }
-            });
-        
 
-        // Troviamo qual è la squadra di Serie A con il conteggio più alto
+                // Controlliamo la rosa completa se esiste
+                if (sq.rosa) {
+                    if (Array.isArray(sq.rosa)) {
+                        giocatoriDaAnalizzare.push(...sq.rosa);
+                    } else if (typeof sq.rosa === 'object') {
+                        Object.values(sq.rosa).forEach(valoreRuolo => {
+                            if (Array.isArray(valoreRuolo)) {
+                                giocatoriDaAnalizzare.push(...valoreRuolo);
+                            }
+                        });
+                    }
+                }
+
+                // Controlliamo le riserve se esistono
+                if (sq.riserveSelezionate) {
+                    if (Array.isArray(sq.riserveSelezionate)) {
+                        giocatoriDaAnalizzare.push(...sq.riserveSelezionate);
+                    } else if (typeof sq.riserveSelezionate === 'object') {
+                        Object.values(sq.riserveSelezionate).forEach(valoreRiserve => {
+                            if (Array.isArray(valoreRiserve)) {
+                                giocatoriDaAnalizzare.push(...valoreRiserve);
+                            }
+                        });
+                    }
+                }
+
+                // Conteggio delle squadre di Serie A
+                giocatoriDaAnalizzare.forEach(p => {
+                    if (p && typeof p === 'object' && p.squadra) {
+                        let nomeSq = String(p.squadra).trim();
+                        if (nomeSq !== "" && nomeSq !== "N/D") {
+                            conteggioSquadreSerieA[nomeSq] = (conteggioSquadreSerieA[nomeSq] || 0) + 1;
+                        }
+                    }
+                });
+
+            } catch (innerErr) {
+                console.warn("Errore minore durante l'analisi di una squadra:", innerErr);
+            }
+        });
+
+        // Individuazione della squadra preferita
         let squadraPreferita = "Nessuna";
         let maxScelte = 0;
         for (let [squadraReale, conteggio] of Object.entries(conteggioSquadreSerieA)) {
