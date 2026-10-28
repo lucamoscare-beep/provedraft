@@ -764,7 +764,6 @@ async function apriProfiloUtente(targetUserId) {
         let puntiTotali = 0;
         let migliorPunteggio = 0;
 	let budgetSpesoTotale = 0; // Calcolo del budget totale speso
-	let conteggioSquadreSerieA = {};
 
         squadre.forEach(sq => {
             let pts = sq.punteggioTotale !== undefined && sq.punteggioTotale !== null ? sq.punteggioTotale : 0;
@@ -776,81 +775,7 @@ async function apriProfiloUtente(targetUserId) {
             let spesoPerQuestaSquadra = 600 - budgetResiduo;
             if (spesoPerQuestaSquadra < 0) spesoPerQuestaSquadra = 0;
             budgetSpesoTotale += spesoPerQuestaSquadra;
-	
-		// Raccogliamo tutti i giocatori presenti nella rosa (o nei titolari/riserve)
-            // Verifichiamo sia sq.rosa che sq.schierati per essere sicuri di trovarli tutti
-           
- let conteggioSquadreSerieA = {};
 
-        squadre.forEach(sq => {
-            try {
-                let pts = (sq.punteggioTotale !== undefined && sq.punteggioTotale !== null) ? sq.punteggioTotale : 0;
-                puntiTotali += pts;
-                if (pts > migliorPunteggio) migliorPunteggio = pts;
-
-                let budgetResiduo = (sq.budget !== undefined && sq.budget !== null) ? sq.budget : 600;
-                let spesoPerQuestaSquadra = 600 - budgetResiduo;
-                if (spesoPerQuestaSquadra < 0) spesoPerQuestaSquadra = 0;
-                budgetSpesoTotale += spesoPerQuestaSquadra;
-
-                // Estrazione sicura dei giocatori
-                let giocatoriDaAnalizzare = [];
-
-                // Controlliamo i titolari schierati
-                if (sq.schierati && Array.isArray(sq.schierati)) {
-                    giocatoriDaAnalizzare.push(...sq.schierati);
-                }
-
-                // Controlliamo la rosa completa se esiste
-                if (sq.rosa) {
-                    if (Array.isArray(sq.rosa)) {
-                        giocatoriDaAnalizzare.push(...sq.rosa);
-                    } else if (typeof sq.rosa === 'object') {
-                        Object.values(sq.rosa).forEach(valoreRuolo => {
-                            if (Array.isArray(valoreRuolo)) {
-                                giocatoriDaAnalizzare.push(...valoreRuolo);
-                            }
-                        });
-                    }
-                }
-
-                // Controlliamo le riserve se esistono
-                if (sq.riserveSelezionate) {
-                    if (Array.isArray(sq.riserveSelezionate)) {
-                        giocatoriDaAnalizzare.push(...sq.riserveSelezionate);
-                    } else if (typeof sq.riserveSelezionate === 'object') {
-                        Object.values(sq.riserveSelezionate).forEach(valoreRiserve => {
-                            if (Array.isArray(valoreRiserve)) {
-                                giocatoriDaAnalizzare.push(...valoreRiserve);
-                            }
-                        });
-                    }
-                }
-
-                // Conteggio delle squadre di Serie A
-                giocatoriDaAnalizzare.forEach(p => {
-                    if (p && typeof p === 'object' && p.squadra) {
-                        let nomeSq = String(p.squadra).trim();
-                        if (nomeSq !== "" && nomeSq !== "N/D") {
-                            conteggioSquadreSerieA[nomeSq] = (conteggioSquadreSerieA[nomeSq] || 0) + 1;
-                        }
-                    }
-                });
-
-            } catch (innerErr) {
-                console.warn("Errore minore durante l'analisi di una squadra:", innerErr);
-            }
-        });
-
-        // Individuazione della squadra preferita
-        let squadraPreferita = "Nessuna";
-        let maxScelte = 0;
-        for (let [squadraReale, conteggio] of Object.entries(conteggioSquadreSerieA)) {
-            if (conteggio > maxScelte) {
-                maxScelte = conteggio;
-                squadraPreferita = squadraReale;
-            }
-        }
 
 
         });
@@ -901,10 +826,8 @@ async function apriProfiloUtente(targetUserId) {
 	// Popolamento della nuova statistica
         if (document.getElementById("stat-budget-speso")) {
             document.getElementById("stat-budget-speso").innerText = `${budgetSpesoTotale} cr`;
-	if (document.getElementById("stat-squadra-preferita")) {
-            document.getElementById("stat-squadra-preferita").innerText = squadraPreferita;
-        }       
- } 
+        }
+
         document.getElementById("stat-podi-oro").innerText = ori;
         document.getElementById("stat-podi-argento").innerText = argenti;
         document.getElementById("stat-podi-bronzo").innerText = bronzi;
