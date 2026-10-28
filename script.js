@@ -859,7 +859,7 @@ async function apriProfiloUtente(targetUserId) {
 	if (document.getElementById("stat-squadra-preferita")) {
             document.getElementById("stat-squadra-preferita").innerText = squadraPreferita;
         }       
-
+ } 
         document.getElementById("stat-podi-oro").innerText = ori;
         document.getElementById("stat-podi-argento").innerText = argenti;
         document.getElementById("stat-podi-bronzo").innerText = bronzi;
