@@ -18,9 +18,13 @@ const db = firebase.firestore();
 const CALENDARIO_FALLBACK = {
     8: { inizio: new Date("2026-10-20T18:30:00"), fine: new Date("2026-10-22T23:00:00") },
     9: { inizio: new Date("2026-10-27T18:30:00"), fine: new Date("2026-10-29T23:00:00") },
-    10: { inizio: new Date("2026-11-03T18:30:00"), fine: new Date("2026-11-05T23:00:00") },
-    11: { inizio: new Date("2026-11-10T18:30:00"), fine: new Date("2026-11-12T23:00:00") },
-    12: { inizio: new Date("2026-11-24T18:30:00"), fine: new Date("2026-11-26T23:00:00") }
+    10: { inizio: new Date("2026-10-31T15:30:00"), fine: new Date("2026-11-02T23:00:00") },
+    11: { inizio: new Date("2026-11-06T20:45:00"), fine: new Date("2026-11-08T23:00:00") },
+    12: { inizio: new Date("2026-11-21T15:00:00"), fine: new Date("2026-11-23T23:00:00") },
+    13: { inizio: new Date("2026-11-27T20:45:00"), fine: new Date("2026-11-30T23:00:00") },                                                14: { inizio: new Date("2026-12-04T20:45:00"), fine: new Date("2026-12-07T23:00:00") },
+15: { inizio: new Date("2026-12-11T120:45:00"), fine: new Date("2026-12-14T23:00:00") },
+16: { inizio: new Date("2026-12-18T18:30:00"), fine: new Date("2026-12-20T23:00:00") }
+
 };
 
 let ACTIVE_MATCHDAY = 9; 
