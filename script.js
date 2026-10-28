@@ -776,7 +776,28 @@ async function apriProfiloUtente(targetUserId) {
             if (spesoPerQuestaSquadra < 0) spesoPerQuestaSquadra = 0;
             budgetSpesoTotale += spesoPerQuestaSquadra;
 
+	// --- CALCOLO MODULO PIÙ SCELTO ---
+        let conteggioModuli = {};
 
+        squadre.forEach(sq => {
+            // Se la squadra ha un modulo salvato, lo conteggiamo
+            if (sq.moduloSelezionato && typeof sq.moduloSelezionato === 'string') {
+                let mod = sq.moduloSelezionato.trim();
+                if (mod !== "") {
+                    conteggioModuli[mod] = (conteggioModuli[mod] || 0) + 1;
+                }
+            }
+        });
+
+        // Troviamo il modulo con più preferenze
+        let moduloPreferito = "Nessuno";
+        let maxScelteModulo = 0;
+        for (let [mod, conteggio] of Object.entries(conteggioModuli)) {
+            if (conteggio > maxScelteModulo) {
+                maxScelteModulo = conteggio;
+                moduloPreferito = mod;
+            }
+        }
 
         });
 
@@ -826,6 +847,11 @@ async function apriProfiloUtente(targetUserId) {
 	// Popolamento della nuova statistica
         if (document.getElementById("stat-budget-speso")) {
             document.getElementById("stat-budget-speso").innerText = `${budgetSpesoTotale} cr`;
+        }
+
+	// Popolamento del box Modulo Preferito
+        if (document.getElementById("stat-modulo-preferito")) {
+            document.getElementById("stat-modulo-preferito").innerText = moduloPreferito;
         }
 
         document.getElementById("stat-podi-oro").innerText = ori;
