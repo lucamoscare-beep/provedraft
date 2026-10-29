@@ -829,6 +829,12 @@ async function apriProfiloUtente(targetUserId) {
             }
         }
 
+// Testo da mostrare nel box (es. nome + conteggio tra parentesi se è stato scelto)
+        let testoGiocatorePreferito = "Nessuno";
+        if (maxScelteGiocatore > 0) {
+            testoGiocatorePreferito = `${giocatorePreferito} <span style="font-size:14px; color:var(--accent-blue); font-weight:700;">(${maxScelteGiocatore} ${maxScelteGiocatore === 1 ? 'volta' : 'volte'})</span>`;
+        }
+
 
         squadre.forEach(sq => {
             let pts = sq.punteggioTotale !== undefined && sq.punteggioTotale !== null ? sq.punteggioTotale : 0;
