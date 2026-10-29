@@ -770,7 +770,7 @@ async function apriProfiloUtente(targetUserId) {
 	let budgetSpesoTotale = 0; // Calcolo del budget totale speso	
 	let conteggioGiocatoriUtente = {};
 
-squadre.forEach(sq => {
+	squadre.forEach(sq => {
             try {
                 let giocatoriDellaSquadra = [];
 
@@ -895,8 +895,8 @@ squadre.forEach(sq => {
         }
 
 	if (document.getElementById("stat-giocatore-preferito")) {
-            document.getElementById("stat-giocatore-preferito.innerText = giocatorePreferito;
-        }
+    document.getElementById("stat-giocatore-preferito").innerText = giocatorePreferito;
+}
 
         document.getElementById("stat-podi-oro").innerText = ori;
         document.getElementById("stat-podi-argento").innerText = argenti;
