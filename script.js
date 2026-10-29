@@ -738,7 +738,7 @@ async function apriSchermataClassifica(giornata) {
 }
 
 async function apriProfiloUtente(targetUserId) {
-    if (!targetUserId && currentUser) targetUserId = currentUser.uid;
+   if (!targetUserId && currentUser) targetUserId = currentUser.uid;
     if (!targetUserId) return;
 
     document.getElementById("welcome-screen").style.display = "none";
@@ -767,90 +767,80 @@ async function apriProfiloUtente(targetUserId) {
         let squadreCreateCount = squadre.length;
         let puntiTotali = 0;
         let migliorPunteggio = 0;
-	let budgetSpesoTotale = 0; // Calcolo del budget totale speso	
-	let conteggioGiocatoriUtente = {};
+        let budgetSpesoTotale = 0;
 
-	squadre.forEach(sq => {
-            try {
-                let giocatoriDellaSquadra = [];
-
-                // 1. Raccogliamo dai titolari schierati
-                if (sq.schierati && Array.isArray(sq.schierati)) {
-                    giocatoriDellaSquadra.push(...sq.schierati);
-                }
-
-                // 2. Raccogliamo dalla rosa completa (se strutturata per ruoli o array)
-                if (sq.rosa) {
-                    if (Array.isArray(sq.rosa)) {
-                        giocatoriDellaSquadra.push(...sq.rosa);
-                    } else if (typeof sq.rosa === 'object') {
-                        Object.values(sq.rosa).forEach(listaRuolo => {
-                            if (Array.isArray(listaRuolo)) {
-                                giocatoriDellaSquadra.push(...listaRuolo);
-                            }
-                        });
-                    }
-                }
-
-                // 3. Raccogliamo dalle riserve
-                if (sq.riserveSelezionate) {
-                    if (Array.isArray(sq.riserveSelezionate)) {
-                        giocatoriDellaSquadra.push(...sq.riserveSelezionate);
-                    } else if (typeof sq.riserveSelezionate === 'object') {
-                        Object.values(sq.riserveSelezionate).forEach(listaRiserve => {
-                            if (Array.isArray(listaRiserve)) {
-                                giocatoriDellaSquadra.push(...listaRiserve);
-                            }
-                        });
-                    }
-                }
-
-                // Conteggio delle occorrenze di ciascun giocatore
-                giocatoriDellaSquadra.forEach(p => {
-                    if (p && p.nome) {
-                        let nomeGiocatore = String(p.nome).trim();
-                        if (nomeGiocatore !== "") {
-                            conteggioGiocatoriUtente[nomeGiocatore] = (conteggioGiocatoriUtente[nomeGiocatore] || 0) + 1;
-                        }
-                    }
-                });
-            } catch (errInner) {
-                // Gestione silenziosa di eventuali anomalie sui dati storici
-            }
-        });
-
-        // Troviamo il giocatore con più scelte
-        let giocatorePreferito = "Nessuno";
-        let maxScelteGiocatore = 0;
-        for (let [nomeG, conteggio] of Object.entries(conteggioGiocatoriUtente)) {
-            if (conteggio > maxScelteGiocatore) {
-                maxScelteGiocatore = conteggio;
-                giocatorePreferito = nomeG;
-            }
-        }
-
-// Testo da mostrare nel box (es. nome + conteggio tra parentesi se è stato scelto)
-        let testoGiocatorePreferito = "Nessuno";
-        if (maxScelteGiocatore > 0) {
-            testoGiocatorePreferito = `${giocatorePreferito} <span style="font-size:14px; color:var(--accent-blue); font-weight:700;">(${maxScelteGiocatore} ${maxScelteGiocatore === 1 ? 'volta' : 'volte'})</span>`;
-        }
-
+        // Oggetti per contare le frequenze
+        let conteggioGiocatoriUtente = {};
+        let conteggioSquadreSerieA = {};
 
         squadre.forEach(sq => {
             let pts = sq.punteggioTotale !== undefined && sq.punteggioTotale !== null ? sq.punteggioTotale : 0;
             puntiTotali += pts;
             if (pts > migliorPunteggio) migliorPunteggio = pts;
 
-	// Calcolo crediti spesi per la singola squadra (600 - budget residuo)
+            // Calcolo del budget speso
             let budgetResiduo = sq.budget !== undefined && sq.budget !== null ? sq.budget : 600;
             let spesoPerQuestaSquadra = 600 - budgetResiduo;
             if (spesoPerQuestaSquadra < 0) spesoPerQuestaSquadra = 0;
             budgetSpesoTotale += spesoPerQuestaSquadra;
 
+            // Raccogliamo i giocatori della rosa
+            try {
+                let giocatoriDellaSquadra = [];
 
+                if (sq.schierati && Array.isArray(sq.schierati)) {
+                    giocatoriDellaSquadra.push(...sq.schierati);
+                }
+                if (sq.rosa) {
+                    if (Array.isArray(sq.rosa)) {
+                        giocatoriDellaSquadra.push(...sq.rosa);
+                    } else if (typeof sq.rosa === 'object') {
+                        Object.values(sq.rosa).forEach(listaRuolo => {
+                            if (Array.isArray(listaRuolo)) giocatoriDellaSquadra.push(...listaRuolo);
+                        });
+                    }
+                }
+                if (sq.riserveSelezionate) {
+                    if (Array.isArray(sq.riserveSelezionate)) {
+                        giocatoriDellaSquadra.push(...sq.riserveSelezionate);
+                    } else if (typeof sq.riserveSelezionate === 'object') {
+                        Object.values(sq.riserveSelezionate).forEach(listaRiserve => {
+                            if (Array.isArray(listaRiserve)) giocatoriDellaSquadra.push(...listaRiserve);
+                        });
+                    }
+                }
 
+                // Incrementiamo i contatori per giocatore e per club
+                giocatoriDellaSquadra.forEach(p => {
+                    if (p) {
+                        if (p.nome) {
+                            let nomeG = String(p.nome).trim();
+                            if (nomeG !== "") conteggioGiocatoriUtente[nomeG] = (conteggioGiocatoriUtente[nomeG] || 0) + 1;
+                        }
+                        if (p.squadra) {
+                            let nomeSa = String(p.squadra).trim();
+                            if (nomeSa !== "" && nomeSa !== "N/D") conteggioSquadreSerieA[nomeSa] = (conteggioSquadreSerieA[nomeSa] || 0) + 1;
+                        }
+                    }
+                });
+            } catch (errInner) {}
         });
 
+        // Troviamo il Giocatore Preferito
+        let giocatorePreferito = "Nessuno";
+        let maxScelteG = 0;
+        for (let [nomeG, count] of Object.entries(conteggioGiocatoriUtente)) {
+            if (count > maxScelteG) { maxScelteG = count; giocatorePreferito = nomeG; }
+        }
+
+        // Troviamo la Squadra Preferita
+        let squadraPreferita = "Nessuna";
+        let maxScelteS = 0;
+        for (let [nomeS, count] of Object.entries(conteggioSquadreSerieA)) {
+            if (count > maxScelteS) { maxScelteS = count; squadraPreferita = nomeS; }
+        }
+
+        // Calcolo Podi
         let ori = 0, argenti = 0, bronzi = 0;
         const ultimaGiornataVoti = getUltimaGiornataConVoti();
         
@@ -889,20 +879,25 @@ async function apriProfiloUtente(targetUserId) {
             });
         }
 
+        // Stampiamo i valori nell'HTML
         document.getElementById("stat-squadre-create").innerText = squadreCreateCount;
         document.getElementById("stat-draft-tentati").innerText = draftTentati;
         document.getElementById("stat-miglior-punteggio").innerText = `${migliorPunteggio.toFixed(1)} pt`;
         document.getElementById("stat-punti-totali").innerText = `${puntiTotali.toFixed(1)} pt`;
-	
 
-	// Popolamento della nuova statistica
         if (document.getElementById("stat-budget-speso")) {
             document.getElementById("stat-budget-speso").innerText = `${budgetSpesoTotale} cr`;
         }
 
-	if (document.getElementById("stat-giocatore-preferito")) {
-    document.getElementById("stat-giocatore-preferito").innerHTML = testoGiocatorePreferito;
-}
+        if (document.getElementById("stat-giocatore-preferito")) {
+            let testoG = maxScelteG > 0 ? `${giocatorePreferito} <span style="font-size:14px; color:var(--accent-blue); font-weight:700;">(${maxScelteG} ${maxScelteG === 1 ? 'volta' : 'volte'})</span>` : "Nessuno";
+            document.getElementById("stat-giocatore-preferito").innerHTML = testoG;
+        }
+
+        if (document.getElementById("stat-squadra-preferita")) {
+            let testoS = maxScelteS > 0 ? `${squadraPreferita} <span style="font-size:14px; color:var(--accent-neon-green); font-weight:700;">(${maxScelteS} ${maxScelteS === 1 ? 'giocatore' : 'giocatori'})</span>` : "Nessuna";
+            document.getElementById("stat-squadra-preferita").innerHTML = testoS;
+        }
 
         document.getElementById("stat-podi-oro").innerText = ori;
         document.getElementById("stat-podi-argento").innerText = argenti;
