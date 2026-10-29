@@ -767,7 +767,68 @@ async function apriProfiloUtente(targetUserId) {
         let squadreCreateCount = squadre.length;
         let puntiTotali = 0;
         let migliorPunteggio = 0;
-	let budgetSpesoTotale = 0; // Calcolo del budget totale speso
+	let budgetSpesoTotale = 0; // Calcolo del budget totale speso	
+	let conteggioGiocatoriUtente = {};
+
+squadre.forEach(sq => {
+            try {
+                let giocatoriDellaSquadra = [];
+
+                // 1. Raccogliamo dai titolari schierati
+                if (sq.schierati && Array.isArray(sq.schierati)) {
+                    giocatoriDellaSquadra.push(...sq.schierati);
+                }
+
+                // 2. Raccogliamo dalla rosa completa (se strutturata per ruoli o array)
+                if (sq.rosa) {
+                    if (Array.isArray(sq.rosa)) {
+                        giocatoriDellaSquadra.push(...sq.rosa);
+                    } else if (typeof sq.rosa === 'object') {
+                        Object.values(sq.rosa).forEach(listaRuolo => {
+                            if (Array.isArray(listaRuolo)) {
+                                giocatoriDellaSquadra.push(...listaRuolo);
+                            }
+                        });
+                    }
+                }
+
+                // 3. Raccogliamo dalle riserve
+                if (sq.riserveSelezionate) {
+                    if (Array.isArray(sq.riserveSelezionate)) {
+                        giocatoriDellaSquadra.push(...sq.riserveSelezionate);
+                    } else if (typeof sq.riserveSelezionate === 'object') {
+                        Object.values(sq.riserveSelezionate).forEach(listaRiserve => {
+                            if (Array.isArray(listaRiserve)) {
+                                giocatoriDellaSquadra.push(...listaRiserve);
+                            }
+                        });
+                    }
+                }
+
+                // Conteggio delle occorrenze di ciascun giocatore
+                giocatoriDellaSquadra.forEach(p => {
+                    if (p && p.nome) {
+                        let nomeGiocatore = String(p.nome).trim();
+                        if (nomeGiocatore !== "") {
+                            conteggioGiocatoriUtente[nomeGiocatore] = (conteggioGiocatoriUtente[nomeGiocatore] || 0) + 1;
+                        }
+                    }
+                });
+            } catch (errInner) {
+                // Gestione silenziosa di eventuali anomalie sui dati storici
+            }
+        });
+
+        // Troviamo il giocatore con più scelte
+        let giocatorePreferito = "Nessuno";
+        let maxScelteGiocatore = 0;
+        for (let [nomeG, conteggio] of Object.entries(conteggioGiocatoriUtente)) {
+            if (conteggio > maxScelteGiocatore) {
+                maxScelteGiocatore = conteggio;
+                giocatorePreferito = nomeG;
+            }
+        }
+
 
         squadre.forEach(sq => {
             let pts = sq.punteggioTotale !== undefined && sq.punteggioTotale !== null ? sq.punteggioTotale : 0;
@@ -826,10 +887,15 @@ async function apriProfiloUtente(targetUserId) {
         document.getElementById("stat-draft-tentati").innerText = draftTentati;
         document.getElementById("stat-miglior-punteggio").innerText = `${migliorPunteggio.toFixed(1)} pt`;
         document.getElementById("stat-punti-totali").innerText = `${puntiTotali.toFixed(1)} pt`;
+	
 
 	// Popolamento della nuova statistica
         if (document.getElementById("stat-budget-speso")) {
             document.getElementById("stat-budget-speso").innerText = `${budgetSpesoTotale} cr`;
+        }
+
+	if (document.getElementById("stat-giocatore-preferito")) {
+            document.getElementById("stat-giocatore-preferito.innerText = giocatorePreferito;
         }
 
         document.getElementById("stat-podi-oro").innerText = ori;
