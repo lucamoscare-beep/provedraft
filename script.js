@@ -901,7 +901,7 @@ async function apriProfiloUtente(targetUserId) {
         }
 
 	if (document.getElementById("stat-giocatore-preferito")) {
-    document.getElementById("stat-giocatore-preferito").innerText = giocatorePreferito;
+    document.getElementById("stat-giocatore-preferito").innerHTML = testoGiocatorePreferito;
 }
 
         document.getElementById("stat-podi-oro").innerText = ori;
