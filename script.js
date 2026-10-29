@@ -840,6 +840,42 @@ async function apriProfiloUtente(targetUserId) {
             if (count > maxScelteS) { maxScelteS = count; squadraPreferita = nomeS; }
         }
 
+
+// --- CALCOLO MODULO TATTICO PIÙ UTILIZZATO ---
+        let conteggioModuli = {};
+
+        squadre.forEach(sq => {
+            try {
+                if (sq.moduloSelezionato) {
+                    let modulo = String(sq.moduloSelezionato).trim();
+                    if (modulo !== "") {
+                        conteggioModuli[modulo] = (conteggioModuli[modulo] || 0) + 1;
+                    }
+                }
+            } catch (errInner) {}
+        });
+
+        // Troviamo il modulo più frequente
+        let moduloPreferito = "Nessuno";
+        let maxScelteModulo = 0;
+        for (let [mod, count] of Object.entries(conteggioModuli)) {
+            if (count > maxScelteModulo) {
+                maxScelteModulo = count;
+                moduloPreferito = mod;
+            }
+        }
+
+        // Testo da mostrare nel box con conteggio
+        let testoModuloPreferito = "Nessuno";
+        if (maxScelteModulo > 0) {
+            testoModuloPreferito = `${moduloPreferito} <span style="font-size:14px; color:var(--accent-gold); font-weight:700;">(${maxScelteModulo} ${maxScelteModulo === 1 ? 'volta' : 'volte'})</span>`;
+        }
+
+        // Popolamento del box HTML
+        if (document.getElementById("stat-modulo-preferito")) {
+            document.getElementById("stat-modulo-preferito").innerHTML = testoModuloPreferito;
+        }
+
         // Calcolo Podi
         let ori = 0, argenti = 0, bronzi = 0;
         const ultimaGiornataVoti = getUltimaGiornataConVoti();
@@ -898,6 +934,13 @@ async function apriProfiloUtente(targetUserId) {
             let testoS = maxScelteS > 0 ? `${squadraPreferita} <span style="font-size:14px; color:var(--accent-neon-green); font-weight:700;">(${maxScelteS} ${maxScelteS === 1 ? 'giocatore' : 'giocatori'})</span>` : "Nessuna";
             document.getElementById("stat-squadra-preferita").innerHTML = testoS;
         }
+
+	if (document.getElementById("stat-modulo-preferito")) {
+            let testoM = maxScelteModulo > 0 ? `${moduloPreferito} <span style="font-size:14px; color:var(--accent-gold); font-weight:700;">(${maxScelteModulo} ${maxScelteModulo === 1 ? 'volta' : 'volte'})</span>` : "Nessuno";
+            document.getElementById("stat-modulo-preferito").innerHTML = testoM;
+        }
+
+
 
         document.getElementById("stat-podi-oro").innerText = ori;
         document.getElementById("stat-podi-argento").innerText = argenti;
