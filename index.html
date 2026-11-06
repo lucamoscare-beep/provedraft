@@ -27,7 +27,10 @@
     </div>
     <div class="user-area">
         <div class="user-badge" onclick="apriProfiloUtente(currentUser.uid)" title="Il tuo Profilo e Statistiche">
-            <i class="fa-solid fa-user"></i>
+
+<!-- AGGIUNGI QUESTO TAG IMG (inizialmente nascosto) -->
+    <img id="user-avatar-navbar" src="" alt="Avatar" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; display: none; margin-right: 6px;">
+            <i class="fa-solid fa-user id="user-icon-fallback"></i>
             <span id="user-display-name">-</span>
         </div>
         <button class="btn-logout" onclick="logout()" title="Disconnettiti">
