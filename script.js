@@ -393,7 +393,15 @@ auth.onAuthStateChanged(async (user) => {
         try {
             const userDoc = await db.collection("utenti").doc(user.uid).get();
             if (userDoc.exists) {
-                displayUsername = getRealUsername(userDoc.data(), user);
+                const uData = userDoc.data();
+                displayUsername = getRealUsername(uData, user);
+                
+                // Aggiorna l'avatar grafico al login
+                if (uData && uData.photoURL) {
+                    aggiornaAvatarGrafica(uData.photoURL);
+                } else {
+                    aggiornaAvatarGrafica(null);
+                }
             }
         } catch(e) {}
 
@@ -760,6 +768,13 @@ async function apriProfiloUtente(targetUserId) {
         const uData = userDoc.data();
         const username = getRealUsername(uData, null);
         document.getElementById("profilo-username-title").innerText = `Profilo di ${username}`;
+
+        // Caricamento dell'avatar dal database Firestore
+        if (uData && uData.photoURL) {
+            aggiornaAvatarGrafica(uData.photoURL);
+        } else {
+            aggiornaAvatarGrafica(null);
+        }
 
         const squadre = uData.squadre || [];
         const draftTentati = uData.draftTentati || 0;
@@ -2125,4 +2140,85 @@ function mostraTabellinoVoti(sq) {
 
     container.innerHTML = html;
     refreshAllMarquees();
+}
+
+// ==========================================
+// FUNZIONI PER GESTIONE FOTO PROFILO (BASE64)
+// ==========================================
+
+async function caricaNuovaFotoProfiloBase64(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+        alert("Formato non valido! Puoi caricare solo immagini JPG, PNG o WEBP.");
+        event.target.value = "";
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const img = new Image();
+        img.src = e.target.result;
+        
+        img.onload = async function() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const MAX_SIZE = 150;
+            
+            let width = img.width;
+            let height = img.height;
+            
+            if (width > height) {
+                if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
+            } else {
+                if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            const base64String = canvas.toDataURL('image/jpeg', 0.75);
+
+            try {
+                if (!currentUser) {
+                    alert("Errore: utente non autenticato.");
+                    return;
+                }
+
+                await db.collection("utenti").doc(currentUser.uid).update({
+                    photoURL: base64String
+                });
+
+                aggiornaAvatarGrafica(base64String);
+                alert("📸 Foto profilo aggiornata con successo!");
+
+            } catch (err) {
+                alert("Errore nel salvataggio sul database: " + err.message);
+            }
+        };
+    };
+    reader.readAsDataURL(file);
+}
+
+function aggiornaAvatarGrafica(url) {
+    const profImg = document.getElementById("profilo-avatar-img");
+    const navImg = document.getElementById("user-avatar-navbar");
+    const navIcon = document.getElementById("user-icon-fallback");
+
+    if (url && url.trim() !== "") {
+        if (profImg) profImg.src = url;
+        if (navImg) {
+            navImg.src = url;
+            navImg.style.display = "inline-block";
+        }
+        if (navIcon) {
+            navIcon.style.display = "none";
+        }
+    } else {
+        if (profImg) profImg.src = "https://via.placeholder.com/60";
+        if (navImg) navImg.style.display = "none";
+        if (navIcon) navIcon.style.display = "inline-block";
+    }
 }
