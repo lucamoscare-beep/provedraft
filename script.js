@@ -2273,25 +2273,7 @@ async function vaiAMissioniProfilo() {
 function renderizzaTraguardi(uData) {
     const container = document.getElementById("badge-grid-container");
     if (!container) return;
-    await apriProfiloUtente(currentUser.uid);
-	setTimeout(() => {
-        // Effetto grafico per evidenziare la sezione al caricamento
-            const parentCard = targetSection.closest('.profilo-section-card') || targetSection.parentElement;
-            if (parentCard) {
-                parentCard.style.transition = "transform 0.3s, border-color 0.3s";
-                parentCard.style.borderColor = "#a78bfa";
-                parentCard.style.transform = "scale(1.02)";
-                setTimeout(() => {
-                    parentCard.style.transform = "scale(1)";
-                    parentCard.style.borderColor = "rgba(255,255,255,0.05)";
-                }, 600);
-            }
-        }
-    }, 150);
-}
-
-
-   
+    container.innerHTML = "";
 
     const squadre = (uData && uData.squadre) ? uData.squadre : [];
     const numSquadre = squadre.length;
