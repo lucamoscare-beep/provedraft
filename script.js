@@ -396,7 +396,7 @@ auth.onAuthStateChanged(async (user) => {
                 const uData = userDoc.data();
                 displayUsername = getRealUsername(uData, user);
                 
-                // Aggiorna l'avatar grafico al login
+                // Aggiorna l'avatar grafico al login (Sia Navbar/Home che Profilo)
                 if (uData && uData.photoURL) {
                     aggiornaAvatarGrafica(uData.photoURL);
                 } else {
@@ -425,8 +425,14 @@ async function caricaDatiUtenteCloud() {
     if (!currentUser) return;
     try {
         const doc = await db.collection("utenti").doc(currentUser.uid).get();
-        if (doc.exists && doc.data().squadre) {
-            userSquadre = doc.data().squadre || [];
+        if (doc.exists) {
+            const uData = doc.data();
+            userSquadre = uData.squadre || [];
+            
+            // Carica la foto profilo anche all'avvio dei dati utente
+            if (uData && uData.photoURL) {
+                aggiornaAvatarGrafica(uData.photoURL);
+            }
         } else {
             userSquadre = [];
         }
@@ -2207,12 +2213,40 @@ function aggiornaAvatarGrafica(url) {
     const navImg = document.getElementById("user-avatar-navbar");
     const navIcon = document.getElementById("user-icon-fallback");
 
+    // Cerca anche il contenitore del badge utente o eventuali icone in homepage
+    const userBadge = document.querySelector(".user-badge");
+
     if (url && url.trim() !== "") {
         if (profImg) profImg.src = url;
+
+        // Gestione della foto nella Navbar / Homepage
         if (navImg) {
             navImg.src = url;
             navImg.style.display = "inline-block";
+        } else if (userBadge) {
+            // Se non c'è ancora un tag <img> creato nella navbar, lo crea dinamicamente al posto dell'icona
+            let iconaBadge = userBadge.querySelector("i.fa-user");
+            if (iconaBadge) {
+                iconaBadge.style.display = "none";
+            }
+            let existingImg = userBadge.querySelector("img#user-avatar-navbar");
+            if (!existingImg) {
+                const newImg = document.createElement("img");
+                newImg.id = "user-avatar-navbar";
+                newImg.src = url;
+                newImg.alt = "Avatar";
+                newImg.style.width = "26px";
+                newImg.style.height = "26px";
+                newImg.style.borderRadius = "50%";
+                newImg.style.objectFit = "cover";
+                newImg.style.marginRight = "6px";
+                userBadge.insertBefore(newImg, userBadge.firstChild);
+            } else {
+                existingImg.src = url;
+                existingImg.style.display = "inline-block";
+            }
         }
+
         if (navIcon) {
             navIcon.style.display = "none";
         }
@@ -2220,5 +2254,12 @@ function aggiornaAvatarGrafica(url) {
         if (profImg) profImg.src = "https://via.placeholder.com/60";
         if (navImg) navImg.style.display = "none";
         if (navIcon) navIcon.style.display = "inline-block";
+
+        if (userBadge) {
+            let iconaBadge = userBadge.querySelector("i.fa-user");
+            if (iconaBadge) iconaBadge.style.display = "inline-block";
+            let existingImg = userBadge.querySelector("img#user-avatar-navbar");
+            if (existingImg) existingImg.style.display = "none";
+        }
     }
 }
