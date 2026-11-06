@@ -2233,7 +2233,7 @@ function aggiornaAvatarGrafica(url) {
 }
 
 // ==========================================
-// GESTIONE TRAGUARDI (ACHIEVEMENTS)
+// GESTIONE TRAGUARDI (STILE DASHBOARD & DRAFT)
 // ==========================================
 
 function renderizzaTraguardi(uData) {
@@ -2245,12 +2245,12 @@ function renderizzaTraguardi(uData) {
     const numSquadre = squadre.length;
     const haFoto = uData && uData.photoURL && uData.photoURL.trim() !== "";
 
-    // Definizione dei traguardi con target numerici chiari
+    // Definizione dei traguardi con il formato compatto
     const listaTraguardi = [
         {
             id: "primo_scatto",
             titolo: "Primo Scatto",
-            descrizione: "Carica la tua foto profilo personalizzata",
+            descrizione: "Carica foto profilo",
             icona: "fa-solid fa-camera",
             colore: "var(--accent-blue)",
             sbloccato: haFoto,
@@ -2260,7 +2260,7 @@ function renderizzaTraguardi(uData) {
         {
             id: "squadre_50",
             titolo: "Mister Esperto",
-            descrizione: "Crea e salva 50 squadre totali",
+            descrizione: "Crea 50 squadre",
             icona: "fa-solid fa-shield-halved",
             colore: "#38bdf8",
             sbloccato: numSquadre >= 50,
@@ -2270,7 +2270,7 @@ function renderizzaTraguardi(uData) {
         {
             id: "squadre_100",
             titolo: "Centurione",
-            descrizione: "Crea e salva 100 squadre totali",
+            descrizione: "Crea 100 squadre",
             icona: "fa-solid fa-trophy",
             colore: "var(--accent-gold)",
             sbloccato: numSquadre >= 100,
@@ -2279,8 +2279,8 @@ function renderizzaTraguardi(uData) {
         },
         {
             id: "squadre_500",
-            titolo: "Leggenda della Panchina",
-            descrizione: "Crea e salva 500 squadre totali",
+            titolo: "Leggenda",
+            descrizione: "Crea 500 squadre",
             icona: "fa-solid fa-crown",
             colore: "#a78bfa",
             sbloccato: numSquadre >= 500,
@@ -2290,7 +2290,7 @@ function renderizzaTraguardi(uData) {
         {
             id: "squadre_1000",
             titolo: "Mitico 1000",
-            descrizione: "Raggiungi quota 1000 squadre create!",
+            descrizione: "Crea 1000 squadre",
             icona: "fa-solid fa-fire-flame-curved",
             colore: "#f43f5e",
             sbloccato: numSquadre >= 1000,
@@ -2299,53 +2299,42 @@ function renderizzaTraguardi(uData) {
         }
     ];
 
-    // Impostiamo la griglia per accogliere card leggibili e spaziate
+    // Griglia coerente con le schede / contatori dell'app
     container.style.display = "grid";
-    container.style.gridTemplateColumns = "repeat(auto-fill, minmax(240px, 1fr))";
-    container.style.gap = "12px";
+    container.style.gridTemplateColumns = "repeat(auto-fill, minmax(140px, 1fr))";
+    container.style.gap = "10px";
 
     listaTraguardi.forEach(t => {
-        // Calcolo della percentuale di avanzamento (massimo 100%)
-        let percentuale = Math.min(100, Math.floor((t.attuale / t.target) * 100));
-        if (t.sbloccato) percentuale = 100;
+        const item = document.createElement("div");
+        item.className = "team-card-item"; // Sfrutta la classe standard delle tue card!
+        item.style.padding = "10px";
+        item.style.display = "flex";
+        item.style.flexDirection = "column";
+        item.style.justifyContent = "space-between";
+        item.style.alignItems = "center";
+        item.style.textAlign = "center";
+        item.style.background = t.sbloccato ? "rgba(15, 23, 42, 0.8)" : "rgba(15, 23, 42, 0.3)";
+        item.style.border = t.sbloccato ? `1px solid ${t.colore}` : "1px solid rgba(255,255,255,0.08)";
+        item.style.opacity = t.sbloccato ? "1" : "0.55";
 
-        const card = document.createElement("div");
-        card.style.background = t.sbloccato ? "rgba(15, 23, 42, 0.85)" : "rgba(15, 23, 42, 0.4)";
-        card.style.border = t.sbloccato ? `1px solid ${t.colore}` : "1px solid rgba(255,255,255,0.08)";
-        card.style.borderRadius = "12px";
-        card.style.padding = "14px";
-        card.style.display = "flex";
-        card.style.flexDirection = "column";
-        card.style.justifyContent = "space-between";
-        card.style.opacity = t.sbloccato ? "1" : "0.7";
-        card.style.boxShadow = t.sbloccato ? `0 0 12px ${t.colore}22` : "none";
+        // Testo del contatore esattamente uguale ai contatori dei ruoli (es. 12/50 o ✔ SBLOCCATO)
+        let countDisplay = t.sbloccato 
+            ? `<span style="color:var(--accent-neon-green); font-weight:900; font-size:13px;">✔ COMPLETATO</span>`
+            : `<span style="color:#fff; font-weight:900; font-size:14px;">${t.attuale} / ${t.target}</span>`;
 
-        card.innerHTML = `
-            <div>
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                    <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 16px; color: ${t.sbloccato ? t.colore : 'var(--text-muted)'};">
-                        <i class="${t.icona}"></i>
-                    </div>
-                    <span style="font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 20px; background: ${t.sbloccato ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255,255,255,0.05)'}; color: ${t.sbloccato ? 'var(--accent-neon-green)' : 'var(--text-muted)'};">
-                        ${t.sbloccato ? '✔ SBLOCCATO' : '🔒 BLOCCATO'}
-                    </span>
-                </div>
-                <div style="font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 3px;">${t.titolo}</div>
-                <div style="font-size: 10px; color: var(--text-muted); line-height: 1.3; margin-bottom: 10px;">${t.descrizione}</div>
+        item.innerHTML = `
+            <div style="font-size: 22px; color: ${t.sbloccato ? t.colore : 'var(--text-muted)'}; margin-bottom: 4px;">
+                <i class="${t.icona}"></i>
             </div>
-
-            <div>
-                <div style="display: flex; justify-content: space-between; font-size: 9px; font-weight: 700; color: #cbd5e1; margin-bottom: 4px;">
-                    <span>Progresso</span>
-                    <span>${t.attuale} / ${t.target} (${percentuale}%)</span>
-                </div>
-                <!-- Barra di caricamento -->
-                <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
-                    <div style="width: ${percentuale}%; height: 100%; background: ${t.sbloccato ? t.colore : 'var(--text-muted)'}; transition: width 0.4s ease;"></div>
-                </div>
+            <div style="font-size: 11px; font-weight: 800; color: #fff; margin-bottom: 2px;">${t.titolo}</div>
+            <div style="font-size: 9px; color: var(--text-muted); margin-bottom: 8px;">${t.descrizione}</div>
+            
+            <!-- Box del contatore stile Draft -->
+            <div style="width: 100%; background: rgba(0,0,0,0.3); border-radius: 6px; padding: 4px 0; border: 1px solid rgba(255,255,255,0.05);">
+                ${countDisplay}
             </div>
         `;
         
-        container.appendChild(card);
+        container.appendChild(card = item);
     });
 }
