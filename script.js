@@ -21,10 +21,10 @@ const CALENDARIO_FALLBACK = {
     10: { inizio: new Date("2026-10-31T15:30:00"), fine: new Date("2026-11-02T23:00:00") },
     11: { inizio: new Date("2026-11-06T20:45:00"), fine: new Date("2026-11-08T23:00:00") },
     12: { inizio: new Date("2026-11-21T15:00:00"), fine: new Date("2026-11-23T23:00:00") },
-    13: { inizio: new Date("2026-11-27T20:45:00"), fine: new Date("2026-11-30T23:00:00") },                                                14: { inizio: new Date("2026-12-04T20:45:00"), fine: new Date("2026-12-07T23:00:00") },
-15: { inizio: new Date("2026-12-11T120:45:00"), fine: new Date("2026-12-14T23:00:00") },
-16: { inizio: new Date("2026-12-18T18:30:00"), fine: new Date("2026-12-20T23:00:00") }
-
+    13: { inizio: new Date("2026-11-27T20:45:00"), fine: new Date("2026-11-30T23:00:00") },
+    14: { inizio: new Date("2026-12-04T20:45:00"), fine: new Date("2026-12-07T23:00:00") },
+    15: { inizio: new Date("2026-12-11T12:45:00"), fine: new Date("2026-12-14T23:00:00") },
+    16: { inizio: new Date("2026-12-18T18:30:00"), fine: new Date("2026-12-20T23:00:00") }
 };
 
 let ACTIVE_MATCHDAY = 9; 
@@ -105,7 +105,7 @@ async function inizializzaGiornataEDeadlineDinamica() {
     const keyCache = "draft_seriea_matchday_info";
     const keyTime = "draft_seriea_matchday_time";
     const oraAttuale = new Date().getTime();
-    const durataCache = 30 * 60 * 1000; // 30 minuti
+    const durataCache = 30 * 60 * 1000;
 
     const cacheSalvata = localStorage.getItem(keyCache);
     const timeSalvato = localStorage.getItem(keyTime);
@@ -175,7 +175,6 @@ async function inizializzaGiornataEDeadlineDinamica() {
         }
     } catch (err) {}
 
-    // Fallback di sicurezza
     const adesso = new Date();
     let trovata = 9;
     for (let [giornata, info] of Object.entries(CALENDARIO_FALLBACK)) {
@@ -225,7 +224,6 @@ function isMarketOpen() {
     const adesso = new Date();
     if (!CURRENT_MATCHDAY_START || !CURRENT_MATCHDAY_END) return true;
 
-    // Bloccato dall'inizio della prima partita fino alla fine dell'ultima
     if (adesso >= CURRENT_MATCHDAY_START && adesso <= CURRENT_MATCHDAY_END) {
         return false;
     }
@@ -396,7 +394,6 @@ auth.onAuthStateChanged(async (user) => {
                 const uData = userDoc.data();
                 displayUsername = getRealUsername(uData, user);
                 
-                // Aggiorna l'avatar grafico al login (Sia Navbar/Home che Profilo)
                 if (uData && uData.photoURL) {
                     aggiornaAvatarGrafica(uData.photoURL);
                 } else {
@@ -429,7 +426,6 @@ async function caricaDatiUtenteCloud() {
             const uData = doc.data();
             userSquadre = uData.squadre || [];
             
-            // Carica la foto profilo anche all'avvio dei dati utente
             if (uData && uData.photoURL) {
                 aggiornaAvatarGrafica(uData.photoURL);
             }
@@ -457,7 +453,6 @@ async function calcolaEVisualizzaTotaleSquadreGlobali(giornataCorrente = ACTIVE_
             });
         });
 
-        // Al click apre direttamente la schermata della classifica della giornata corrente
         const badgeEl = document.getElementById("total-global-teams-count");
         if (badgeEl) {
             badgeEl.innerText = conteggioTotale;
@@ -528,7 +523,6 @@ function updateHomeStatusBannerState() {
 
     container.style.display = "block";
 
-    // Cliccando sul banner si apre sempre la classifica della giornata dei voti (es. la 8)
     banner.style.cursor = "pointer";
     banner.onclick = () => apriSchermataClassifica(ultimaGiornataVoti);
 
@@ -775,7 +769,6 @@ async function apriProfiloUtente(targetUserId) {
         const username = getRealUsername(uData, null);
         document.getElementById("profilo-username-title").innerText = `Profilo di ${username}`;
 
-        // Caricamento dell'avatar dal database Firestore
         if (uData && uData.photoURL) {
             aggiornaAvatarGrafica(uData.photoURL);
         } else {
@@ -790,7 +783,6 @@ async function apriProfiloUtente(targetUserId) {
         let migliorPunteggio = 0;
         let budgetSpesoTotale = 0;
 
-        // Oggetti per contare le frequenze
         let conteggioGiocatoriUtente = {};
         let conteggioSquadreSerieA = {};
 
@@ -799,13 +791,11 @@ async function apriProfiloUtente(targetUserId) {
             puntiTotali += pts;
             if (pts > migliorPunteggio) migliorPunteggio = pts;
 
-            // Calcolo del budget speso
             let budgetResiduo = sq.budget !== undefined && sq.budget !== null ? sq.budget : 600;
             let spesoPerQuestaSquadra = 600 - budgetResiduo;
             if (spesoPerQuestaSquadra < 0) spesoPerQuestaSquadra = 0;
             budgetSpesoTotale += spesoPerQuestaSquadra;
 
-            // Raccogliamo i giocatori della rosa
             try {
                 let giocatoriDellaSquadra = [];
 
@@ -831,7 +821,6 @@ async function apriProfiloUtente(targetUserId) {
                     }
                 }
 
-                // Incrementiamo i contatori per giocatore e per club
                 giocatoriDellaSquadra.forEach(p => {
                     if (p) {
                         if (p.nome) {
@@ -847,24 +836,19 @@ async function apriProfiloUtente(targetUserId) {
             } catch (errInner) {}
         });
 
-        // Troviamo il Giocatore Preferito
         let giocatorePreferito = "Nessuno";
         let maxScelteG = 0;
         for (let [nomeG, count] of Object.entries(conteggioGiocatoriUtente)) {
             if (count > maxScelteG) { maxScelteG = count; giocatorePreferito = nomeG; }
         }
 
-        // Troviamo la Squadra Preferita
         let squadraPreferita = "Nessuna";
         let maxScelteS = 0;
         for (let [nomeS, count] of Object.entries(conteggioSquadreSerieA)) {
             if (count > maxScelteS) { maxScelteS = count; squadraPreferita = nomeS; }
         }
 
-
-// --- CALCOLO MODULO TATTICO PIÙ UTILIZZATO ---
         let conteggioModuli = {};
-
         squadre.forEach(sq => {
             try {
                 if (sq.moduloSelezionato) {
@@ -876,7 +860,6 @@ async function apriProfiloUtente(targetUserId) {
             } catch (errInner) {}
         });
 
-        // Troviamo il modulo più frequente
         let moduloPreferito = "Nessuno";
         let maxScelteModulo = 0;
         for (let [mod, count] of Object.entries(conteggioModuli)) {
@@ -886,18 +869,6 @@ async function apriProfiloUtente(targetUserId) {
             }
         }
 
-        // Testo da mostrare nel box con conteggio
-        let testoModuloPreferito = "Nessuno";
-        if (maxScelteModulo > 0) {
-            testoModuloPreferito = `${moduloPreferito} <span style="font-size:14px; color:var(--accent-gold); font-weight:700;">(${maxScelteModulo} ${maxScelteModulo === 1 ? 'volta' : 'volte'})</span>`;
-        }
-
-        // Popolamento del box HTML
-        if (document.getElementById("stat-modulo-preferito")) {
-            document.getElementById("stat-modulo-preferito").innerHTML = testoModuloPreferito;
-        }
-
-        // Calcolo Podi
         let ori = 0, argenti = 0, bronzi = 0;
         const ultimaGiornataVoti = getUltimaGiornataConVoti();
         
@@ -936,7 +907,6 @@ async function apriProfiloUtente(targetUserId) {
             });
         }
 
-        // Stampiamo i valori nell'HTML
         document.getElementById("stat-squadre-create").innerText = squadreCreateCount;
         document.getElementById("stat-draft-tentati").innerText = draftTentati;
         document.getElementById("stat-miglior-punteggio").innerText = `${migliorPunteggio.toFixed(1)} pt`;
@@ -956,16 +926,17 @@ async function apriProfiloUtente(targetUserId) {
             document.getElementById("stat-squadra-preferita").innerHTML = testoS;
         }
 
-	if (document.getElementById("stat-modulo-preferito")) {
+        if (document.getElementById("stat-modulo-preferito")) {
             let testoM = maxScelteModulo > 0 ? `${moduloPreferito} <span style="font-size:14px; color:var(--accent-gold); font-weight:700;">(${maxScelteModulo} ${maxScelteModulo === 1 ? 'volta' : 'volte'})</span>` : "Nessuno";
             document.getElementById("stat-modulo-preferito").innerHTML = testoM;
         }
 
-
-
         document.getElementById("stat-podi-oro").innerText = ori;
         document.getElementById("stat-podi-argento").innerText = argenti;
         document.getElementById("stat-podi-bronzo").innerText = bronzi;
+
+        // Renderizziamo i traguardi (es. Primo Scatto)
+        renderizzaTraguardi(uData);
 
     } catch (err) {
         alert("Errore nel caricamento delle statistiche utente.");
@@ -992,7 +963,6 @@ function renderMatchdayPills(selectedDay) {
     const container = document.getElementById("matchdays-pills-container");
     container.innerHTML = "";
 
-    // Genera le pillole fino alla giornata attiva (incluso il turno in corso)
     for (let g = 1; g <= ACTIVE_MATCHDAY; g++) {
         const btn = document.createElement("button");
         btn.className = `btn-matchday-pill ${g === selectedDay ? 'active' : ''}`;
@@ -1067,8 +1037,6 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false) {
 
     const recapCampo = document.getElementById("recap-campo");
     recapCampo.innerHTML = "";
-    
-    const [D, C, A] = sq.moduloSelezionato.split("-").map(n => parseInt(n));
     
     creaRepartoCampo(recapCampo, "Portiere", [sq.schierati.find(p => p.ruolo === "Portiere")], true);
     creaRepartoCampo(recapCampo, "Difensore", sq.schierati.filter(p => p.ruolo === "Difensore"), true);
@@ -2149,7 +2117,7 @@ function mostraTabellinoVoti(sq) {
 }
 
 // ==========================================
-// FUNZIONI PER GESTIONE FOTO PROFILO (BASE64)
+// GESTIONE FOTO PROFILO (BASE64)
 // ==========================================
 
 async function caricaNuovaFotoProfiloBase64(event) {
@@ -2198,6 +2166,11 @@ async function caricaNuovaFotoProfiloBase64(event) {
                 });
 
                 aggiornaAvatarGrafica(base64String);
+                
+                // Aggiorna subito anche i traguardi nel profilo se l'utente è lì
+                const uDoc = await db.collection("utenti").doc(currentUser.uid).get();
+                if (uDoc.exists) renderizzaTraguardi(uDoc.data());
+
                 alert("📸 Foto profilo aggiornata con successo!");
 
             } catch (err) {
@@ -2212,23 +2185,18 @@ function aggiornaAvatarGrafica(url) {
     const profImg = document.getElementById("profilo-avatar-img");
     const navImg = document.getElementById("user-avatar-navbar");
     const navIcon = document.getElementById("user-icon-fallback");
-
-    // Cerca anche il contenitore del badge utente o eventuali icone in homepage
     const userBadge = document.querySelector(".user-badge");
 
     if (url && url.trim() !== "") {
         if (profImg) profImg.src = url;
 
-        // Gestione della foto nella Navbar / Homepage
         if (navImg) {
             navImg.src = url;
             navImg.style.display = "inline-block";
         } else if (userBadge) {
-            // Se non c'è ancora un tag <img> creato nella navbar, lo crea dinamicamente al posto dell'icona
             let iconaBadge = userBadge.querySelector("i.fa-user");
-            if (iconaBadge) {
-                iconaBadge.style.display = "none";
-            }
+            if (iconaBadge) iconaBadge.style.display = "none";
+
             let existingImg = userBadge.querySelector("img#user-avatar-navbar");
             if (!existingImg) {
                 const newImg = document.createElement("img");
@@ -2262,4 +2230,38 @@ function aggiornaAvatarGrafica(url) {
             if (existingImg) existingImg.style.display = "none";
         }
     }
+}
+
+// ==========================================
+// GESTIONE TRAGUARDI (ACHIEVEMENTS)
+// ==========================================
+
+function renderizzaTraguardi(uData) {
+    const container = document.getElementById("badge-grid-container");
+    if (!container) return;
+    container.innerHTML = "";
+
+    const haFoto = uData && uData.photoURL && uData.photoURL.trim() !== "";
+
+    const card = document.createElement("div");
+    card.style.background = haFoto ? "rgba(15, 23, 42, 0.6)" : "rgba(15, 23, 42, 0.2)";
+    card.style.border = haFoto ? "1px solid var(--accent-blue)" : "1px dashed rgba(255,255,255,0.1)";
+    card.style.borderRadius = "10px";
+    card.style.padding = "10px";
+    card.style.textAlign = "center";
+    card.style.opacity = haFoto ? "1" : "0.4";
+    card.style.transition = "transform 0.2s";
+
+    card.innerHTML = `
+        <div style="font-size: 20px; color: ${haFoto ? 'var(--accent-blue)' : 'var(--text-muted)'}; margin-bottom: 6px;">
+            <i class="fa-solid fa-camera"></i>
+        </div>
+        <div style="font-size: 11px; font-weight: 700; color: #fff; margin-bottom: 2px;">Primo Scatto</div>
+        <div style="font-size: 9px; color: var(--text-muted); line-height: 1.2;">Carica la tua foto profilo personalizzata</div>
+        <div style="margin-top: 6px; font-size: 8px; font-weight: bold; color: ${haFoto ? 'var(--accent-neon-green)' : 'var(--text-muted)'};">
+            ${haFoto ? '✔ SBLOCCATO' : '🔒 BLOCCATO'}
+        </div>
+    `;
+    
+    container.appendChild(card);
 }
