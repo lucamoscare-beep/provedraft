@@ -152,6 +152,14 @@
     <!-- BOX WIDGET ACCESSO RAPIDO PROFILO -->
     <div class="home-profile-banner" onclick="apriProfiloUtente(currentUser.uid)">
         <div class="home-profile-left">
+
+<div class="user-badge" onclick="apriProfiloUtente(currentUser.uid)" title="Il tuo Profilo e Statistiche" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+    <!-- Immagine avatar (inizialmente nascosta se non c'è) -->
+    <img id="user-avatar-navbar" src="" alt="Avatar" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; display: none;">
+    <!-- Icona di fallback se non c'è foto -->
+    <i class="fa-solid fa-user" id="user-icon-fallback"></i>
+    <span id="user-display-name">-</span>
+</div>
             <div class="home-profile-icon"><i class="fa-solid fa-id-badge"></i></div>
             <div class="home-profile-text">
                 <div class="title">Il Mio Profilo & Statistiche di Gioco</div>
