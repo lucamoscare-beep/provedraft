@@ -318,10 +318,29 @@
             <i class="fa-solid fa-id-badge"></i>
             <span id="profilo-username-title">Profilo Fantallenatore</span>
         </div>
-        <button onclick="tornaAllaHome()" class="btn-action-primary" style="padding:8px 16px; font-size:12px;">
-            <i class="fa-solid fa-house"></i> Torna alla Home
-        </button>
+
+<div class="profilo-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <!-- Avatar cliccabile con icona fotocamera -->
+        <div style="position: relative; cursor: pointer;" onclick="document.getElementById('input-file-avatar').click()" title="Clicca per cambiare foto profilo">
+            <img id="profilo-avatar-img" src="https://via.placeholder.com/60" alt="Avatar" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-blue);">
+            <div style="position: absolute; bottom: 0; right: 0; background: var(--accent-blue); color: #fff; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 11px;">
+                <i class="fa-solid fa-camera"></i>
+            </div>
+        </div>
+        <div>
+            <h2 id="profilo-username-title" style="margin: 0; font-size: 20px; color: #fff;">Profilo Fantallenatore</h2>
+            <div style="font-size: 12px; color: var(--text-muted);">Tocca la foto per caricarne una nuova</div>
+        </div>
     </div>
+
+    <!-- Input file nascosto (filtra solo immagini) -->
+    <input type="file" id="input-file-avatar" accept="image/jpeg, image/png, image/webp" style="display: none;" onchange="caricaNuovaFotoProfiloBase64(event)">
+    
+    <button onclick="tornaAllaHome()" class="btn-action-primary" style="padding: 8px 16px; font-size: 12px;">
+        <i class="fa-solid fa-house"></i> Torna alla Home
+    </button>
+</div>
 
     <div class="stats-grid">
         <div class="stat-box">
