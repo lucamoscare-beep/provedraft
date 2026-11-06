@@ -2245,7 +2245,7 @@ function renderizzaTraguardi(uData) {
     const numSquadre = squadre.length;
     const haFoto = uData && uData.photoURL && uData.photoURL.trim() !== "";
 
-    // Definizione di tutti i traguardi
+    // Definizione dei traguardi con target numerici chiari
     const listaTraguardi = [
         {
             id: "primo_scatto",
@@ -2253,68 +2253,96 @@ function renderizzaTraguardi(uData) {
             descrizione: "Carica la tua foto profilo personalizzata",
             icona: "fa-solid fa-camera",
             colore: "var(--accent-blue)",
-            sbloccato: haFoto
+            sbloccato: haFoto,
+            attuale: haFoto ? 1 : 0,
+            target: 1
         },
         {
             id: "squadre_50",
             titolo: "Mister Esperto",
             descrizione: "Crea e salva 50 squadre totali",
             icona: "fa-solid fa-shield-halved",
-            colore: "#38bdf8", // Celeste
+            colore: "#38bdf8",
             sbloccato: numSquadre >= 50,
-            progresso: `${Math.min(numSquadre, 50)}/50`
+            attuale: numSquadre,
+            target: 50
         },
         {
             id: "squadre_100",
             titolo: "Centurione",
             descrizione: "Crea e salva 100 squadre totali",
             icona: "fa-solid fa-trophy",
-            colore: "var(--accent-gold)", // Oro
+            colore: "var(--accent-gold)",
             sbloccato: numSquadre >= 100,
-            progresso: `${Math.min(numSquadre, 100)}/100`
+            attuale: numSquadre,
+            target: 100
         },
         {
             id: "squadre_500",
             titolo: "Leggenda della Panchina",
             descrizione: "Crea e salva 500 squadre totali",
             icona: "fa-solid fa-crown",
-            colore: "#a78bfa", // Viola Neone
+            colore: "#a78bfa",
             sbloccato: numSquadre >= 500,
-            progresso: `${Math.min(numSquadre, 500)}/500`
+            attuale: numSquadre,
+            target: 500
         },
         {
             id: "squadre_1000",
             titolo: "Mitico 1000",
             descrizione: "Raggiungi quota 1000 squadre create!",
             icona: "fa-solid fa-fire-flame-curved",
-            colore: "#f43f5e", // Rosso Rubino / Fuoco
+            colore: "#f43f5e",
             sbloccato: numSquadre >= 1000,
-            progresso: `${Math.min(numSquadre, 1000)}/1000`
+            attuale: numSquadre,
+            target: 1000
         }
     ];
 
-    // Generazione della griglia traguardi
-    listaTraguardi.forEach(t => {
-        const card = document.createElement("div");
-        card.style.background = t.sbloccato ? "rgba(15, 23, 42, 0.7)" : "rgba(15, 23, 42, 0.25)";
-        card.style.border = t.sbloccato ? `1px solid ${t.colore}` : "1px dashed rgba(255,255,255,0.1)";
-        card.style.borderRadius = "10px";
-        card.style.padding = "10px";
-        card.style.textAlign = "center";
-        card.style.opacity = t.sbloccato ? "1" : "0.45";
-        card.style.transition = "transform 0.2s, opacity 0.2s";
+    // Impostiamo la griglia per accogliere card leggibili e spaziate
+    container.style.display = "grid";
+    container.style.gridTemplateColumns = "repeat(auto-fill, minmax(240px, 1fr))";
+    container.style.gap = "12px";
 
-        const progressoTxt = t.progresso ? `<div style="font-size: 8px; color: var(--text-muted); margin-top: 2px;">Progresso: ${t.progresso}</div>` : '';
+    listaTraguardi.forEach(t => {
+        // Calcolo della percentuale di avanzamento (massimo 100%)
+        let percentuale = Math.min(100, Math.floor((t.attuale / t.target) * 100));
+        if (t.sbloccato) percentuale = 100;
+
+        const card = document.createElement("div");
+        card.style.background = t.sbloccato ? "rgba(15, 23, 42, 0.85)" : "rgba(15, 23, 42, 0.4)";
+        card.style.border = t.sbloccato ? `1px solid ${t.colore}` : "1px solid rgba(255,255,255,0.08)";
+        card.style.borderRadius = "12px";
+        card.style.padding = "14px";
+        card.style.display = "flex";
+        card.style.flexDirection = "column";
+        card.style.justifyContent = "space-between";
+        card.style.opacity = t.sbloccato ? "1" : "0.7";
+        card.style.boxShadow = t.sbloccato ? `0 0 12px ${t.colore}22` : "none";
 
         card.innerHTML = `
-            <div style="font-size: 20px; color: ${t.sbloccato ? t.colore : 'var(--text-muted)'}; margin-bottom: 6px;">
-                <i class="${t.icona}"></i>
+            <div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                    <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 16px; color: ${t.sbloccato ? t.colore : 'var(--text-muted)'};">
+                        <i class="${t.icona}"></i>
+                    </div>
+                    <span style="font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 20px; background: ${t.sbloccato ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255,255,255,0.05)'}; color: ${t.sbloccato ? 'var(--accent-neon-green)' : 'var(--text-muted)'};">
+                        ${t.sbloccato ? '✔ SBLOCCATO' : '🔒 BLOCCATO'}
+                    </span>
+                </div>
+                <div style="font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 3px;">${t.titolo}</div>
+                <div style="font-size: 10px; color: var(--text-muted); line-height: 1.3; margin-bottom: 10px;">${t.descrizione}</div>
             </div>
-            <div style="font-size: 11px; font-weight: 700; color: #fff; margin-bottom: 2px;">${t.titolo}</div>
-            <div style="font-size: 9px; color: var(--text-muted); line-height: 1.2;">${t.descrizione}</div>
-            ${progressoTxt}
-            <div style="margin-top: 6px; font-size: 8px; font-weight: bold; color: ${t.sbloccato ? 'var(--accent-neon-green)' : 'var(--text-muted)'};">
-                ${t.sbloccato ? '✔ SBLOCCATO' : '🔒 BLOCCATO'}
+
+            <div>
+                <div style="display: flex; justify-content: space-between; font-size: 9px; font-weight: 700; color: #cbd5e1; margin-bottom: 4px;">
+                    <span>Progresso</span>
+                    <span>${t.attuale} / ${t.target} (${percentuale}%)</span>
+                </div>
+                <!-- Barra di caricamento -->
+                <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                    <div style="width: ${percentuale}%; height: 100%; background: ${t.sbloccato ? t.colore : 'var(--text-muted)'}; transition: width 0.4s ease;"></div>
+                </div>
             </div>
         `;
         
