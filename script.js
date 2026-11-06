@@ -2232,6 +2232,40 @@ function aggiornaAvatarGrafica(url) {
     }
 }
 
+
+// ==========================================
+// ROUTING RAPIDO DALLA HOME ALLE MISSIONI
+// ==========================================
+
+async function vaiAMissioniProfilo() {
+    if (!currentUser) return;
+
+    // 1. Apriamo il profilo dell'utente loggato
+    await apriProfiloUtente(currentUser.uid);
+
+    // 2. Facciamo uno scroll fluido diretto alla sezione Traguardi
+    setTimeout(() => {
+        const targetSection = document.getElementById("badge-grid-container");
+        if (targetSection) {
+            targetSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Effetto grafico pulsante per far capire all'utente dove si trova
+            const parentCard = targetSection.closest('.profilo-section-card') || targetSection.parentElement;
+            if (parentCard) {
+                parentCard.style.transition = "transform 0.3s, border-color 0.3s";
+                parentCard.style.borderColor = "#a78bfa";
+                parentCard.style.transform = "scale(1.02)";
+                setTimeout(() => {
+                    parentCard.style.transform = "scale(1)";
+                    parentCard.style.borderColor = "rgba(255,255,255,0.05)";
+                }, 600);
+            }
+        }
+    }, 150);
+}
+
+
+
 // ==========================================
 // GESTIONE TRAGUARDI (ALTA LEGGIBILITÀ)
 // ==========================================
@@ -2342,3 +2376,6 @@ function renderizzaTraguardi(uData) {
         container.appendChild(item);
     });
 }
+
+
+
