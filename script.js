@@ -2241,27 +2241,83 @@ function renderizzaTraguardi(uData) {
     if (!container) return;
     container.innerHTML = "";
 
+    const squadre = (uData && uData.squadre) ? uData.squadre : [];
+    const numSquadre = squadre.length;
     const haFoto = uData && uData.photoURL && uData.photoURL.trim() !== "";
 
-    const card = document.createElement("div");
-    card.style.background = haFoto ? "rgba(15, 23, 42, 0.6)" : "rgba(15, 23, 42, 0.2)";
-    card.style.border = haFoto ? "1px solid var(--accent-blue)" : "1px dashed rgba(255,255,255,0.1)";
-    card.style.borderRadius = "10px";
-    card.style.padding = "10px";
-    card.style.textAlign = "center";
-    card.style.opacity = haFoto ? "1" : "0.4";
-    card.style.transition = "transform 0.2s";
+    // Definizione di tutti i traguardi
+    const listaTraguardi = [
+        {
+            id: "primo_scatto",
+            titolo: "Primo Scatto",
+            descrizione: "Carica la tua foto profilo personalizzata",
+            icona: "fa-solid fa-camera",
+            colore: "var(--accent-blue)",
+            sbloccato: haFoto
+        },
+        {
+            id: "squadre_50",
+            titolo: "Mister Esperto",
+            descrizione: "Crea e salva 50 squadre totali",
+            icona: "fa-solid fa-shield-halved",
+            colore: "#38bdf8", // Celeste
+            sbloccato: numSquadre >= 50,
+            progresso: `${Math.min(numSquadre, 50)}/50`
+        },
+        {
+            id: "squadre_100",
+            titolo: "Centurione",
+            descrizione: "Crea e salva 100 squadre totali",
+            icona: "fa-solid fa-trophy",
+            colore: "var(--accent-gold)", // Oro
+            sbloccato: numSquadre >= 100,
+            progresso: `${Math.min(numSquadre, 100)}/100`
+        },
+        {
+            id: "squadre_500",
+            titolo: "Leggenda della Panchina",
+            descrizione: "Crea e salva 500 squadre totali",
+            icona: "fa-solid fa-crown",
+            colore: "#a78bfa", // Viola Neone
+            sbloccato: numSquadre >= 500,
+            progresso: `${Math.min(numSquadre, 500)}/500`
+        },
+        {
+            id: "squadre_1000",
+            titolo: "Mitico 1000",
+            descrizione: "Raggiungi quota 1000 squadre create!",
+            icona: "fa-solid fa-fire-flame-curved",
+            colore: "#f43f5e", // Rosso Rubino / Fuoco
+            sbloccato: numSquadre >= 1000,
+            progresso: `${Math.min(numSquadre, 1000)}/1000`
+        }
+    ];
 
-    card.innerHTML = `
-        <div style="font-size: 20px; color: ${haFoto ? 'var(--accent-blue)' : 'var(--text-muted)'}; margin-bottom: 6px;">
-            <i class="fa-solid fa-camera"></i>
-        </div>
-        <div style="font-size: 11px; font-weight: 700; color: #fff; margin-bottom: 2px;">Primo Scatto</div>
-        <div style="font-size: 9px; color: var(--text-muted); line-height: 1.2;">Carica la tua foto profilo personalizzata</div>
-        <div style="margin-top: 6px; font-size: 8px; font-weight: bold; color: ${haFoto ? 'var(--accent-neon-green)' : 'var(--text-muted)'};">
-            ${haFoto ? '✔ SBLOCCATO' : '🔒 BLOCCATO'}
-        </div>
-    `;
-    
-    container.appendChild(card);
+    // Generazione della griglia traguardi
+    listaTraguardi.forEach(t => {
+        const card = document.createElement("div");
+        card.style.background = t.sbloccato ? "rgba(15, 23, 42, 0.7)" : "rgba(15, 23, 42, 0.25)";
+        card.style.border = t.sbloccato ? `1px solid ${t.colore}` : "1px dashed rgba(255,255,255,0.1)";
+        card.style.borderRadius = "10px";
+        card.style.padding = "10px";
+        card.style.textAlign = "center";
+        card.style.opacity = t.sbloccato ? "1" : "0.45";
+        card.style.transition = "transform 0.2s, opacity 0.2s";
+
+        const progressoTxt = t.progresso ? `<div style="font-size: 8px; color: var(--text-muted); margin-top: 2px;">Progresso: ${t.progresso}</div>` : '';
+
+        card.innerHTML = `
+            <div style="font-size: 20px; color: ${t.sbloccato ? t.colore : 'var(--text-muted)'}; margin-bottom: 6px;">
+                <i class="${t.icona}"></i>
+            </div>
+            <div style="font-size: 11px; font-weight: 700; color: #fff; margin-bottom: 2px;">${t.titolo}</div>
+            <div style="font-size: 9px; color: var(--text-muted); line-height: 1.2;">${t.descrizione}</div>
+            ${progressoTxt}
+            <div style="margin-top: 6px; font-size: 8px; font-weight: bold; color: ${t.sbloccato ? 'var(--accent-neon-green)' : 'var(--text-muted)'};">
+                ${t.sbloccato ? '✔ SBLOCCATO' : '🔒 BLOCCATO'}
+            </div>
+        `;
+        
+        container.appendChild(card);
+    });
 }
