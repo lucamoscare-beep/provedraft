@@ -701,7 +701,7 @@ async function apriSchermataClassifica(giornata) {
                         <div style="font-size:10px; color:var(--text-muted); margin-bottom:4px;">Budget: ${leaderCard.budgetResiduo} cr</div>
                         <div class="podium-score">${leaderCard.punteggio} pt</div>
                         ${subtextHtml}
-                        <button onclick="visualizzaSquadraGenerica('${leaderCard.userId}', '${leaderCard.nomeSquadra.replace(/'/g, "\\'")}', ${giornata})" class="btn-action-primary" style="padding:4px 10px; font-size:10px; margin-top:8px;" title="Vedi Formazione">
+                        <button onclick="visualizzaSquadraGenerica('${leaderCard.userId}', '${leaderCard.nomeSquadra.replace(/'/g, "\\'")}','${giornata}')" class="btn-action-primary" style="padding:4px 10px; font-size:10px; margin-top:8px;" title="Vedi Formazione">
                             <i class="fa-solid fa-eye"></i>
                         </button>
                     `;
@@ -730,7 +730,7 @@ async function apriSchermataClassifica(giornata) {
                 <td style="font-weight:900; color:var(--accent-neon-green); font-size:13px;">${item.punteggio} pt</td>
                 <td style="color:var(--accent-gold); font-weight:700;">${item.budgetResiduo} cr</td>
                 <td style="text-align:right;">
-                    <button onclick="visualizzaSquadraGenerica('${item.userId}', '${item.nomeSquadra.replace(/'/g, "\\'")}', ${giornata})" class="btn-action-primary" style="padding:6px 12px; font-size:11px;" title="Vedi Formazione">
+                    <button onclick="visualizzaSquadraGenerica('${item.userId}', '${item.nomeSquadra.replace(/'/g, "\\'")}','${giornata}')" class="btn-action-primary" style="padding:6px 12px; font-size:11px;" title="Vedi Formazione">
                         <i class="fa-solid fa-eye"></i>
                     </button>
                 </td>
@@ -746,7 +746,7 @@ async function apriSchermataClassifica(giornata) {
 }
 
 async function apriProfiloUtente(targetUserId) {
-   if (!targetUserId && currentUser) targetUserId = currentUser.uid;
+    if (!targetUserId && currentUser) targetUserId = currentUser.uid;
     if (!targetUserId) return;
 
     document.getElementById("welcome-screen").style.display = "none";
@@ -935,7 +935,7 @@ async function apriProfiloUtente(targetUserId) {
         document.getElementById("stat-podi-argento").innerText = argenti;
         document.getElementById("stat-podi-bronzo").innerText = bronzi;
 
-        // Renderizziamo i traguardi (es. Primo Scatto)
+        // Renderizziamo i traguardi esclusivamente nella pagina profilo
         renderizzaTraguardi(uData);
 
     } catch (err) {
@@ -981,7 +981,7 @@ async function visualizzaSquadraGenerica(userId, nomeSquadra, giornata) {
         const username = getRealUsername(uData, null);
         const squadreArr = uData.squadre || [];
 
-        const sq = squadreArr.find(s => s.nomeSquadra.toLowerCase() === nomeSquadra.toLowerCase() && (s.giornata !== undefined ? s.giornata : 8) === giornata);
+        const sq = squadreArr.find(s => s.nomeSquadra.toLowerCase() === nomeSquadra.toLowerCase() && (s.giornata !== undefined ? s.giornata : 8) === parseInt(giornata));
         if (!sq) return alert("Squadra non trovata per questa giornata.");
 
         renderRecapScreenReadOnly(sq, username, true);
@@ -1657,28 +1657,6 @@ function assegnaGiocatoreDaModale(nomeGiocatore, ruolo, targetType) {
     renderPanchinaGrafica();
 }
 
-function rimuoviSlotSelezionato(ruolo, targetType, indexTitolare = null) {
-    if (targetType === "campo" || targetType.startsWith("campo_indice_")) {
-        let idx = indexTitolare;
-        if (targetType.startsWith("campo_indice_")) {
-            idx = parseInt(targetType.replace("campo_indice_", ""));
-        }
-        let titolariRuolo = schierati.filter(s => s.ruolo === ruolo);
-        if (idx !== null && !isNaN(idx) && titolariRuolo[idx]) {
-            schierati = schierati.filter(s => s.nome !== titolariRuolo[idx].nome);
-        }
-    } else {
-        let index = parseInt(targetType);
-        if (!isNaN(index) && riserveSelezionate[ruolo][index]) {
-            riserveSelezionate[ruolo].splice(index, 1);
-        }
-    }
-    chiudiModale();
-    ripristinaCampoTattico();
-    renderSlots();
-    renderPanchinaGrafica();
-}
-
 function showModuloSelection() {
     const headerTitle = isTestMode ? `Test Draft Completato!` : `Draft Completato per ${tempNomeSquadra}!`;
     document.getElementById("draft-panel").innerHTML = `
@@ -2167,7 +2145,6 @@ async function caricaNuovaFotoProfiloBase64(event) {
 
                 aggiornaAvatarGrafica(base64String);
                 
-                // Aggiorna subito anche i traguardi nel profilo se l'utente è lì
                 const uDoc = await db.collection("utenti").doc(currentUser.uid).get();
                 if (uDoc.exists) renderizzaTraguardi(uDoc.data());
 
@@ -2232,47 +2209,13 @@ function aggiornaAvatarGrafica(url) {
     }
 }
 
-
 // ==========================================
-// ROUTING RAPIDO DALLA HOME ALLE MISSIONI
-// ==========================================
-
-async function vaiAMissioniProfilo() {
-    if (!currentUser) return;
-
-    // 1. Apriamo il profilo dell'utente loggato
-    await apriProfiloUtente(currentUser.uid);
-
-    // 2. Facciamo uno scroll fluido diretto alla sezione Traguardi
-    setTimeout(() => {
-        const targetSection = document.getElementById("badge-grid-container");
-        if (targetSection) {
-            targetSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
-            // Effetto grafico pulsante per far capire all'utente dove si trova
-            const parentCard = targetSection.closest('.profilo-section-card') || targetSection.parentElement;
-            if (parentCard) {
-                parentCard.style.transition = "transform 0.3s, border-color 0.3s";
-                parentCard.style.borderColor = "#a78bfa";
-                parentCard.style.transform = "scale(1.02)";
-                setTimeout(() => {
-                    parentCard.style.transform = "scale(1)";
-                    parentCard.style.borderColor = "rgba(255,255,255,0.05)";
-                }, 600);
-            }
-        }
-    }, 150);
-}
-
-
-
-// ==========================================
-// GESTIONE TRAGUARDI (ALTA LEGGIBILITÀ)
+// GESTIONE TRAGUARDI (VISIBILE SOLO NEL PROFILO)
 // ==========================================
 
 function renderizzaTraguardi(uData) {
     const container = document.getElementById("badge-grid-container");
-    if (!container) return;
+    if (!container) return; // Se non siamo nella pagina del profilo, si ferma
     container.innerHTML = "";
 
     const squadre = (uData && uData.squadre) ? uData.squadre : [];
@@ -2332,7 +2275,6 @@ function renderizzaTraguardi(uData) {
         }
     ];
 
-    // Forziamo il display a colonna ma vincolato al 100% del box contenitore
     container.style.display = "flex";
     container.style.flexDirection = "column";
     container.style.gap = "10px";
@@ -2351,7 +2293,7 @@ function renderizzaTraguardi(uData) {
         item.style.opacity = t.sbloccato ? "1" : "0.75";
         item.style.gap = "12px";
         item.style.width = "100%";
-        item.style.boxSizing = "border-box"; // Evita che il padding faccia sbordare la card
+        item.style.boxSizing = "border-box";
 
         let badgeProgresso = t.sbloccato 
             ? `<div style="background: rgba(16, 185, 129, 0.15); border: 1px solid var(--accent-neon-green); color: var(--accent-neon-green); font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; white-space: nowrap;">✔ SBLOCCATO</div>`
@@ -2376,5 +2318,32 @@ function renderizzaTraguardi(uData) {
     });
 }
 
+// ==========================================
+// ROUTING RAPIDO DALLA HOME ALLE MISSIONI
+// ==========================================
 
+async function vaiAMissioniProfilo() {
+    if (!currentUser) return;
 
+    // Apre il profilo dell'utente loggato
+    await apriProfiloUtente(currentUser.uid);
+
+    // Esegue uno scroll fluido fino alla sezione Traguardi
+    setTimeout(() => {
+        const targetSection = document.getElementById("badge-grid-container");
+        if (targetSection) {
+            targetSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            const parentCard = targetSection.closest('.profilo-section-card') || targetSection.parentElement;
+            if (parentCard) {
+                parentCard.style.transition = "transform 0.3s, border-color 0.3s";
+                parentCard.style.borderColor = "#a78bfa";
+                parentCard.style.transform = "scale(1.02)";
+                setTimeout(() => {
+                    parentCard.style.transform = "scale(1)";
+                    parentCard.style.borderColor = "rgba(255,255,255,0.05)";
+                }, 600);
+            }
+        }
+    }, 150);
+}
