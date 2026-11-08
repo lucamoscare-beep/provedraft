@@ -2279,7 +2279,6 @@ function renderizzaTraguardi(uData) {
     const numSquadre = squadre.length;
     const haFoto = uData && uData.photoURL && uData.photoURL.trim() !== "";
 
-    // Lista traguardi con descrizioni chiare ed estese
     const listaTraguardi = [
         {
             id: "primo_scatto",
@@ -2333,10 +2332,12 @@ function renderizzaTraguardi(uData) {
         }
     ];
 
-    // Layout a colonna singola (o doppia su schermi grandi) per dare respiro al testo
+    // Forziamo il display a colonna ma vincolato al 100% del box contenitore
     container.style.display = "flex";
     container.style.flexDirection = "column";
     container.style.gap = "10px";
+    container.style.width = "100%";
+    container.style.boxSizing = "border-box";
 
     listaTraguardi.forEach(t => {
         const item = document.createElement("div");
@@ -2349,14 +2350,14 @@ function renderizzaTraguardi(uData) {
         item.style.border = t.sbloccato ? `1px solid ${t.colore}` : "1px solid rgba(255,255,255,0.08)";
         item.style.opacity = t.sbloccato ? "1" : "0.75";
         item.style.gap = "12px";
+        item.style.width = "100%";
+        item.style.boxSizing = "border-box"; // Evita che il padding faccia sbordare la card
 
-        // Stato / Progresso ben visibile a destra
         let badgeProgresso = t.sbloccato 
             ? `<div style="background: rgba(16, 185, 129, 0.15); border: 1px solid var(--accent-neon-green); color: var(--accent-neon-green); font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; white-space: nowrap;">✔ SBLOCCATO</div>`
             : `<div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 12px; font-weight: 800; padding: 6px 12px; border-radius: 8px; white-space: nowrap; text-align: center;">${t.attuale} / ${t.target}</div>`;
 
         item.innerHTML = `
-            <!-- Sinistra: Icona + Testi estesi -->
             <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;">
                 <div style="width: 40px; height: 40px; min-width: 40px; border-radius: 8px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 18px; color: ${t.sbloccato ? t.colore : 'var(--text-muted)'};">
                     <i class="${t.icona}"></i>
@@ -2366,8 +2367,6 @@ function renderizzaTraguardi(uData) {
                     <div style="font-size: 11px; color: #94a3b8; line-height: 1.3;">${t.descrizione}</div>
                 </div>
             </div>
-
-            <!-- Destra: Box Avanzamento Stile Draft -->
             <div>
                 ${badgeProgresso}
             </div>
