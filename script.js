@@ -56,6 +56,9 @@ let activeTeamIndex = -1;
 let isVotiOkAvailable = false;
 let currentSelectedMatchday = ACTIVE_MATCHDAY; 
 
+let currentRecapSquadraObj = null; // Memorizza la squadra visualizzata nella schermata recap
+let currentRecapSquadraIndex = -1;  // Memorizza l'indice della squadra dell'utente loggato (-1 se di altri)
+
 let tempNomeSquadra = "";
 let isTestMode = false;
 let rosa = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
@@ -266,11 +269,18 @@ function initCountdown() {
         const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const secs = Math.floor((diff % (1000 * 60)) / 1000);
 
+        // Aggiorna Home
         ["w-cd-days"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(days).padStart(2, '0'); });
         ["w-cd-hours"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(hours).padStart(2, '0'); });
         ["w-cd-mins"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(mins).padStart(2, '0'); });
         ["w-cd-secs"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(secs).padStart(2, '0'); });
         
+        // Aggiorna Recap
+        ["recap-cd-days"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(days).padStart(2, '0'); });
+        ["recap-cd-hours"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(hours).padStart(2, '0'); });
+        ["recap-cd-mins"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(mins).padStart(2, '0'); });
+        ["recap-cd-secs"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(secs).padStart(2, '0'); });
+
         const textEl = document.getElementById("welcome-deadline-text");
         if (textEl) textEl.innerText = `Iscrivi le tue squadre alla giornata ${ACTIVE_MATCHDAY} entro l'inizio della prima partita:`;
     }
@@ -278,6 +288,7 @@ function initCountdown() {
     updateTimer();
     setInterval(updateTimer, 1000);
 }
+
 
 document.addEventListener("DOMContentLoaded", async () => {
     await inizializzaGiornataEDeadlineDinamica();
@@ -993,6 +1004,7 @@ async function visualizzaSquadraGenerica(userId, nomeSquadra, giornata) {
 async function apriRecapSquadraUtenteCorrente(index) {
     const sq = userSquadre[index];
     let username = "Fantallenatore";
+    let ownerId = currentUser ? currentUser.uid : null;
     if (currentUser) {
         try {
             const uDoc = await db.collection("utenti").doc(currentUser.uid).get();
@@ -1008,12 +1020,38 @@ async function apriRecapSquadraUtenteCorrente(index) {
     renderRecapScreenReadOnly(sq, username, false);
 }
 
-function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false) {
+async function visualizzaSquadraGenerica(userId, nomeSquadra, giornata) {
+    try {
+        const doc = await db.collection("utenti").doc(userId).get();
+        if (!doc.exists) return alert("Utente non trovato.");
+
+        const uData = doc.data();
+        const username = getRealUsername(uData, null);
+        const squadreArr = uData.squadre || [];
+
+        const sq = squadreArr.find(s => s.nomeSquadra.toLowerCase() === nomeSquadra.toLowerCase() && (s.giornata !== undefined ? s.giornata : 8) === parseInt(giornata));
+        if (!sq) return alert("Squadra non trovata per questa giornata.");
+
+        if (currentUser && userId === currentUser.uid) {
+            currentRecapSquadraIndex = userSquadre.findIndex(s => s.nomeSquadra.toLowerCase() === nomeSquadra.toLowerCase() && (s.giornata !== undefined ? s.giornata : 8) === parseInt(giornata));
+        } else {
+            currentRecapSquadraIndex = -1;
+        }
+
+        renderRecapScreenReadOnly(sq, username, true, userId);
+    } catch (err) {
+        alert("Errore nel caricamento della squadra: " + err.message);
+    }
+}
+
+function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false, ownerUserId = null) {
     document.getElementById("welcome-screen").style.display = "none";
     document.getElementById("main-app").style.display = "none";
     document.getElementById("classifica-screen").style.display = "none";
     document.getElementById("profilo-screen").style.display = "none";
     document.getElementById("recap-screen").style.display = "block";
+
+    currentRecapSquadraObj = sq;
 
     document.getElementById("recap-nome-squadra").innerText = sq.nomeSquadra;
     document.getElementById("recap-utente-owner").innerText = `Username: ${usernameOwner}`;
@@ -1021,6 +1059,17 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false) {
 
     const btnBackClassifica = document.getElementById("btn-recap-back-classifica");
     btnBackClassifica.style.display = fromClassifica ? "inline-flex" : "none";
+
+    // PERMESSI MODIFICA: Il pulsante viene mostrato SOLO se l'utente loggato è l'autore E il mercato è aperto
+    const btnModifica = document.getElementById("btn-recap-modifica-formazione");
+    const isOwner = currentUser && ownerUserId === currentUser.uid;
+    const marketIsOpen = isMarketOpen();
+
+    if (isOwner && marketIsOpen && !sq.isTest) {
+        btnModifica.style.display = "inline-flex";
+    } else {
+        btnModifica.style.display = "none";
+    }
 
     const recapBadge = document.getElementById("recap-badge-status");
     if (sq.isTest) {
@@ -2294,7 +2343,7 @@ function renderizzaTraguardi(uData) {
         {
             id: "squadre_50",
             titolo: "Mister Esperto",
-            descrizione: "Crea e salva 50 squadre di Fantacalcio",
+            descrizione: "Crea e salva 50 squadre",
             icona: "fa-solid fa-shield-halved",
             colore: "#38bdf8",
             sbloccato: numSquadre >= 50,
@@ -2304,7 +2353,7 @@ function renderizzaTraguardi(uData) {
         {
             id: "squadre_100",
             titolo: "Centurione",
-            descrizione: "Crea e salva 100 squadre di Fantacalcio",
+            descrizione: "Crea e salva 100 squadre",
             icona: "fa-solid fa-trophy",
             colore: "var(--accent-gold)",
             sbloccato: numSquadre >= 100,
@@ -2314,7 +2363,7 @@ function renderizzaTraguardi(uData) {
         {
             id: "squadre_500",
             titolo: "Leggenda della Panchina",
-            descrizione: "Crea e salva 500 squadre di Fantacalcio",
+            descrizione: "Crea e salva 500 squadre",
             icona: "fa-solid fa-crown",
             colore: "#a78bfa",
             sbloccato: numSquadre >= 500,
@@ -2378,4 +2427,105 @@ function renderizzaTraguardi(uData) {
 }
 
 
+// ==========================================
+// LOGICA MODIFICA FORMAZIONE SALVATA
+// ==========================================
 
+function avviaModificaFormazioneSalvata() {
+    if (!isMarketOpen()) {
+        alert("⚠️ Tempo scaduto! Il mercato è chiuso e le formazioni sono bloccate per questo turno.");
+        return;
+    }
+
+    if (!currentRecapSquadraObj) return;
+
+    const sq = currentRecapSquadraObj;
+
+    // Carichiamo la rosa esistente (senza rifare il draft)
+    rosa = JSON.parse(JSON.stringify(sq.rosa || { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] }));
+    schierati = JSON.parse(JSON.stringify(sq.schierati || []));
+    riserveSelezionate = JSON.parse(JSON.stringify(sq.riserveSelezionate || { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] }));
+    moduloSelezionato = sq.moduloSelezionato;
+    budget = sq.budget !== undefined ? sq.budget : 600;
+    tempNomeSquadra = sq.nomeSquadra;
+    isTestMode = false;
+
+    // Nascondiamo il pannello di draft dei giocatori (perché i 24 della rosa sono già stati scelti)
+    document.getElementById("draft-panel").style.display = "none";
+    document.getElementById("welcome-screen").style.display = "none";
+    document.getElementById("recap-screen").style.display = "none";
+    document.getElementById("main-app").style.display = "flex";
+
+    document.getElementById("current-draft-team-title").innerText = `Modifica Formazione: ${sq.nomeSquadra}`;
+    
+    document.getElementById("campo-panel-container").style.display = "block";
+    document.getElementById("panchina-panel-container").style.display = "block";
+    document.getElementById("conferma-container").style.display = "flex";
+
+    // Sostituiamo il tasto di conferma normale con quello per salvare la modifica
+    document.getElementById("btn-conferma-formazione").onclick = salvaModificaFormazioneSuCloud;
+    document.getElementById("btn-conferma-formazione").innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Salva Modifiche Formazione`;
+
+    ripristinaCampoTattico();
+    renderSlots();
+    renderPanchinaGrafica();
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function salvaModificaFormazioneSuCloud() {
+    if (!isMarketOpen()) {
+        alert("⚠️ Tempo scaduto! Il mercato ha chiuso durante le tue modifiche. Le modifiche non possono essere salvate.");
+        tornaAllaHome();
+        return;
+    }
+
+    if (schierati.length < 11) {
+        alert("Devi schierare tutti gli 11 titolari!");
+        return;
+    }
+
+    if (confirm(`Confermi le modifiche alla formazione di "${tempNomeSquadra}"?`)) {
+        try {
+            const userDocRef = db.collection("utenti").doc(currentUser.uid);
+            const docSnapshot = await userDocRef.get();
+            
+            if (!docSnapshot.exists) return alert("Utente non trovato.");
+
+            let squadreEsistenti = docSnapshot.data().squadre || [];
+
+            // Troviamo l'indice della squadra nel database
+            let indexTarget = currentRecapSquadraIndex;
+            if (indexTarget === -1 || indexTarget >= squadreEsistenti.length) {
+                indexTarget = squadreEsistenti.findIndex(s => s.nomeSquadra.toLowerCase() === tempNomeSquadra.toLowerCase() && (s.giornata !== undefined ? s.giornata : 8) === ACTIVE_MATCHDAY);
+            }
+
+            if (indexTarget === -1) {
+                alert("Errore: Squadra non trovata nel database.");
+                return;
+            }
+
+            // Aggiorniamo solo lo schieramento titolari e riserve
+            squadreEsistenti[indexTarget].schierati = JSON.parse(JSON.stringify(schierati));
+            squadreEsistenti[indexTarget].riserveSelezionate = JSON.parse(JSON.stringify(riserveSelezionate));
+            squadreEsistenti[indexTarget].moduloSelezionato = moduloSelezionato;
+            squadreEsistenti[indexTarget].modificataIl = new Date();
+
+            userSquadre = squadreEsistenti;
+
+            await userDocRef.update({ squadre: userSquadre });
+
+            alert("✅ Formazione aggiornata con successo!");
+
+            // Ripristiniamo la funzione di conferma predefinita per i nuovi draft
+            document.getElementById("btn-conferma-formazione").onclick = confermaFormazioneDefinitiva;
+            document.getElementById("draft-panel").style.display = "block";
+
+            // Riapriamo il recap con la nuova formazione aggiornata
+            apriRecapSquadraUtenteCorrente(indexTarget);
+
+        } catch (err) {
+            alert("❌ Errore durante l'aggiornamento: " + err.message);
+        }
+    }
+}
