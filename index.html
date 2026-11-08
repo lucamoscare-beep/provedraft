@@ -512,17 +512,46 @@
     </div>
 </div>
 
-<!-- SCHERMATA RECAP -->
-<div id="recap-screen">
+<!-- SCHERMATA RECAP & MODIFICA SQUADRA -->
+<div id="recap-screen" style="display: none;">
+    
+    <!-- BANNER COUNTDOWN DEADLINE (Visibile anche qui) -->
+    <div class="deadline-banner" id="recap-deadline-banner" style="margin-bottom: 15px;">
+        <div class="deadline-info">
+            <i class="fa-solid fa-stopwatch"></i>
+            <span id="recap-deadline-text">Tempo rimasto per modificare la formazione:</span>
+        </div>
+        <div class="countdown-timer">
+            <div class="countdown-box"><div class="countdown-number" id="recap-cd-days">00</div><div class="countdown-label">Giorni</div></div>
+            <div class="countdown-dots">:</div>
+            <div class="countdown-box"><div class="countdown-number" id="recap-cd-hours">00</div><div class="countdown-label">Ore</div></div>
+            <div class="countdown-dots">:</div>
+            <div class="countdown-box"><div class="countdown-number" id="recap-cd-mins">00</div><div class="countdown-label">Minuti</div></div>
+            <div class="countdown-dots">:</div>
+            <div class="countdown-box"><div class="countdown-number" id="recap-cd-secs">00</div><div class="countdown-label">Secondi</div></div>
+        </div>
+    </div>
+
+    <!-- HEADER RECAP -->
     <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(15,23,42,0.6); padding:12px; border-radius:12px; border:1px solid var(--card-border); margin-bottom:15px; flex-wrap:wrap; gap:10px;">
         <div>
             <span id="recap-badge-status" style="background:rgba(16, 185, 129, 0.2); border:1px solid var(--accent-neon-green); color:var(--accent-neon-green); padding:3px 10px; border-radius:16px; font-size:10px; font-weight:800;">🔒 SQUADRA SALVATA</span>
             <h2 id="recap-nome-squadra" style="margin:4px 0 0 0; color:#fff;">-</h2>
             <div id="recap-utente-owner" style="font-size:11px; color:var(--accent-blue); font-weight:700;">-</div>
         </div>
-        <div style="display:flex; gap:8px;">
-            <button id="btn-recap-back-classifica" onclick="apriSchermataClassifica()" class="btn-action-primary" style="background:linear-gradient(135deg, #f59e0b, #d97706); padding:8px 14px; font-size:12px; display:none;"><i class="fa-solid fa-ranking-star"></i> Vedi classifica di giornata</button>
-            <button onclick="tornaAllaHome()" class="btn-action-primary" style="padding:8px 14px; font-size:12px;"><i class="fa-solid fa-house"></i> Home Page</button>
+        <div style="display:flex; gap:8px; flex-wrap: wrap;">
+            
+            <!-- NUOVO PULSANTE MODIFICA FORMAZIONE (Visibile SOLO all'autore a mercato aperto) -->
+            <button id="btn-recap-modifica-formazione" onclick="avviaModificaFormazioneSalvata()" class="btn-action-primary" style="display:none; background: linear-gradient(135deg, #8b5cf6, #6d28d9); padding:8px 14px; font-size:12px;">
+                <i class="fa-solid fa-pen-to-square"></i> Modifica Formazione
+            </button>
+
+            <button id="btn-recap-back-classifica" onclick="apriSchermataClassifica()" class="btn-action-primary" style="background:linear-gradient(135deg, #f59e0b, #d97706); padding:8px 14px; font-size:12px; display:none;">
+                <i class="fa-solid fa-ranking-star"></i> Classifica
+            </button>
+            <button onclick="tornaAllaHome()" class="btn-action-primary" style="padding:8px 14px; font-size:12px;">
+                <i class="fa-solid fa-house"></i> Home Page
+            </button>
         </div>
     </div>
 
