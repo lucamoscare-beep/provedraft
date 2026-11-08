@@ -2036,29 +2036,43 @@ async function verificaECalcolaVotiAutomaticamente() {
                         let vInfo = votiObj[tit.nome];
                         let eff = vInfo;
 
-                        if (!vInfo || vInfo.sv) {
-                            let riserveRuolo = (sq.riserveSelezionate || {})[tit.ruolo] || [];
-                            let riservaValida = null;
+                       let isSenzaVoto = false;
+if (!vInfo) {
+    isSenzaVoto = true;
+} else if (vInfo.sv === true) {
+    isSenzaVoto = true;
+} else if (vInfo.voto === undefined || vInfo.voto === null || vInfo.voto === 0) {
+    // Se il voto puro in pagella è 0 o assente, significa che non ha giocato / S.V.
+    isSenzaVoto = true;
+}
 
-                            for (let ris of riserveRuolo) {
-                                if (!riserveGiaSubentrate.has(ris.nome)) {
-                                    let risInfo = votiObj[ris.nome];
-                                    if (risInfo && !risInfo.sv) {
-                                        riservaValida = { obj: ris, info: risInfo };
-                                        riserveGiaSubentrate.add(ris.nome);
-                                        break;
-                                    }
-                                }
-                            }
+if (isSenzaVoto) {
+    let riserveRuolo = (sq.riserveSelezionate || {})[tit.ruolo] || [];
+    let riservaValida = null;
 
-                            if (riservaValida) {
-                                eff = riservaValida.info;
-                            } else {
-                                eff = { voto: 0, fantavoto: 0, sv: true };
-                            }
-                        }
+    for (let ris of riserveRuolo) {
+        if (!riserveGiaSubentrate.has(ris.nome)) {
+            let risInfo = votiObj[ris.nome];
+            // Anche per la riserva verifichiamo che abbia un voto valido (non S.V.)
+            let risHaVotoValido = risInfo && risInfo.sv !== true && risInfo.voto > 0;
+            if (risHaVotoValido) {
+                riservaValida = { obj: ris, info: risInfo };
+                riserveGiaSubentrate.add(ris.nome);
+                break;
+            }
+        }
+    }
+
+    if (riservaValida) {
+        eff = riservaValida.info;
+    } else {
+        eff = { voto: 0, fantavoto: 0, sv: true };
+    }
+}
                         totaleSquadra += (eff.fantavoto > 0 ? eff.fantavoto : 0);
                     });
+
+
 
                     sq.votiGiornata = votiObj;
                     sq.punteggioTotale = totaleSquadra;
@@ -2117,32 +2131,38 @@ function mostraTabellinoVoti(sq) {
 
     sq.schierati.forEach(tit => {
         let vInfo = sq.votiGiornata[tit.nome];
-        let eff = vInfo;
-        let note = "<span style='color:var(--accent-green)'>Titolare</span>";
+let eff = vInfo;
+let note = "<span style='color:var(--accent-green)'>Titolare</span>";
 
-        if (!vInfo || vInfo.sv) {
-            let riserveRuolo = sq.riserveSelezionate[tit.ruolo] || [];
-            let riservaValida = null;
+let isSenzaVoto = false;
+if (!vInfo || vInfo.sv === true || vInfo.voto === undefined || vInfo.voto === null || vInfo.voto === 0) {
+    isSenzaVoto = true;
+}
 
-            for (let ris of riserveRuolo) {
-                if (!riserveGiaSubentrate.has(ris.nome)) {
-                    let risInfo = sq.votiGiornata[ris.nome];
-                    if (risInfo && !risInfo.sv) {
-                        riservaValida = { obj: ris, info: risInfo };
-                        riserveGiaSubentrate.add(ris.nome);
-                        break;
-                    }
-                }
-            }
+if (isSenzaVoto) {
+    let riserveRuolo = sq.riserveSelezionate[tit.ruolo] || [];
+    let riservaValida = null;
 
-            if (riservaValida) {
-                eff = riservaValida.info;
-                note = `<span style='color:var(--accent-gold)'>🔁 Subentra (${riservaValida.obj.nome})</span>`;
-            } else {
-                note = "<span style='color:var(--accent-red)'>❌ S.V.</span>";
-                eff = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
+    for (let ris of riserveRuolo) {
+        if (!riserveGiaSubentrate.has(ris.nome)) {
+            let risInfo = sq.votiGiornata[ris.nome];
+            let risHaVotoValido = risInfo && risInfo.sv !== true && risInfo.voto > 0;
+            if (risHaVotoValido) {
+                riservaValida = { obj: ris, info: risInfo };
+                riserveGiaSubentrate.add(ris.nome);
+                break;
             }
         }
+    }
+
+    if (riservaValida) {
+        eff = riservaValida.info;
+        note = `<span style='color:var(--accent-gold)'>🔁 Subentra (${riservaValida.obj.nome})</span>`;
+    } else {
+        note = "<span style='color:var(--accent-red)'>❌ S.V.</span>";
+        eff = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
+    }
+}
 
         totale += (eff.fantavoto > 0 ? eff.fantavoto : 0);
         let iconeHtml = generaIconeBonusMalus(eff);
