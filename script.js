@@ -2584,3 +2584,89 @@ async function salvaModificaFormazioneSuCloud() {
         }
     }
 }
+
+
+// ==========================================
+// LOGICA PANNELLO ADMIN & BACKOFFICE
+// ==========================================
+
+async function controllaRuoloAdmin(uData) {
+    const adminBtn = document.getElementById("admin-nav-button");
+    if (uData && uData.isAdmin === true) {
+        if (adminBtn) adminBtn.style.display = "inline-flex";
+    } else {
+        if (adminBtn) adminBtn.style.display = "none";
+    }
+}
+
+async function apriPannelloAdmin() {
+    if (!currentUser) return;
+    
+    // Controllo di sicurezza sul database
+    try {
+        const uDoc = await db.collection("utenti").doc(currentUser.uid).get();
+        if (!uDoc.exists || uDoc.data().isAdmin !== true) {
+            alert("⛔ Accesso Negato: Non disponi dei privilegi di amministratore.");
+            return;
+        }
+    } catch (e) {
+        alert("Errore di verifica permessi.");
+        return;
+    }
+
+    // Nascondiamo gli altri schermi e mostriamo quello admin
+    document.getElementById("welcome-screen").style.display = "none";
+    document.getElementById("main-app").style.display = "none";
+    document.getElementById("recap-screen").style.display = "none";
+    document.getElementById("classifica-screen").style.display = "none";
+    document.getElementById("profilo-screen").style.display = "none";
+    document.getElementById("admin-screen").style.display = "block";
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    caricaStatisticheAdmin();
+}
+
+async function caricaStatisticheAdmin() {
+    try {
+        const snap = await db.collection("utenti").get();
+        let totaleUtenti = snap.size;
+        let totaleSquadre = 0;
+
+        snap.forEach(doc => {
+            const squadre = doc.data().squadre || [];
+            totaleSquadre += squadre.length;
+        });
+
+        const elUtenti = document.getElementById("admin-stat-utenti");
+        const elSquadre = document.getElementById("admin-stat-squadre");
+        
+        if (elUtenti) elUtenti.innerText = totaleUtenti;
+        if (elSquadre) elSquadre.innerText = totaleSquadre;
+    } catch (e) {
+        console.error("Errore caricamento statistiche admin:", e);
+    }
+}
+
+async function adminEseguiRicalcoloGiornata() {
+    const gInput = parseInt(document.getElementById("admin-input-giornata").value);
+    if (isNaN(gInput) || gInput < 1) {
+        alert("Inserisci un numero di giornata valido.");
+        return;
+    }
+    
+    // Richiama la funzione di ricalcolo massivo dei voti
+    if (typeof ricalcolaTuttaLaGiornata === 'function') {
+        await ricalcolaTuttaLaGiornata(gInput);
+    } else {
+        alert("Funzione di ricalcolo non ancora definita nel sistema.");
+    }
+}
+
+function adminForzaStatoMercato(apri) {
+    if (apri) {
+        alert("Funzione di override: Mercato forzato APERTO per i test.");
+        // Qui potrai aggiungere eventuali flag globali di test se necessario
+    } else {
+        alert("Funzione di override: Mercato forzato CHIUSO.");
+    }
+}

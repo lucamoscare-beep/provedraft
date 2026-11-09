@@ -34,6 +34,10 @@
         <button class="btn-logout" onclick="logout()" title="Disconnettiti">
             <i class="fa-solid fa-right-from-bracket"></i> Esci
         </button>
+<!-- PULSANTE BADGE ADMIN (Nascosto di default) -->
+<button id="admin-nav-button" onclick="apriPannelloAdmin()" style="display: none; background: rgba(245, 158, 11, 0.2); border: 1px solid var(--accent-gold); color: var(--accent-gold); padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">
+    <i class="fa-solid fa-user-shield"></i> Admin Panel
+</button>
     </div>
 </header>
 
@@ -149,6 +153,87 @@
             <div class="countdown-box"><div class="countdown-number" id="w-cd-secs">00</div><div class="countdown-label">Secondi</div></div>
         </div>
     </div>
+
+
+<!-- SCHERMATA BACKOFFICE ADMIN -->
+<div id="admin-screen" style="display: none; padding: 20px;">
+    
+    <!-- HEADER ADMIN -->
+    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(15,23,42,0.8); padding: 15px 20px; border-radius: 12px; border: 1px solid var(--accent-gold); margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 42px; height: 42px; background: rgba(245, 158, 11, 0.2); border: 1px solid var(--accent-gold); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--accent-gold); font-size: 20px;">
+                <i class="fa-solid fa-user-shield"></i>
+            </div>
+            <div>
+                <h2 style="margin: 0; color: #fff; font-size: 18px;">Pannello di Controllo Admin</h2>
+                <span style="font-size: 11px; color: var(--text-muted);">Gestione leghe, ricalcoli e manutenzione generale</span>
+            </div>
+        </div>
+        <button onclick="tornaAllaHome()" class="btn-action-primary" style="padding: 8px 14px; font-size: 12px;">
+            <i class="fa-solid fa-house"></i> Ritorna alla Home
+        </button>
+    </div>
+
+    <!-- GRID STRUMENTI ADMIN -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+        
+        <!-- CARD 1: RICALCOLO MASSIVO VOTI -->
+        <div class="profilo-section-card" style="border: 1px solid rgba(245, 158, 11, 0.3);">
+            <h3 style="color: var(--accent-gold); font-size: 15px; margin-bottom: 10px;">
+                <i class="fa-solid fa-calculator"></i> Gestione Voti e Ricalcolo
+            </h3>
+            <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 15px;">
+                Forza il ricalcolo immediato dei punteggi di tutte le squadre registrate per una specifica giornata leggendo dal file Excel caricato.
+            </p>
+            
+            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px;">
+                <label style="font-size: 12px; color: #fff; font-weight: 700;">Giornata:</label>
+                <input type="number" id="admin-input-giornata" min="1" max="38" value="9" class="styled-input" style="width: 80px; text-align: center; padding: 6px;">
+            </div>
+
+            <button onclick="adminEseguiRicalcoloGiornata()" class="btn-action-primary" style="width: 100%; background: linear-gradient(135deg, #f59e0b, #d97706); font-size: 12px;">
+                <i class="fa-solid fa-rotate"></i> Forza Ricalcolo Massivo
+            </button>
+        </div>
+
+        <!-- CARD 2: DISABILITA/SBLOCCA MERCATO -->
+        <div class="profilo-section-card" style="border: 1px solid rgba(56, 189, 248, 0.3);">
+            <h3 style="color: var(--accent-blue); font-size: 15px; margin-bottom: 10px;">
+                <i class="fa-solid fa-lock"></i> Override Stato Mercato
+            </h3>
+            <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 15px;">
+                Forza la chiusura o la riapertura straordinaria del mercato per la giornata in corso ignorando i timer automatici.
+            </p>
+
+            <div style="display: flex; gap: 10px;">
+                <button onclick="adminForzaStatoMercato(false)" class="btn-action-danger" style="flex: 1; font-size: 11px; padding: 10px;">
+                    <i class="fa-solid fa-lock"></i> Chiudi Ora
+                </button>
+                <button onclick="adminForzaStatoMercato(true)" class="btn-action-primary" style="flex: 1; font-size: 11px; padding: 10px; background: linear-gradient(135deg, #10b981, #059669);">
+                    <i class="fa-solid fa-lock-open"></i> Apri Ora
+                </button>
+            </div>
+        </div>
+
+        <!-- CARD 3: STATISTICHE E LOG DI SISTEMA -->
+        <div class="profilo-section-card" style="border: 1px solid rgba(167, 139, 250, 0.3);">
+            <h3 style="color: #a78bfa; font-size: 15px; margin-bottom: 10px;">
+                <i class="fa-solid fa-chart-line"></i> Panoramica Database
+            </h3>
+            <div style="font-size: 12px; color: #cbd5e1; display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Utenti Registrati Totali:</span>
+                    <strong id="admin-stat-utenti" style="color: #fff;">-</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Squadre Totali Salvate:</span>
+                    <strong id="admin-stat-squadre" style="color: var(--accent-neon-green);">-</strong>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
 
     <!-- BOX WIDGET ACCESSO RAPIDO PROFILO & MISSIONI AFFAIANCATI -->
     <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
