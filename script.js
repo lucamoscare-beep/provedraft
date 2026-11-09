@@ -2031,14 +2031,16 @@ async function verificaECalcolaVotiAutomaticamente() {
 
                         if (matchRow) {
                             let rawVotoPuro = parseColumnVal(matchRow, ["voto", "Voto", "VOTO"]);
-                            let rawFanta = parseColumnVal(matchRow, ["fantavoto", "Fantavoto", "FANTAVOTO"]);
-                            if (rawFanta === 0 && rawVotoPuro > 0) rawFanta = rawVotoPuro;
+			    let rawFanta = parseColumnVal(matchRow, ["fantavoto", "Fantavoto", "FANTAVOTO"]);
 
-                            if (rawFanta > 0 || rawVotoPuro > 0) {
-                                votiObj[p.nome] = {
-                                    voto: rawVotoPuro,
-                                    fantavoto: rawFanta,
-                                    sv: false,
+// 2. Determiniamo se ha giocato basandoci SOLO sul voto in pagella
+		           let haGiocato = (rawVotoPuro > 0);
+
+                           if (matchRow && haGiocato) {
+   			   votiObj[p.nome] = {
+        		   voto: rawVotoPuro,
+        		   fantavoto: rawFanta, // Prende il fantavoto reale di Excel (mantiene anche lo 0.0 da malus)
+        		   sv: false,           // Ha giocato, quindi NON è Senza Voto
                                     gf: parseColumnVal(matchRow, ["gf"]),
                                     gs: parseColumnVal(matchRow, ["gs"]),
                                     ass: parseColumnVal(matchRow, ["ass"]),
