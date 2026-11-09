@@ -73,7 +73,7 @@
       <button type="submit" class="btn-auth">ACCEDI</button>
     </form>
 
-    <!-- FORM REGISTRAZIONE -->
+  <!-- FORM REGISTRAZIONE -->
     <form id="register-form" style="display: none;" onsubmit="handleRegister(event)">
       <h2>Crea il tuo Account</h2>
       <div class="input-group">
@@ -117,7 +117,7 @@
       <button type="submit" class="btn-auth">REGISTRATI</button>
     </form>
 
-    <!-- FORM RECUPERO PASSWORD -->
+  <!-- FORM RECUPERO PASSWORD -->
     <form id="forgot-form" style="display: none;" onsubmit="handleForgotPassword(event)">
       <h2>Recupera Password</h2>
       <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">Inserisci la tua email registrata. Ti invieremo un link per impostare una nuova password.</p>
@@ -155,6 +155,132 @@
     </div>
 
 
+ <!-- BOX WIDGET ACCESSO RAPIDO PROFILO & MISSIONI AFFAIANCATI -->
+    <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+        
+        <!-- 1. Box Profilo Esistente -->
+        <div class="home-profile-banner" onclick="apriProfiloUtente(currentUser.uid)" style="flex: 2; min-width: 250px; margin-bottom: 0;">
+            <div class="home-profile-left">
+                <div class="home-profile-icon"><i class="fa-solid fa-id-badge"></i></div>
+                <div class="home-profile-text">
+                    <div class="title">Il Mio Profilo & Statistiche di Gioco</div>
+                    <div class="subtitle">Visualizza podi, record personali e storico</div>
+                </div>
+            </div>
+            <button class="home-profile-btn">Visualizza <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+
+  <!-- 2. Boxino Missioni con Razzo 🚀 (Subito a fianco) -->
+        <div onclick="vaiAMissioniProfilo()" class="home-profile-banner" style="flex: 1; min-width: 180px; margin-bottom: 0; cursor: pointer; background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(79, 70, 229, 0.2)); border: 1px solid #a78bfa;">
+            <div class="home-profile-left">
+                <div class="home-profile-icon" style="background: rgba(139, 92, 246, 0.3); color: #c4b5fd;"><i class="fa-solid fa-rocket"></i></div>
+                <div class="home-profile-text">
+                    <div class="title" style="color: #c4b5fd;">Missioni & Traguardi</div>
+                    <div class="subtitle">Scopri i badge sbloccati</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="top-info-row">
+        <div class="top-info-card global-teams-box">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <i class="fa-solid fa-shield-halved"></i>
+                <div class="top-info-text">
+                    <div class="title-text" id="global-teams-card-title">Squadre Iscritte</div>
+                    <div class="sub-text">Totale di tutta la lega</div>
+                </div>
+            </div>
+            <div class="global-teams-badge-number" id="total-global-teams-count">...</div>
+        </div>
+
+        <div class="top-info-card tokens-box-inline">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <i class="fa-solid fa-coins"></i>
+                <div class="top-info-text">
+                    <div class="title-text">Gettoni Rimasti</div>
+                    <div class="sub-text">Disponibili per te</div>
+                </div>
+            </div>
+            <div class="tokens-badge-number" id="tokens-count-display-inline">3 / 3</div>
+        </div>
+    </div>
+
+    <div class="welcome-card">
+        <div class="welcome-title" id="welcome-greeting">Benvenuto nel Fantacalcio Draft!</div>
+        <p style="color:var(--text-muted); font-size:13px; line-height:1.6; margin-bottom:15px;">
+            Sfida gli altri fantallenatori nella prossima giornata di campionato! Costruisci le tue rose tramite il sistema di Draft live, seleziona il modulo tattico e schiera i tuoi titolari prima del fischio d'inizio.
+        </p>
+
+  <!-- GRIGLIA REGOLE FONDAMENTALI (4 PUNTI) -->
+        <div class="rules-grid">
+            <div class="rule-box">
+                <i class="fa-solid fa-coins"></i>
+                <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">3 Gettoni Settimanali</h4>
+                <p style="color:var(--text-muted); font-size:11px; margin:0;">Utilizzabili per schierare fino a 3 rose differenti a turno.</p>
+            </div>
+            <div class="rule-box">
+                <i class="fa-solid fa-rotate"></i>
+                <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">Draft Infiniti</h4>
+                <p style="color:var(--text-muted); font-size:11px; margin:0;">Puoi rifare il draft quante vuoi prima della convalida e scelta della formazione ideale.</p>
+            </div>
+            <div class="rule-box">
+                <i class="fa-solid fa-sack-dollar"></i>
+                <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">600 Crediti</h4>
+                <p style="color:var(--text-muted); font-size:11px; margin:0;">Il budget fisso a disposizione per la realizzazione e l'asta delle rose.</p>
+            </div>
+            <div class="rule-box">
+                <i class="fa-solid fa-ranking-star"></i>
+                <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">Classifiche e Pari Merito</h4>
+                <p style="color:var(--text-muted); font-size:11px; margin:0;">Classifiche di ogni giornata con regola spartiacque basata sul budget residuo in caso di ex aequo.</p>
+            </div>
+        </div>
+
+        <div class="tokens-status-box">
+            <div id="new-team-creation-area">
+                <p style="font-size:12px; color:#fff; font-weight:700; margin-bottom:10px;">Inserisci il nome della tua nuova squadra per iniziare un draft:</p>
+                <div style="display:flex; justify-content:center; gap:10px; max-width:450px; margin:0 auto; flex-wrap:wrap;">
+                    <div class="input-wrapper" style="flex:1; min-width:200px;">
+                        <i class="fa-solid fa-shirt input-icon"></i>
+                        <input type="text" id="new-team-name-input" class="styled-input" placeholder="es. Real Fanta 1" style="padding-left: 36px;">
+                    </div>
+                    <button onclick="preparaEAvviaDraft()" class="btn-action-primary"><i class="fa-solid fa-play"></i> INIZIA DRAFT</button>
+                </div>
+            </div>
+            <div id="tokens-exhausted-msg" style="display:none; color:var(--accent-gold); font-weight:700; font-size:13px; margin-top:10px;">
+                ⚠️ Hai utilizzato tutti i 3 gettoni a disposizione per questa giornata!
+            </div>
+        </div>
+
+
+ <!-- BANNER DINAMICO STATO VOTI -->
+        <div id="home-status-banner-container" style="display:none;">
+            <div id="home-status-banner" class="home-status-banner" onclick="apriSchermataClassifica()">
+                <i id="home-status-icon" class="fa-solid fa-hourglass-half"></i>
+                <span id="home-status-text">In attesa dei voti della giornata</span>
+            </div>
+        </div>
+
+        <div style="margin-top:25px;">
+            <h3 style="font-size:15px; color:#fff; border-bottom:1px solid var(--card-border); padding-bottom:6px;" id="user-created-teams-title">Le tue Squadre create per la giornata di campionato in corso</h3>
+            <div id="created-teams-container" class="created-teams-list">
+                <p style="color:var(--text-muted); font-size:12px;">Nessuna squadra ancora creata per questo turno.</p>
+            </div>
+        </div>
+
+        <div class="home-nav-buttons">
+            <button onclick="apriSchermataClassifica()" class="btn-home-classifica">
+                <i class="fa-solid fa-ranking-star"></i> Vedi classifica di giornata
+            </button>
+            <button onclick="avviaTestDraft()" class="btn-home-test">
+                <i class="fa-solid fa-vials"></i> Test Draft (No Firebase)
+            </button>
+        </div>
+    </div>
+</div>
+
+
 <!-- SCHERMATA BACKOFFICE ADMIN -->
 <div id="admin-screen" style="display: none; padding: 20px;">
     
@@ -174,7 +300,7 @@
         </button>
     </div>
 
-    <!-- GRID STRUMENTI ADMIN -->
+ <!-- GRID STRUMENTI ADMIN -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
         
         <!-- CARD 1: RICALCOLO MASSIVO VOTI -->
@@ -235,129 +361,7 @@
     </div>
 </div>
 
-    <!-- BOX WIDGET ACCESSO RAPIDO PROFILO & MISSIONI AFFAIANCATI -->
-    <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
-        
-        <!-- 1. Box Profilo Esistente -->
-        <div class="home-profile-banner" onclick="apriProfiloUtente(currentUser.uid)" style="flex: 2; min-width: 250px; margin-bottom: 0;">
-            <div class="home-profile-left">
-                <div class="home-profile-icon"><i class="fa-solid fa-id-badge"></i></div>
-                <div class="home-profile-text">
-                    <div class="title">Il Mio Profilo & Statistiche di Gioco</div>
-                    <div class="subtitle">Visualizza podi, record personali e storico</div>
-                </div>
-            </div>
-            <button class="home-profile-btn">Visualizza <i class="fa-solid fa-arrow-right"></i></button>
-        </div>
 
-        <!-- 2. Boxino Missioni con Razzo 🚀 (Subito a fianco) -->
-        <div onclick="vaiAMissioniProfilo()" class="home-profile-banner" style="flex: 1; min-width: 180px; margin-bottom: 0; cursor: pointer; background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(79, 70, 229, 0.2)); border: 1px solid #a78bfa;">
-            <div class="home-profile-left">
-                <div class="home-profile-icon" style="background: rgba(139, 92, 246, 0.3); color: #c4b5fd;"><i class="fa-solid fa-rocket"></i></div>
-                <div class="home-profile-text">
-                    <div class="title" style="color: #c4b5fd;">Missioni & Traguardi</div>
-                    <div class="subtitle">Scopri i badge sbloccati</div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="top-info-row">
-        <div class="top-info-card global-teams-box">
-            <div style="display:flex; align-items:center; gap:12px;">
-                <i class="fa-solid fa-shield-halved"></i>
-                <div class="top-info-text">
-                    <div class="title-text" id="global-teams-card-title">Squadre Iscritte</div>
-                    <div class="sub-text">Totale di tutta la lega</div>
-                </div>
-            </div>
-            <div class="global-teams-badge-number" id="total-global-teams-count">...</div>
-        </div>
-
-        <div class="top-info-card tokens-box-inline">
-            <div style="display:flex; align-items:center; gap:12px;">
-                <i class="fa-solid fa-coins"></i>
-                <div class="top-info-text">
-                    <div class="title-text">Gettoni Rimasti</div>
-                    <div class="sub-text">Disponibili per te</div>
-                </div>
-            </div>
-            <div class="tokens-badge-number" id="tokens-count-display-inline">3 / 3</div>
-        </div>
-    </div>
-
-    <div class="welcome-card">
-        <div class="welcome-title" id="welcome-greeting">Benvenuto nel Fantacalcio Draft!</div>
-        <p style="color:var(--text-muted); font-size:13px; line-height:1.6; margin-bottom:15px;">
-            Sfida gli altri fantallenatori nella prossima giornata di campionato! Costruisci le tue rose tramite il sistema di Draft live, seleziona il modulo tattico e schiera i tuoi titolari prima del fischio d'inizio.
-        </p>
-
-        <!-- GRIGLIA REGOLE FONDAMENTALI (4 PUNTI) -->
-        <div class="rules-grid">
-            <div class="rule-box">
-                <i class="fa-solid fa-coins"></i>
-                <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">3 Gettoni Settimanali</h4>
-                <p style="color:var(--text-muted); font-size:11px; margin:0;">Utilizzabili per schierare fino a 3 rose differenti a turno.</p>
-            </div>
-            <div class="rule-box">
-                <i class="fa-solid fa-rotate"></i>
-                <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">Draft Infiniti</h4>
-                <p style="color:var(--text-muted); font-size:11px; margin:0;">Puoi rifare il draft quante vuoi prima della convalida e scelta della formazione ideale.</p>
-            </div>
-            <div class="rule-box">
-                <i class="fa-solid fa-sack-dollar"></i>
-                <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">600 Crediti</h4>
-                <p style="color:var(--text-muted); font-size:11px; margin:0;">Il budget fisso a disposizione per la realizzazione e l'asta delle rose.</p>
-            </div>
-            <div class="rule-box">
-                <i class="fa-solid fa-ranking-star"></i>
-                <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">Classifiche e Pari Merito</h4>
-                <p style="color:var(--text-muted); font-size:11px; margin:0;">Classifiche di ogni giornata con regola spartiacque basata sul budget residuo in caso di ex aequo.</p>
-            </div>
-        </div>
-
-        <div class="tokens-status-box">
-            <div id="new-team-creation-area">
-                <p style="font-size:12px; color:#fff; font-weight:700; margin-bottom:10px;">Inserisci il nome della tua nuova squadra per iniziare un draft:</p>
-                <div style="display:flex; justify-content:center; gap:10px; max-width:450px; margin:0 auto; flex-wrap:wrap;">
-                    <div class="input-wrapper" style="flex:1; min-width:200px;">
-                        <i class="fa-solid fa-shirt input-icon"></i>
-                        <input type="text" id="new-team-name-input" class="styled-input" placeholder="es. Real Fanta 1" style="padding-left: 36px;">
-                    </div>
-                    <button onclick="preparaEAvviaDraft()" class="btn-action-primary"><i class="fa-solid fa-play"></i> INIZIA DRAFT</button>
-                </div>
-            </div>
-            <div id="tokens-exhausted-msg" style="display:none; color:var(--accent-gold); font-weight:700; font-size:13px; margin-top:10px;">
-                ⚠️ Hai utilizzato tutti i 3 gettoni a disposizione per questa giornata!
-            </div>
-        </div>
-
-        <!-- BANNER DINAMICO STATO VOTI -->
-        <div id="home-status-banner-container" style="display:none;">
-            <div id="home-status-banner" class="home-status-banner" onclick="apriSchermataClassifica()">
-                <i id="home-status-icon" class="fa-solid fa-hourglass-half"></i>
-                <span id="home-status-text">In attesa dei voti della giornata</span>
-            </div>
-        </div>
-
-        <div style="margin-top:25px;">
-            <h3 style="font-size:15px; color:#fff; border-bottom:1px solid var(--card-border); padding-bottom:6px;" id="user-created-teams-title">Le tue Squadre create per la giornata di campionato in corso</h3>
-            <div id="created-teams-container" class="created-teams-list">
-                <p style="color:var(--text-muted); font-size:12px;">Nessuna squadra ancora creata per questo turno.</p>
-            </div>
-        </div>
-
-        <div class="home-nav-buttons">
-            <button onclick="apriSchermataClassifica()" class="btn-home-classifica">
-                <i class="fa-solid fa-ranking-star"></i> Vedi classifica di giornata
-            </button>
-            <button onclick="avviaTestDraft()" class="btn-home-test">
-                <i class="fa-solid fa-vials"></i> Test Draft (No Firebase)
-            </button>
-        </div>
-    </div>
-</div>
 
 <!-- PAGINA CLASSIFICA -->
 <div id="classifica-screen">
@@ -371,7 +375,9 @@
         </button>
     </div>
 
-    <!-- NOTA INFORMATIVA SPARTIACQUE BUDGET -->
+
+
+<!-- NOTA INFORMATIVA SPARTIACQUE BUDGET -->
     <div style="background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); padding: 10px 14px; border-radius: 10px; margin-bottom: 20px; font-size: 12px; color: var(--accent-gold); display: flex; align-items: center; gap: 10px;">
         <i class="fa-solid fa-circle-info" style="font-size: 16px;"></i>
         <span><strong>Regola di Parità:</strong> A parità di punteggio totale, la classifica e i piazzamenti sul podio premiano la squadra con il <strong>Budget Residuo</strong> più alto.</span>
@@ -404,6 +410,8 @@
         <div id="matchdays-pills-container" class="matchday-grid"></div>
     </div>
 </div>
+
+
 
 <!-- PAGINA PROFILO E STATISTICHE UTENTE (La bacheca traguardi vive SOLO qui dentro) -->
 <div id="profilo-screen">
@@ -490,7 +498,8 @@
         </div>
     </div>
 
-    <!-- SEZIONE TRAGUARDI & MISSIONI (Visibile SOLO nella pagina utente) -->
+
+ <!-- SEZIONE TRAGUARDI & MISSIONI (Visibile SOLO nella pagina utente) -->
     <div class="profilo-section-card" style="margin-top: 20px; background: rgba(30, 41, 59, 0.7); border-radius: 12px; padding: 15px; border: 1px solid rgba(255,255,255,0.05); width: 100%; box-sizing: border-box; margin-bottom: 30px;">
         <h3 style="font-size: 15px; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
             <i class="fa-solid fa-medal" style="color: var(--accent-gold);"></i> Traguardi & Missioni
@@ -498,6 +507,8 @@
         <div id="badge-grid-container" style="display: flex; flex-direction: column; gap: 10px; width: 100%; box-sizing: border-box;"></div>
     </div>
 </div>
+
+
 
 <!-- PAGINA PRINCIPALE DEL DRAFT -->
 <div id="main-app">
