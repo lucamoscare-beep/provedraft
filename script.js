@@ -573,6 +573,7 @@ function renderWelcomeScreen() {
     document.getElementById("recap-screen").style.display = "none";
     document.getElementById("classifica-screen").style.display = "none";
     document.getElementById("profilo-screen").style.display = "none";
+    document.getElementById("admin-screen").style.display = "none";
 
     const squadreGiornataCorrente = userSquadre.filter(sq => (sq.giornata !== undefined ? sq.giornata : 8) === ACTIVE_MATCHDAY);
 
@@ -642,7 +643,7 @@ async function apriSchermataClassifica(giornata) {
     document.getElementById("recap-screen").style.display = "none";
     document.getElementById("profilo-screen").style.display = "none";
     document.getElementById("classifica-screen").style.display = "block";
-
+    document.getElementById("admin-screen").style.display = "none";
     document.getElementById("classifica-heading-text").innerText = `Classifica della giornata n°${giornata}`;
 
     renderMatchdayPills(giornata);
@@ -784,6 +785,7 @@ async function apriProfiloUtente(targetUserId) {
     document.getElementById("recap-screen").style.display = "none";
     document.getElementById("classifica-screen").style.display = "none";
     document.getElementById("profilo-screen").style.display = "block";
+    document.getElementById("admin-screen").style.display = "none";
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -1052,6 +1054,7 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false, ow
     document.getElementById("classifica-screen").style.display = "none";
     document.getElementById("profilo-screen").style.display = "none";
     document.getElementById("recap-screen").style.display = "block";
+    document.getElementById("admin-screen").style.display = "none";
 
     currentRecapSquadraObj = sq;
 
@@ -2493,7 +2496,7 @@ function avviaModificaFormazioneSalvata() {
     document.getElementById("welcome-screen").style.display = "none";
     document.getElementById("recap-screen").style.display = "none";
     document.getElementById("main-app").style.display = "flex";
-
+    document.getElementById("admin-screen").style.display = "none";
     document.getElementById("current-draft-team-title").innerText = `Modifica Formazione: ${sq.nomeSquadra} (G${giornataSquadra})`;
     
     document.getElementById("campo-panel-container").style.display = "block";
