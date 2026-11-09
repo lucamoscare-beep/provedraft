@@ -1002,23 +1002,6 @@ function renderMatchdayPills(selectedDay) {
     }
 }
 
-async function visualizzaSquadraGenerica(userId, nomeSquadra, giornata) {
-    try {
-        const doc = await db.collection("utenti").doc(userId).get();
-        if (!doc.exists) return alert("Utente non trovato.");
-
-        const uData = doc.data();
-        const username = getRealUsername(uData, null);
-        const squadreArr = uData.squadre || [];
-
-        const sq = squadreArr.find(s => s.nomeSquadra.toLowerCase() === nomeSquadra.toLowerCase() && (s.giornata !== undefined ? s.giornata : 8) === giornata);
-        if (!sq) return alert("Squadra non trovata per questa giornata.");
-
-        renderRecapScreenReadOnly(sq, username, true);
-    } catch (err) {
-        alert("Errore nel caricamento della squadra: " + err.message);
-    }
-}
 
 async function apriRecapSquadraUtenteCorrente(index) {
     const sq = userSquadre[index];
@@ -2670,5 +2653,17 @@ function adminForzaStatoMercato(apri) {
         // Qui potrai aggiungere eventuali flag globali di test se necessario
     } else {
         alert("Funzione di override: Mercato forzato CHIUSO.");
+    }
+}
+
+async function ricalcolaTuttaLaGiornata(giornata) {
+    if (!confirm(`Vuoi forzare il ricalcolo dei punteggi per tutte le squadre della Giornata ${giornata}?`)) return;
+    try {
+        alert(`🔄 Avvio ricalcolo massivo per la Giornata ${giornata}...`);
+        await verificaECalcolaVotiAutomaticamente();
+        alert("✅ Ricalcolo completato con successo!");
+        caricaStatisticheAdmin();
+    } catch (err) {
+        alert("❌ Errore durante il ricalcolo: " + err.message);
     }
 }
