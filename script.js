@@ -225,6 +225,21 @@ function getRealUsername(uData, defaultAuthUser) {
 function isMarketOpen() {
     if (isTestMode) return true;
     const adesso = new Date();
+
+	
+    // Se la giornata corrisponde a quella attiva, usiamo il controllo standard
+    if (giornata === ACTIVE_MATCHDAY) {
+        return isMarketOpen();
+    }
+    
+    // Se è una giornata futura rispetto a quella attiva, il mercato è sicuramente aperto
+    if (giornata > ACTIVE_MATCHDAY) {
+        return true;
+    }
+    
+    // Se è una giornata passata, il mercato è chiuso
+    return false;
+
     if (!CURRENT_MATCHDAY_START || !CURRENT_MATCHDAY_END) return true;
 
     if (adesso >= CURRENT_MATCHDAY_START && adesso <= CURRENT_MATCHDAY_END) {
@@ -1062,20 +1077,22 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false, ow
 
    // REGOLE DI ACCESSO AL TASTO MODIFICA:
     // 1. L'utente deve essere il proprietario (ownerUserId === currentUser.uid)
-    // 2. La squadra deve appartenere ESCLUSIVAMENTE alla giornata corrente in corso (ACTIVE_MATCHDAY). Le giornate passate sono immutabili!
-    // 3. Il mercato della giornata deve essere ancora aperto (prima dell'inizio della prima partita)
-    // 4. Non deve essere un test draft
+    // 2. La squadra NON deve essere un test draft
+    // 3. Il mercato per QUELLA SPECIFICA GIORNATA della squadra deve essere ancora aperto (cioè la prima partita di quella giornata non è ancora iniziata).
+    
     const btnModifica = document.getElementById("btn-recap-modifica-formazione");
     const isOwner = currentUser && ownerUserId === currentUser.uid;
-    const giornataSquadra = sq.giornata !== undefined ? sq.giornata : 8;
-    const isGiornataCorrente = giornataSquadra === ACTIVE_MATCHDAY;
-    const marketIsOpen = isMarketOpen();
 
-    if (isOwner && isGiornataCorrente && marketIsOpen && !sq.isTest) {
+   // Controlliamo se il mercato è aperto per la giornata specifica di questa squadra
+    const giornataSquadra = sq.giornata !== undefined ? sq.giornata : ACTIVE_MATCHDAY;
+    const isMarketOpenForThisTeam = isMarketOpenForMatchday(giornataSquadra);
+
+    if (isOwner && isMarketOpenForThisTeam && !sq.isTest) {
         btnModifica.style.display = "inline-flex";
     } else {
         btnModifica.style.display = "none";
     }
+
 
     const recapBadge = document.getElementById("recap-badge-status");
     if (sq.isTest) {
