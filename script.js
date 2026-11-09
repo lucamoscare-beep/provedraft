@@ -239,6 +239,23 @@ function isMarketOpen() {
     return true;
 }
 
+function isMarketOpenForMatchday(giornata) {
+    if (isTestMode) return true;
+    
+    // Se la giornata della squadra è precedente a quella attiva, il mercato è CHIUSO e immutabile!
+    if (giornata < ACTIVE_MATCHDAY) {
+        return false;
+    }
+    
+    // Se è la giornata corrente, verifica se le partite sono già iniziate
+    if (giornata === ACTIVE_MATCHDAY) {
+        return isMarketOpen();
+    }
+    
+    // Se è una giornata futura rispetto a quella attiva, il mercato è aperto
+    return true;
+}
+
 function initCountdown() {
     function updateTimer() {
         const now = new Date();
@@ -1060,12 +1077,17 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false, ow
     const btnBackClassifica = document.getElementById("btn-recap-back-classifica");
     btnBackClassifica.style.display = fromClassifica ? "inline-flex" : "none";
 
-    // PERMESSI MODIFICA: Il pulsante viene mostrato SOLO se l'utente loggato è l'autore E il mercato è aperto
+    // CONTROLLO RIGIDO PERMESSI MODIFICA:
+    // 1. Deve essere il proprietario della squadra
+    // 2. Non deve essere un draft di test
+    // 3. La giornata della squadra NON deve essere già passata
+    // 4. Il mercato per la giornata di QUESTA squadra deve essere aperto (prima dell'inizio partite)
     const btnModifica = document.getElementById("btn-recap-modifica-formazione");
     const isOwner = currentUser && ownerUserId === currentUser.uid;
-    const marketIsOpen = isMarketOpen();
+    const giornataSquadra = sq.giornata !== undefined ? sq.giornata : ACTIVE_MATCHDAY;
+    const isMarketOpenForThisTeam = isMarketOpenForMatchday(giornataSquadra);
 
-    if (isOwner && marketIsOpen && !sq.isTest) {
+    if (isOwner && isMarketOpenForThisTeam && !sq.isTest) {
         btnModifica.style.display = "inline-flex";
     } else {
         btnModifica.style.display = "none";
@@ -1081,7 +1103,7 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false, ow
         recapBadge.style.background = "rgba(16, 185, 129, 0.2)";
         recapBadge.style.borderColor = "var(--accent-neon-green)";
         recapBadge.style.color = "var(--accent-neon-green)";
-        recapBadge.innerText = `🔒 SQUADRA SALVATA (GIORNATA ${sq.giornata || 8})`;
+        recapBadge.innerText = `🔒 SQUADRA SALVATA (GIORNATA ${giornataSquadra})`;
     }
 
     const recapCampo = document.getElementById("recap-campo");
@@ -1122,6 +1144,7 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false, ow
     
     refreshAllMarquees();
 }
+
 
 function tornaAllaHome() {
     renderWelcomeScreen();
@@ -2452,16 +2475,24 @@ function renderizzaTraguardi(uData) {
 // ==========================================
 
 function avviaModificaFormazioneSalvata() {
-    if (!isMarketOpen()) {
+    if (!currentRecapSquadraObj) return;
+
+    const sq = currentRecapSquadraObj;
+    const giornataSquadra = sq.giornata !== undefined ? sq.giornata : ACTIVE_MATCHDAY;
+
+    // 1. Blocco assoluto per giornate trascorse
+    if (giornataSquadra < ACTIVE_MATCHDAY) {
+        alert("❌ Impossibile modificare le formazioni delle giornate precedenti o concluse.");
+        return;
+    }
+
+    // 2. Blocco per mercato chiuso sulla giornata della squadra
+    if (!isMarketOpenForMatchday(giornataSquadra)) {
         alert("⚠️ Tempo scaduto! Il mercato è chiuso e le formazioni sono bloccate per questo turno.");
         return;
     }
 
-    if (!currentRecapSquadraObj) return;
-
-    const sq = currentRecapSquadraObj;
-
-    // Carichiamo la rosa esistente (senza rifare il draft)
+    // Carichiamo la rosa esistente (i 24 giocatori acquistati rimangono FISSI, no redraft)
     rosa = JSON.parse(JSON.stringify(sq.rosa || { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] }));
     schierati = JSON.parse(JSON.stringify(sq.schierati || []));
     riserveSelezionate = JSON.parse(JSON.stringify(sq.riserveSelezionate || { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] }));
@@ -2470,19 +2501,18 @@ function avviaModificaFormazioneSalvata() {
     tempNomeSquadra = sq.nomeSquadra;
     isTestMode = false;
 
-    // Nascondiamo il pannello di draft dei giocatori (perché i 24 della rosa sono già stati scelti)
+    // Nascondiamo la sezione draft dei giocatori (non si rifà l'asta)
     document.getElementById("draft-panel").style.display = "none";
     document.getElementById("welcome-screen").style.display = "none";
     document.getElementById("recap-screen").style.display = "none";
     document.getElementById("main-app").style.display = "flex";
 
-    document.getElementById("current-draft-team-title").innerText = `Modifica Formazione: ${sq.nomeSquadra}`;
+    document.getElementById("current-draft-team-title").innerText = `Modifica Formazione: ${sq.nomeSquadra} (G${giornataSquadra})`;
     
     document.getElementById("campo-panel-container").style.display = "block";
     document.getElementById("panchina-panel-container").style.display = "block";
     document.getElementById("conferma-container").style.display = "flex";
 
-    // Sostituiamo il tasto di conferma normale con quello per salvare la modifica
     document.getElementById("btn-conferma-formazione").onclick = salvaModificaFormazioneSuCloud;
     document.getElementById("btn-conferma-formazione").innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Salva Modifiche Formazione`;
 
@@ -2494,8 +2524,11 @@ function avviaModificaFormazioneSalvata() {
 }
 
 async function salvaModificaFormazioneSuCloud() {
-    if (!isMarketOpen()) {
-        alert("⚠️ Tempo scaduto! Il mercato ha chiuso durante le tue modifiche. Le modifiche non possono essere salvate.");
+    if (!currentRecapSquadraObj) return;
+    const giornataSquadra = currentRecapSquadraObj.giornata !== undefined ? currentRecapSquadraObj.giornata : ACTIVE_MATCHDAY;
+
+    if (!isMarketOpenForMatchday(giornataSquadra)) {
+        alert("⚠️ Tempo scaduto! Il mercato ha chiuso durante le tue modifiche. Le modifiche non sono state salvate.");
         tornaAllaHome();
         return;
     }
@@ -2514,10 +2547,10 @@ async function salvaModificaFormazioneSuCloud() {
 
             let squadreEsistenti = docSnapshot.data().squadre || [];
 
-            // Troviamo l'indice della squadra nel database
+            // Identifichiamo l'indice esatto della squadra nel cloud
             let indexTarget = currentRecapSquadraIndex;
             if (indexTarget === -1 || indexTarget >= squadreEsistenti.length) {
-                indexTarget = squadreEsistenti.findIndex(s => s.nomeSquadra.toLowerCase() === tempNomeSquadra.toLowerCase() && (s.giornata !== undefined ? s.giornata : 8) === ACTIVE_MATCHDAY);
+                indexTarget = squadreEsistenti.findIndex(s => s.nomeSquadra.toLowerCase() === tempNomeSquadra.toLowerCase() && (s.giornata !== undefined ? s.giornata : ACTIVE_MATCHDAY) === giornataSquadra);
             }
 
             if (indexTarget === -1) {
@@ -2525,7 +2558,7 @@ async function salvaModificaFormazioneSuCloud() {
                 return;
             }
 
-            // Aggiorniamo solo lo schieramento titolari e riserve
+            // Aggiorniamo solo la disposizione tattica (titolari e panchina)
             squadreEsistenti[indexTarget].schierati = JSON.parse(JSON.stringify(schierati));
             squadreEsistenti[indexTarget].riserveSelezionate = JSON.parse(JSON.stringify(riserveSelezionate));
             squadreEsistenti[indexTarget].moduloSelezionato = moduloSelezionato;
@@ -2537,11 +2570,11 @@ async function salvaModificaFormazioneSuCloud() {
 
             alert("✅ Formazione aggiornata con successo!");
 
-            // Ripristiniamo la funzione di conferma predefinita per i nuovi draft
+            // Ripristiniamo il comportamento standard del tasto di conferma per i nuovi draft
             document.getElementById("btn-conferma-formazione").onclick = confermaFormazioneDefinitiva;
             document.getElementById("draft-panel").style.display = "block";
 
-            // Riapriamo il recap con la nuova formazione aggiornata
+            // Riapriamo il recap aggiornato
             apriRecapSquadraUtenteCorrente(indexTarget);
 
         } catch (err) {
