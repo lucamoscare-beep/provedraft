@@ -222,11 +222,10 @@ function getRealUsername(uData, defaultAuthUser) {
     return "Utente";
 }
 
-function isMarketOpen() {
-    if (isTestMode) return true;
-    const adesso = new Date();
 
-	
+function isMarketOpenForMatchday(giornata) {
+    if (isTestMode) return true;
+    
     // Se la giornata corrisponde a quella attiva, usiamo il controllo standard
     if (giornata === ACTIVE_MATCHDAY) {
         return isMarketOpen();
@@ -239,20 +238,8 @@ function isMarketOpen() {
     
     // Se è una giornata passata, il mercato è chiuso
     return false;
-
-    if (!CURRENT_MATCHDAY_START || !CURRENT_MATCHDAY_END) return true;
-
-    if (adesso >= CURRENT_MATCHDAY_START && adesso <= CURRENT_MATCHDAY_END) {
-        return false;
-    }
-
-    if (adesso > CURRENT_MATCHDAY_END) {
-        inizializzaGiornataEDeadlineDinamica();
-        return true;
-    }
-
-    return true;
 }
+
 
 function initCountdown() {
     function updateTimer() {
