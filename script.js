@@ -222,24 +222,22 @@ function getRealUsername(uData, defaultAuthUser) {
     return "Utente";
 }
 
-
-function isMarketOpenForMatchday(giornata) {
+function isMarketOpen() {
     if (isTestMode) return true;
-    
-    // Se la giornata corrisponde a quella attiva, usiamo il controllo standard
-    if (giornata === ACTIVE_MATCHDAY) {
-        return isMarketOpen();
+    const adesso = new Date();
+    if (!CURRENT_MATCHDAY_START || !CURRENT_MATCHDAY_END) return true;
+
+    if (adesso >= CURRENT_MATCHDAY_START && adesso <= CURRENT_MATCHDAY_END) {
+        return false;
     }
-    
-    // Se è una giornata futura rispetto a quella attiva, il mercato è sicuramente aperto
-    if (giornata > ACTIVE_MATCHDAY) {
+
+    if (adesso > CURRENT_MATCHDAY_END) {
+        inizializzaGiornataEDeadlineDinamica();
         return true;
     }
-    
-    // Se è una giornata passata, il mercato è chiuso
-    return false;
-}
 
+    return true;
+}
 
 function initCountdown() {
     function updateTimer() {
@@ -1062,24 +1060,16 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false, ow
     const btnBackClassifica = document.getElementById("btn-recap-back-classifica");
     btnBackClassifica.style.display = fromClassifica ? "inline-flex" : "none";
 
-   // REGOLE DI ACCESSO AL TASTO MODIFICA:
-    // 1. L'utente deve essere il proprietario (ownerUserId === currentUser.uid)
-    // 2. La squadra NON deve essere un test draft
-    // 3. Il mercato per QUELLA SPECIFICA GIORNATA della squadra deve essere ancora aperto (cioè la prima partita di quella giornata non è ancora iniziata).
-    
+    // PERMESSI MODIFICA: Il pulsante viene mostrato SOLO se l'utente loggato è l'autore E il mercato è aperto
     const btnModifica = document.getElementById("btn-recap-modifica-formazione");
     const isOwner = currentUser && ownerUserId === currentUser.uid;
+    const marketIsOpen = isMarketOpen();
 
-   // Controlliamo se il mercato è aperto per la giornata specifica di questa squadra
-    const giornataSquadra = sq.giornata !== undefined ? sq.giornata : ACTIVE_MATCHDAY;
-    const isMarketOpenForThisTeam = isMarketOpenForMatchday(giornataSquadra);
-
-    if (isOwner && isMarketOpenForThisTeam && !sq.isTest) {
+    if (isOwner && marketIsOpen && !sq.isTest) {
         btnModifica.style.display = "inline-flex";
     } else {
         btnModifica.style.display = "none";
     }
-
 
     const recapBadge = document.getElementById("recap-badge-status");
     if (sq.isTest) {
@@ -2470,12 +2460,7 @@ function avviaModificaFormazioneSalvata() {
     if (!currentRecapSquadraObj) return;
 
     const sq = currentRecapSquadraObj;
-    const giornataSquadra = sq.giornata !== undefined ? sq.giornata : 8;
 
-    if (giornataSquadra !== ACTIVE_MATCHDAY) {
-        alert("❌ Non è possibile modificare le formazioni delle giornate precedenti o concluse.");
-        return;
-    }
     // Carichiamo la rosa esistente (senza rifare il draft)
     rosa = JSON.parse(JSON.stringify(sq.rosa || { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] }));
     schierati = JSON.parse(JSON.stringify(sq.schierati || []));
