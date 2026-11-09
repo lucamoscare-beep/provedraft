@@ -422,6 +422,8 @@ auth.onAuthStateChanged(async (user) => {
                 const uData = userDoc.data();
                 displayUsername = getRealUsername(uData, user);
                 
+		controllaRuoloAdmin(uData);
+
                 if (uData && uData.photoURL) {
                     aggiornaAvatarGrafica(uData.photoURL);
                 } else {
