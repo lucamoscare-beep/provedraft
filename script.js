@@ -813,10 +813,12 @@ try {
         document.getElementById("profilo-username-title").innerText = `Profilo di ${username}`;
 
 
-// 2. GESTIONE IMMAGINE PROFILO (Usa la foto di uData, NON del currentUser)
+// 2. GESTIONE IMMAGINE PROFILO (Sicura contro elementi mancanti)
         const profImg = document.getElementById("profilo-avatar-img");
         const cameraOverlay = document.querySelector("#profilo-screen .profilo-header .fa-camera")?.parentElement;
-        const uploadTextElement = document.getElementById("upload-foto-label"); // O il selettore della scritta
+        
+        // Usiamo un controllo sicuro nel caso in cui l'elemento non esista nell'HTML
+        const uploadTextElement = document.getElementById("upload-foto-label");
 
         if (uData && uData.photoURL && uData.photoURL.trim() !== "") {
             if (profImg) profImg.src = uData.photoURL;
@@ -828,12 +830,11 @@ try {
         if (isViewingOwnProfile) {
             if (cameraOverlay) cameraOverlay.style.display = "flex";
             if (uploadTextElement) uploadTextElement.style.display = "block";
-            if (inputFileFoto) inputFileFoto.disabled = false;
         } else {
             if (cameraOverlay) cameraOverlay.style.display = "none";
             if (uploadTextElement) uploadTextElement.style.display = "none";
-            if (inputFileFoto) inputFileFoto.disabled = true;
         }
+
 
         const squadre = uData.squadre || [];
         const draftTentati = uData.draftTentati || 0;
