@@ -1007,8 +1007,11 @@ function renderMatchdayPills(selectedDay) {
 
 async function apriRecapSquadraUtenteCorrente(index) {
     const sq = userSquadre[index];
+    currentRecapSquadraIndex = index; // ?? Assegniamo l'indice corretto della squadra dell'utente
+    
     let username = "Fantallenatore";
     let ownerId = currentUser ? currentUser.uid : null;
+    
     if (currentUser) {
         try {
             const uDoc = await db.collection("utenti").doc(currentUser.uid).get();
@@ -1021,7 +1024,9 @@ async function apriRecapSquadraUtenteCorrente(index) {
             username = getRealUsername(null, currentUser);
         }
     }
-    renderRecapScreenReadOnly(sq, username, false);
+    
+    // Passiamo ownerId (currentUser.uid) così la schermata sa che il proprietario è loggato
+    renderRecapScreenReadOnly(sq, username, false, ownerId);
 }
 
 async function visualizzaSquadraGenerica(userId, nomeSquadra, giornata) {
@@ -2472,17 +2477,17 @@ function avviaModificaFormazioneSalvata() {
 
     // 1. Blocco assoluto per giornate trascorse
     if (giornataSquadra < ACTIVE_MATCHDAY) {
-        alert("âŒ Impossibile modificare le formazioni delle giornate precedenti o concluse.");
+        alert("? Impossibile modificare le formazioni delle giornate precedenti o concluse.");
         return;
     }
 
     // 2. Blocco per mercato chiuso sulla giornata della squadra
     if (!isMarketOpenForMatchday(giornataSquadra)) {
-        alert("âš ï¸ Tempo scaduto! Il mercato Ã¨ chiuso e le formazioni sono bloccate per questo turno.");
+        alert("?? Tempo scaduto! Il mercato è chiuso e le formazioni sono bloccate per questo turno.");
         return;
     }
 
-    // Carichiamo la rosa esistente (i 24 giocatori acquistati rimangono FISSI, no redraft)
+    // Carichiamo la rosa esistente (i 24 giocatori acquistati rimangono FISSI)
     rosa = JSON.parse(JSON.stringify(sq.rosa || { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] }));
     schierati = JSON.parse(JSON.stringify(sq.schierati || []));
     riserveSelezionate = JSON.parse(JSON.stringify(sq.riserveSelezionate || { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] }));
@@ -2491,18 +2496,21 @@ function avviaModificaFormazioneSalvata() {
     tempNomeSquadra = sq.nomeSquadra;
     isTestMode = false;
 
-    // Nascondiamo la sezione draft dei giocatori (non si rifÃ  l'asta)
-	const draftPanel = document.getElementById("draft-panel");
+    // ?? NASCONDIAMO COMPLETAMENTE IL PANNELLO DEL DRAFT E QUALSIASI TASTO DI RE-DRAFT
+    const draftPanel = document.getElementById("draft-panel");
     if (draftPanel) {
         draftPanel.style.display = "none";
     }
 
+    // Mostriamo la schermata principale dell'applicazione (dove ci sono campo, panchina e rosa)
     document.getElementById("welcome-screen").style.display = "none";
     document.getElementById("recap-screen").style.display = "none";
     document.getElementById("main-app").style.display = "flex";
     document.getElementById("admin-screen").style.display = "none";
+    
     document.getElementById("current-draft-team-title").innerText = `Modifica Formazione: ${sq.nomeSquadra} (G${giornataSquadra})`;
     
+    // Attiviamo i box di campo, panchina e il tasto per salvare
     document.getElementById("campo-panel-container").style.display = "block";
     document.getElementById("panchina-panel-container").style.display = "block";
     document.getElementById("conferma-container").style.display = "flex";
@@ -2511,6 +2519,7 @@ function avviaModificaFormazioneSalvata() {
     btnConferma.onclick = salvaModificaFormazioneSuCloud;
     btnConferma.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Salva Modifiche Formazione`;
 
+    // Renderizziamo la disposizione tattica e la lista dei 24 giocatori disponibili in rosa
     ripristinaCampoTattico();
     renderSlots();
     renderPanchinaGrafica();
