@@ -1007,9 +1007,11 @@ function renderMatchdayPills(selectedDay) {
 
 async function apriRecapSquadraUtenteCorrente(index) {
     const sq = userSquadre[index];
+    currentRecapSquadraIndex = index;
     let username = "Fantallenatore";
     let ownerId = currentUser ? currentUser.uid : null;
-    if (currentUser) {
+   
+ if (currentUser) {
         try {
             const uDoc = await db.collection("utenti").doc(currentUser.uid).get();
             if (uDoc.exists) {
@@ -1021,7 +1023,7 @@ async function apriRecapSquadraUtenteCorrente(index) {
             username = getRealUsername(null, currentUser);
         }
     }
-    renderRecapScreenReadOnly(sq, username, false);
+    renderRecapScreenReadOnly(sq, username, false, ownerId);
 }
 
 async function visualizzaSquadraGenerica(userId, nomeSquadra, giornata) {
@@ -2509,8 +2511,9 @@ function avviaModificaFormazioneSalvata() {
     document.getElementById("panchina-panel-container").style.display = "block";
     document.getElementById("conferma-container").style.display = "flex";
 
-    document.getElementById("btn-conferma-formazione").onclick = salvaModificaFormazioneSuCloud;
-    document.getElementById("btn-conferma-formazione").innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Salva Modifiche Formazione`;
+    const btnConferma = document.getElementById("btn-conferma-formazione");
+    btnConferma.onclick = salvaModificaFormazioneSuCloud;
+    btnConferma.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Salva Modifiche Formazione`;
 
     ripristinaCampoTattico();
     renderSlots();
@@ -2565,8 +2568,10 @@ async function salvaModificaFormazioneSuCloud() {
             alert("✅ Formazione aggiornata con successo!");
 
             // Ripristiniamo il comportamento standard per i nuovi draft futuri
+
             document.getElementById("btn-conferma-formazione").onclick = confermaFormazioneDefinitiva;
-            const draftPanel = document.getElementById("draft-panel");
+           
+	    const draftPanel = document.getElementById("draft-panel");
             if (draftPanel) draftPanel.style.display = "block";
 
             apriRecapSquadraUtenteCorrente(indexTarget);
