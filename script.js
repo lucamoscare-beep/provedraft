@@ -778,13 +778,19 @@ async function apriSchermataClassifica(giornata) {
 }
 
 async function apriProfiloUtente(targetUserId) {
-   if (!targetUserId && currentUser) targetUserId = currentUser.uid;
+    if (!targetUserId && currentUser) targetUserId = currentUser.uid;
     if (!targetUserId) return;
 
-// 🔒 Verifichiamo se l'utente sta guardando il proprio profilo o quello di un altro
-    isViewingOwnProfile = (currentUser && targetUserId === currentUser.uid);
+// Mostriamo o nascondiamo i comandi di modifica foto in base a chi è il proprietario
+        if (isViewingOwnProfile) {
+            if (cameraOverlay) cameraOverlay.style.display = "flex";
+            if (uploadTextElement) uploadTextElement.style.display = "block";
+        } else {
+            if (cameraOverlay) cameraOverlay.style.display = "none";
+            if (uploadTextElement) uploadTextElement.style.display = "none";
+        }    document.getElementById("welcome-screen").style.display = "none";
 
-    document.getElementById("welcome-screen").style.display = "none";
+
     document.getElementById("main-app").style.display = "none";
     document.getElementById("recap-screen").style.display = "none";
     document.getElementById("classifica-screen").style.display = "none";
@@ -822,9 +828,11 @@ try {
         if (isViewingOwnProfile) {
             if (cameraOverlay) cameraOverlay.style.display = "flex";
             if (uploadTextElement) uploadTextElement.style.display = "block";
+            if (inputFileFoto) inputFileFoto.disabled = false;
         } else {
             if (cameraOverlay) cameraOverlay.style.display = "none";
             if (uploadTextElement) uploadTextElement.style.display = "none";
+            if (inputFileFoto) inputFileFoto.disabled = true;
         }
 
         const squadre = uData.squadre || [];
