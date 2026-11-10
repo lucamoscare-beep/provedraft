@@ -1007,11 +1007,8 @@ function renderMatchdayPills(selectedDay) {
 
 async function apriRecapSquadraUtenteCorrente(index) {
     const sq = userSquadre[index];
-    currentRecapSquadraIndex = index; // ?? Assegniamo l'indice corretto della squadra dell'utente
-    
     let username = "Fantallenatore";
     let ownerId = currentUser ? currentUser.uid : null;
-    
     if (currentUser) {
         try {
             const uDoc = await db.collection("utenti").doc(currentUser.uid).get();
@@ -1024,9 +1021,7 @@ async function apriRecapSquadraUtenteCorrente(index) {
             username = getRealUsername(null, currentUser);
         }
     }
-    
-    // Passiamo ownerId (currentUser.uid) così la schermata sa che il proprietario è loggato
-    renderRecapScreenReadOnly(sq, username, false, ownerId);
+    renderRecapScreenReadOnly(sq, username, false);
 }
 
 async function visualizzaSquadraGenerica(userId, nomeSquadra, giornata) {
@@ -2477,17 +2472,17 @@ function avviaModificaFormazioneSalvata() {
 
     // 1. Blocco assoluto per giornate trascorse
     if (giornataSquadra < ACTIVE_MATCHDAY) {
-        alert("? Impossibile modificare le formazioni delle giornate precedenti o concluse.");
+        alert("âŒ Impossibile modificare le formazioni delle giornate precedenti o concluse.");
         return;
     }
 
     // 2. Blocco per mercato chiuso sulla giornata della squadra
     if (!isMarketOpenForMatchday(giornataSquadra)) {
-        alert("?? Tempo scaduto! Il mercato è chiuso e le formazioni sono bloccate per questo turno.");
+        alert("âš ï¸ Tempo scaduto! Il mercato Ã¨ chiuso e le formazioni sono bloccate per questo turno.");
         return;
     }
 
-    // Carichiamo la rosa esistente (i 24 giocatori acquistati rimangono FISSI)
+    // Carichiamo la rosa esistente (i 24 giocatori acquistati rimangono FISSI, no redraft)
     rosa = JSON.parse(JSON.stringify(sq.rosa || { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] }));
     schierati = JSON.parse(JSON.stringify(sq.schierati || []));
     riserveSelezionate = JSON.parse(JSON.stringify(sq.riserveSelezionate || { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] }));
@@ -2496,32 +2491,20 @@ function avviaModificaFormazioneSalvata() {
     tempNomeSquadra = sq.nomeSquadra;
     isTestMode = false;
 
-    // ?? NASCONDIAMO ESPLICITAMENTE TUTTO CIO' CHE RIGUARDA IL DRAFT
-    const colonnaSinistraDraft = document.querySelector(".desktop-col-left");
-    if (colonnaSinistraDraft) {
-        colonnaSinistraDraft.style.display = "none";
-    }
-
-    // Assicuriamoci di nascondere anche eventuali sezioni/boxini di riepilogo del draft se hanno classi o ID separati
-    document.querySelectorAll(".draft-container, .section-rosa, #players").forEach(el => {
-        // Se si trovano dentro il main app ma non servono nella modifica pulita, gestiscili qui
-    });
-
+    // Nascondiamo la sezione draft dei giocatori (non si rifÃ  l'asta)
+    document.getElementById("draft-panel").style.display = "none";
     document.getElementById("welcome-screen").style.display = "none";
     document.getElementById("recap-screen").style.display = "none";
     document.getElementById("main-app").style.display = "flex";
     document.getElementById("admin-screen").style.display = "none";
-    
     document.getElementById("current-draft-team-title").innerText = `Modifica Formazione: ${sq.nomeSquadra} (G${giornataSquadra})`;
     
-    // Attiviamo solo campo, panchina e pulsante di conferma
     document.getElementById("campo-panel-container").style.display = "block";
     document.getElementById("panchina-panel-container").style.display = "block";
     document.getElementById("conferma-container").style.display = "flex";
 
-    const btnConferma = document.getElementById("btn-conferma-formazione");
-    btnConferma.onclick = salvaModificaFormazioneSuCloud;
-    btnConferma.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Salva Modifiche Formazione`;
+    document.getElementById("btn-conferma-formazione").onclick = salvaModificaFormazioneSuCloud;
+    document.getElementById("btn-conferma-formazione").innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Salva Modifiche Formazione`;
 
     ripristinaCampoTattico();
     renderSlots();
@@ -2531,13 +2514,7 @@ function avviaModificaFormazioneSalvata() {
 }
 
 async function salvaModificaFormazioneSuCloud() {
-    const colonnaSinistraDraft = document.querySelector(".desktop-col-left");
-if (colonnaSinistraDraft) {
-    colonnaSinistraDraft.style.display = "block";
-}
-	
-	
-	if (!currentRecapSquadraObj) return;
+    if (!currentRecapSquadraObj) return;
     const giornataSquadra = currentRecapSquadraObj.giornata !== undefined ? currentRecapSquadraObj.giornata : ACTIVE_MATCHDAY;
 
     if (!isMarketOpenForMatchday(giornataSquadra)) {
