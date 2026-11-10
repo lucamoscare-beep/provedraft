@@ -138,6 +138,7 @@
 
 <!-- LANDING PAGE -->
 <div id="welcome-screen">
+    <!-- 1. COUNTDOWN SCADENZA GIORNATA -->
     <div class="deadline-banner">
         <div class="deadline-info">
             <i class="fa-solid fa-stopwatch"></i>
@@ -154,11 +155,8 @@
         </div>
     </div>
 
-
- <!-- BOX WIDGET ACCESSO RAPIDO PROFILO & MISSIONI AFFAIANCATI -->
+    <!-- 2. WIDGET RAPIDI (Profilo & Missioni) -->
     <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
-        
-        <!-- 1. Box Profilo Esistente -->
         <div class="home-profile-banner" onclick="apriProfiloUtente(currentUser.uid)" style="flex: 2; min-width: 250px; margin-bottom: 0;">
             <div class="home-profile-left">
                 <div class="home-profile-icon"><i class="fa-solid fa-id-badge"></i></div>
@@ -170,7 +168,6 @@
             <button class="home-profile-btn">Visualizza <i class="fa-solid fa-arrow-right"></i></button>
         </div>
 
-  <!-- 2. Boxino Missioni con Razzo 🚀 (Subito a fianco) -->
         <div onclick="vaiAMissioniProfilo()" class="home-profile-banner" style="flex: 1; min-width: 180px; margin-bottom: 0; cursor: pointer; background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(79, 70, 229, 0.2)); border: 1px solid #a78bfa;">
             <div class="home-profile-left">
                 <div class="home-profile-icon" style="background: rgba(139, 92, 246, 0.3); color: #c4b5fd;"><i class="fa-solid fa-rocket"></i></div>
@@ -180,9 +177,9 @@
                 </div>
             </div>
         </div>
-
     </div>
 
+    <!-- 3. INFO GETTONI E SQUADRE ISCRIZIONI -->
     <div class="top-info-row">
         <div class="top-info-card global-teams-box">
             <div style="display:flex; align-items:center; gap:12px;">
@@ -207,13 +204,50 @@
         </div>
     </div>
 
+    <!-- ================================================= -->
+    <!-- 4. IN PRIMO PIANO: CREAZIONE NUOVA SQUADRA (DRAFT) -->
+    <!-- ================================================= -->
+    <div class="welcome-card" style="border: 1px solid var(--accent-gold); background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95)); margin-bottom: 15px;">
+        <h3 style="font-size: 15px; color: var(--accent-gold); margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-shirt"></i> Crea Nuova Formazione / Inizia Draft
+        </h3>
+        <p style="color:var(--text-muted); font-size:12px; margin-bottom:12px;">
+            Inserisci il nome della tua squadra e scendi in campo sfruttando i gettoni a disposizione per questo turno.
+        </p>
+
+        <div class="tokens-status-box" style="padding: 0; background: transparent; border: none;">
+            <div id="new-team-creation-area">
+                <div style="display:flex; justify-content:center; gap:10px; margin:0 auto; flex-wrap:wrap;">
+                    <div class="input-wrapper" style="flex:1; min-width:220px;">
+                        <i class="fa-solid fa-signature input-icon"></i>
+                        <input type="text" id="new-team-name-input" class="styled-input" placeholder="es. Real Fanta 1" style="padding-left: 36px;">
+                    </div>
+                    <button onclick="preparaEAvviaDraft()" class="btn-action-primary" style="padding: 10px 20px;"><i class="fa-solid fa-play"></i> INIZIA DRAFT</button>
+                </div>
+            </div>
+            <div id="tokens-exhausted-msg" style="display:none; color:var(--accent-gold); font-weight:700; font-size:13px; text-align: center;">
+                ⚠️ Hai utilizzato tutti i 3 gettoni a disposizione per questa giornata!
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================= -->
+    <!-- 5. IN PRIMO PIANO: BANNER VOTI AGGIORNATI         -->
+    <!-- ================================================= -->
+    <div id="home-status-banner-container" style="display:none; margin-bottom: 15px;">
+        <div id="home-status-banner" class="home-status-banner" onclick="apriSchermataClassifica()">
+            <i id="home-status-icon" class="fa-solid fa-hourglass-half"></i>
+            <span id="home-status-text">In attesa dei voti della giornata</span>
+        </div>
+    </div>
+
+    <!-- 6. CARD REGOLE E DESCRIZIONE GENERALE (Più in basso) -->
     <div class="welcome-card">
         <div class="welcome-title" id="welcome-greeting">Benvenuto nel Fantacalcio Draft!</div>
         <p style="color:var(--text-muted); font-size:13px; line-height:1.6; margin-bottom:15px;">
             Sfida gli altri fantallenatori nella prossima giornata di campionato! Costruisci le tue rose tramite il sistema di Draft live, seleziona il modulo tattico e schiera i tuoi titolari prima del fischio d'inizio.
         </p>
 
-  <!-- GRIGLIA REGOLE FONDAMENTALI (4 PUNTI) -->
         <div class="rules-grid">
             <div class="rule-box">
                 <i class="fa-solid fa-coins"></i>
@@ -227,38 +261,13 @@
             </div>
             <div class="rule-box">
                 <i class="fa-solid fa-sack-dollar"></i>
-                <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">600 Crediti</h4>
+                <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">800 Crediti</h4>
                 <p style="color:var(--text-muted); font-size:11px; margin:0;">Il budget fisso a disposizione per la realizzazione e l'asta delle rose.</p>
             </div>
             <div class="rule-box">
                 <i class="fa-solid fa-ranking-star"></i>
                 <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">Classifiche e Pari Merito</h4>
                 <p style="color:var(--text-muted); font-size:11px; margin:0;">Classifiche di ogni giornata con regola spartiacque basata sul budget residuo in caso di ex aequo.</p>
-            </div>
-        </div>
-
-        <div class="tokens-status-box">
-            <div id="new-team-creation-area">
-                <p style="font-size:12px; color:#fff; font-weight:700; margin-bottom:10px;">Inserisci il nome della tua nuova squadra per iniziare un draft:</p>
-                <div style="display:flex; justify-content:center; gap:10px; max-width:450px; margin:0 auto; flex-wrap:wrap;">
-                    <div class="input-wrapper" style="flex:1; min-width:200px;">
-                        <i class="fa-solid fa-shirt input-icon"></i>
-                        <input type="text" id="new-team-name-input" class="styled-input" placeholder="es. Real Fanta 1" style="padding-left: 36px;">
-                    </div>
-                    <button onclick="preparaEAvviaDraft()" class="btn-action-primary"><i class="fa-solid fa-play"></i> INIZIA DRAFT</button>
-                </div>
-            </div>
-            <div id="tokens-exhausted-msg" style="display:none; color:var(--accent-gold); font-weight:700; font-size:13px; margin-top:10px;">
-                ⚠️ Hai utilizzato tutti i 3 gettoni a disposizione per questa giornata!
-            </div>
-        </div>
-
-
- <!-- BANNER DINAMICO STATO VOTI -->
-        <div id="home-status-banner-container" style="display:none;">
-            <div id="home-status-banner" class="home-status-banner" onclick="apriSchermataClassifica()">
-                <i id="home-status-icon" class="fa-solid fa-hourglass-half"></i>
-                <span id="home-status-text">In attesa dei voti della giornata</span>
             </div>
         </div>
 
@@ -282,8 +291,13 @@
 
 
 <!-- SCHERMATA BACKOFFICE ADMIN -->
-<div id="admin-screen" style="display: none; padding: 20px;">
-    
+
+<div id="admin-screen" style="display: none;" class="screen-container">
+    <div class="admin-header-box">
+        <h2>🛠️ Pannello di Controllo Amministratore</h2>
+        <p style="color: var(--text-muted); font-size: 12px;">Gestione centrale e backoffice della lega</p>
+    </div>    
+
     <!-- HEADER ADMIN -->
     <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(15,23,42,0.8); padding: 15px 20px; border-radius: 12px; border: 1px solid var(--accent-gold); margin-bottom: 20px;">
         <div style="display: flex; align-items: center; gap: 12px;">
@@ -524,7 +538,7 @@
                             <div class="sub-text">Budget disponibile per l'asta</div>
                         </div>
                     </div>
-                    <div class="dash-card-badge" id="budget-display">600</div>
+                    <div class="dash-card-badge" id="budget-display">800</div>
                 </div>
 
                 <div class="roles-grid-container">
