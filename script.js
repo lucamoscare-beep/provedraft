@@ -2497,9 +2497,9 @@ function avviaModificaFormazioneSalvata() {
     isTestMode = false;
 
     // ?? NASCONDIAMO ESPLICITAMENTE TUTTO CIO' CHE RIGUARDA IL DRAFT
-    const draftPanel = document.getElementById("draft-panel");
-    if (draftPanel) {
-        draftPanel.style.display = "none";
+    const colonnaSinistraDraft = document.querySelector(".desktop-col-left");
+    if (colonnaSinistraDraft) {
+        colonnaSinistraDraft.style.display = "none";
     }
 
     // Assicuriamoci di nascondere anche eventuali sezioni/boxini di riepilogo del draft se hanno classi o ID separati
