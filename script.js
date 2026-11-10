@@ -797,15 +797,19 @@ async function apriProfiloUtente(targetUserId) {
     const cameraOverlay = document.querySelector("#profilo-screen .profilo-header .fa-camera")?.parentElement;
     const avatarContainer = document.getElementById("profilo-avatar-img")?.parentElement;
     
-    if (avatarContainer) {
+
+
+        if (avatarContainer) {
         if (isViewingOwnProfile) {
             avatarContainer.style.cursor = "pointer";
             avatarContainer.title = "Cambia foto profilo";
             if (cameraOverlay) cameraOverlay.style.display = "flex";
+	    if (uploadTextElement) uploadTextElement.style.display = "block"; // Visibile sul proprio profilo
         } else {
             avatarContainer.style.cursor = "default";
             avatarContainer.title = "";
             if (cameraOverlay) cameraOverlay.style.display = "none"; // Nasconde l'icona della fotocamera se è il profilo di un altro
+	    if (uploadTextElement) uploadTextElement.style.display = "none"; // 🚫 Nasconde la scritta sul profilo degli altri
         }
     }
 
