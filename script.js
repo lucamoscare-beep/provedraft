@@ -807,48 +807,24 @@ try {
         document.getElementById("profilo-username-title").innerText = `Profilo di ${username}`;
 
 
-// Gestione visibilità icona fotocamera in base ai permessi
-    const profImg = document.getElementById("profilo-avatar-img");
-    const cameraOverlay = document.querySelector("#profilo-screen .profilo-header .fa-camera")?.parentElement;
-    const uploadTextElement = document.getElementById("upload-foto-label");
-    
+// 2. GESTIONE IMMAGINE PROFILO (Usa la foto di uData, NON del currentUser)
+        const profImg = document.getElementById("profilo-avatar-img");
+        const cameraOverlay = document.querySelector("#profilo-screen .profilo-header .fa-camera")?.parentElement;
+        const uploadTextElement = document.getElementById("upload-foto-label"); // O il selettore della scritta
 
-if (uData && uData.photoURL && uData.photoURL.trim() !== "") {
+        if (uData && uData.photoURL && uData.photoURL.trim() !== "") {
             if (profImg) profImg.src = uData.photoURL;
         } else {
             if (profImg) profImg.src = "https://via.placeholder.com/60";
         }
 
+        // Mostriamo o nascondiamo i comandi di modifica foto in base a chi è il proprietario
         if (isViewingOwnProfile) {
-            avatarContainer.style.cursor = "pointer";
-            avatarContainer.title = "Cambia foto profilo";
             if (cameraOverlay) cameraOverlay.style.display = "flex";
-	    if (uploadTextElement) uploadTextElement.style.display = "block"; // Visibile sul proprio profilo
+            if (uploadTextElement) uploadTextElement.style.display = "block";
         } else {
-            avatarContainer.style.cursor = "default";
-            avatarContainer.title = "";
-            if (cameraOverlay) cameraOverlay.style.display = "none"; // Nasconde l'icona della fotocamera se è il profilo di un altro
-	    if (uploadTextElement) uploadTextElement.style.display = "none"; // 🚫 Nasconde la scritta sul profilo degli altri
-        }
-    }
-
-
-    try {
-        const userDoc = await db.collection("utenti").doc(targetUserId).get();
-        if (!userDoc.exists) {
-            alert("Utente non trovato.");
-            tornaAllaHome();
-            return;
-        }
-
-        const uData = userDoc.data();
-        const username = getRealUsername(uData, null);
-        document.getElementById("profilo-username-title").innerText = `Profilo di ${username}`;
-
-        if (uData && uData.photoURL) {
-            aggiornaAvatarGrafica(uData.photoURL);
-        } else {
-            aggiornaAvatarGrafica(null);
+            if (cameraOverlay) cameraOverlay.style.display = "none";
+            if (uploadTextElement) uploadTextElement.style.display = "none";
         }
 
         const squadre = uData.squadre || [];
