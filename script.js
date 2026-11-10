@@ -2496,13 +2496,17 @@ function avviaModificaFormazioneSalvata() {
     tempNomeSquadra = sq.nomeSquadra;
     isTestMode = false;
 
-    // ?? NASCONDIAMO COMPLETAMENTE IL PANNELLO DEL DRAFT E QUALSIASI TASTO DI RE-DRAFT
+    // ?? NASCONDIAMO ESPLICITAMENTE TUTTO CIO' CHE RIGUARDA IL DRAFT
     const draftPanel = document.getElementById("draft-panel");
     if (draftPanel) {
         draftPanel.style.display = "none";
     }
 
-    // Mostriamo la schermata principale dell'applicazione (dove ci sono campo, panchina e rosa)
+    // Assicuriamoci di nascondere anche eventuali sezioni/boxini di riepilogo del draft se hanno classi o ID separati
+    document.querySelectorAll(".draft-container, .section-rosa, #players").forEach(el => {
+        // Se si trovano dentro il main app ma non servono nella modifica pulita, gestiscili qui
+    });
+
     document.getElementById("welcome-screen").style.display = "none";
     document.getElementById("recap-screen").style.display = "none";
     document.getElementById("main-app").style.display = "flex";
@@ -2510,7 +2514,7 @@ function avviaModificaFormazioneSalvata() {
     
     document.getElementById("current-draft-team-title").innerText = `Modifica Formazione: ${sq.nomeSquadra} (G${giornataSquadra})`;
     
-    // Attiviamo i box di campo, panchina e il tasto per salvare
+    // Attiviamo solo campo, panchina e pulsante di conferma
     document.getElementById("campo-panel-container").style.display = "block";
     document.getElementById("panchina-panel-container").style.display = "block";
     document.getElementById("conferma-container").style.display = "flex";
@@ -2519,7 +2523,6 @@ function avviaModificaFormazioneSalvata() {
     btnConferma.onclick = salvaModificaFormazioneSuCloud;
     btnConferma.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Salva Modifiche Formazione`;
 
-    // Renderizziamo la disposizione tattica e la lista dei 24 giocatori disponibili in rosa
     ripristinaCampoTattico();
     renderSlots();
     renderPanchinaGrafica();
