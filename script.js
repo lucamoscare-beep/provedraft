@@ -1137,6 +1137,14 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false, ow
 
 
 function tornaAllaHome() {
+
+// 🟢 ASSICURIAMO CHE IL DRAFT SIA VISIBILE QUANDO SI TORNA ALLA HOME
+    const colonnaSinistraDraft = document.querySelector(".desktop-col-left");
+    if (colonnaSinistraDraft) colonnaSinistraDraft.style.display = "block";
+
+    const btnCancellaTutto = document.querySelector("#conferma-container button.btn-action-danger");
+    if (btnCancellaTutto) btnCancellaTutto.style.display = "inline-flex";
+
     renderWelcomeScreen();
 }
 
@@ -1238,6 +1246,13 @@ function resetDraftState() {
     riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
     availablePlayers = [...customPlayersList];
     
+    // 🟢 RIPRISTINIAMO SEMPRE LA COLONNA DEL DRAFT E IL TASTO ROSSO QUANDO SI INIZIA UN DRAFT
+    const colonnaSinistraDraft = document.querySelector(".desktop-col-left");
+    if (colonnaSinistraDraft) colonnaSinistraDraft.style.display = "block";
+
+    const btnCancellaTutto = document.querySelector("#conferma-container button.btn-action-danger");
+    if (btnCancellaTutto) btnCancellaTutto.style.display = "inline-flex";
+
     document.getElementById("campo-panel-container").style.display = "none";
     document.getElementById("panchina-panel-container").style.display = "none";
 
