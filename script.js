@@ -1463,8 +1463,6 @@ function renderPlayers() {
     // 🟢 ATTIVA L'EFFETTO SCORRIMENTO SUI NOMI APPENA GENERATI
     refreshAllMarquees();
 }
-Cosa cambia?
-Ora, quando i 5 giocatori vengono mostrati nel pannello del draft, se il nome del calciatore è particolarmente lungo rispetto alla larghezza della scheda, partirà automaticamente l'animazione di scorrimento (marquee), alternandosi in modo fluido ed elegante esattamente come avviene per le rose e la classifica!
 
 function draft(nome) {
     if (!isTestMode && !isMarketOpen()) {
