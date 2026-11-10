@@ -2531,7 +2531,13 @@ function avviaModificaFormazioneSalvata() {
 }
 
 async function salvaModificaFormazioneSuCloud() {
-    if (!currentRecapSquadraObj) return;
+    const colonnaSinistraDraft = document.querySelector(".desktop-col-left");
+if (colonnaSinistraDraft) {
+    colonnaSinistraDraft.style.display = "block";
+}
+	
+	
+	if (!currentRecapSquadraObj) return;
     const giornataSquadra = currentRecapSquadraObj.giornata !== undefined ? currentRecapSquadraObj.giornata : ACTIVE_MATCHDAY;
 
     if (!isMarketOpenForMatchday(giornataSquadra)) {
