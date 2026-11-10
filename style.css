@@ -58,7 +58,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 }
 
 .marquee-text.scroll-active {
-    animation: marqueeScroll linear infinite alternate;
+    animation: marqueeScroll var(--scroll-duration, 5s) linear infinite alternate;
 }
 
 @keyframes marqueeScroll {
@@ -836,6 +836,8 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     font-weight: 900; 
     font-size: 11px; 
     color: #fff; 
+    white-space: nowrap;
+    overflow: hidden;
     margin-bottom: 2px; 
     width: 100%;
 }

@@ -87,6 +87,8 @@ function initMarquee(el, isInline = false) {
         if (textWidth > containerWidth && containerWidth > 0) {
             const distance = containerWidth - textWidth - 5;
             textEl.style.setProperty('--scroll-distance', `${distance}px`);
+	    const duration = Math.max(3, Math.abs(distance) * 0.04);
+            textEl.style.setProperty('--scroll-duration', `${duration}s`);
             textEl.classList.add('scroll-active');
         } else {
             textEl.style.removeProperty('--scroll-distance');
