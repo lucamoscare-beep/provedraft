@@ -35,6 +35,7 @@ let currentUser = null;
 let customPlayersList = [];
 let availablePlayers = [];
 let budget = 800;
+let isViewingOwnProfile = false;
 
 const limits = { Portiere: 3, Difensore: 7, Centrocampista: 8, Attaccante: 6 };
 const roleIcons = {
@@ -780,6 +781,9 @@ async function apriProfiloUtente(targetUserId) {
    if (!targetUserId && currentUser) targetUserId = currentUser.uid;
     if (!targetUserId) return;
 
+// 🔒 Verifichiamo se l'utente sta guardando il proprio profilo o quello di un altro
+    isViewingOwnProfile = (currentUser && targetUserId === currentUser.uid);
+
     document.getElementById("welcome-screen").style.display = "none";
     document.getElementById("main-app").style.display = "none";
     document.getElementById("recap-screen").style.display = "none";
@@ -788,6 +792,23 @@ async function apriProfiloUtente(targetUserId) {
     document.getElementById("admin-screen").style.display = "none";
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+// Gestione visibilità icona fotocamera in base ai permessi
+    const cameraOverlay = document.querySelector("#profilo-screen .profilo-header .fa-camera")?.parentElement;
+    const avatarContainer = document.getElementById("profilo-avatar-img")?.parentElement;
+    
+    if (avatarContainer) {
+        if (isViewingOwnProfile) {
+            avatarContainer.style.cursor = "pointer";
+            avatarContainer.title = "Cambia foto profilo";
+            if (cameraOverlay) cameraOverlay.style.display = "flex";
+        } else {
+            avatarContainer.style.cursor = "default";
+            avatarContainer.title = "";
+            if (cameraOverlay) cameraOverlay.style.display = "none"; // Nasconde l'icona della fotocamera se è il profilo di un altro
+        }
+    }
+
 
     try {
         const userDoc = await db.collection("utenti").doc(targetUserId).get();
@@ -2220,7 +2241,15 @@ if (isSenzaVoto) {
 // ==========================================
 
 async function caricaNuovaFotoProfiloBase64(event) {
-    const file = event.target.files[0];
+    
+// 🔒 Blocco di sicurezza: se non stiamo guardando il nostro profilo, blocca l'azione
+    if (!isViewingOwnProfile) {
+        alert("⛔ Non puoi modificare la foto del profilo di un altro utente.");
+        event.target.value = "";
+        return;
+    }
+
+const file = event.target.files[0];
     if (!file) return;
 
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
