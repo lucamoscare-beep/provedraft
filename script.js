@@ -781,16 +781,11 @@ async function apriProfiloUtente(targetUserId) {
     if (!targetUserId && currentUser) targetUserId = currentUser.uid;
     if (!targetUserId) return;
 
-// Mostriamo o nascondiamo i comandi di modifica foto in base a chi è il proprietario
-        if (isViewingOwnProfile) {
-            if (cameraOverlay) cameraOverlay.style.display = "flex";
-            if (uploadTextElement) uploadTextElement.style.display = "block";
-        } else {
-            if (cameraOverlay) cameraOverlay.style.display = "none";
-            if (uploadTextElement) uploadTextElement.style.display = "none";
-        }    document.getElementById("welcome-screen").style.display = "none";
+    // 1. Verifichiamo subito se l'utente sta guardando il proprio profilo o quello di un altro
+    isViewingOwnProfile = (currentUser && targetUserId === currentUser.uid);
 
-
+    // 2. Nascondiamo tutte le schermate e mostriamo quella del profilo
+    document.getElementById("welcome-screen").style.display = "none";
     document.getElementById("main-app").style.display = "none";
     document.getElementById("recap-screen").style.display = "none";
     document.getElementById("classifica-screen").style.display = "none";
@@ -799,8 +794,8 @@ async function apriProfiloUtente(targetUserId) {
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-try {
-        // 1. SCARICHIAMO PRIMA I DATI DELL'UTENTE DEL PROFILO TARGET
+    try {
+        // 3. Scarichiamo i dati dell'utente dal database
         const userDoc = await db.collection("utenti").doc(targetUserId).get();
         if (!userDoc.exists) {
             alert("Utente non trovato.");
@@ -808,17 +803,14 @@ try {
             return;
         }
 
-	const uData = userDoc.data();
+        const uData = userDoc.data();
         const username = getRealUsername(uData, null);
         document.getElementById("profilo-username-title").innerText = `Profilo di ${username}`;
 
-
-// 2. GESTIONE IMMAGINE PROFILO (Sicura contro elementi mancanti)
+        // 4. Gestione sicura dell'immagine profilo e dei permessi di modifica
         const profImg = document.getElementById("profilo-avatar-img");
         const cameraOverlay = document.querySelector("#profilo-screen .profilo-header .fa-camera")?.parentElement;
-        
-        // Usiamo un controllo sicuro nel caso in cui l'elemento non esista nell'HTML
-        const uploadTextElement = document.getElementById("upload-foto-label");
+        const uploadTextElement = document.getElementById("upload-foto-label"); // Opzionale se presente nell'HTML
 
         if (uData && uData.photoURL && uData.photoURL.trim() !== "") {
             if (profImg) profImg.src = uData.photoURL;
@@ -834,7 +826,6 @@ try {
             if (cameraOverlay) cameraOverlay.style.display = "none";
             if (uploadTextElement) uploadTextElement.style.display = "none";
         }
-
 
         const squadre = uData.squadre || [];
         const draftTentati = uData.draftTentati || 0;
@@ -996,7 +987,6 @@ try {
         document.getElementById("stat-podi-argento").innerText = argenti;
         document.getElementById("stat-podi-bronzo").innerText = bronzi;
 
-        // Renderizziamo i traguardi (es. Primo Scatto)
         renderizzaTraguardi(uData);
 
     } catch (err) {
@@ -1004,7 +994,6 @@ try {
         tornaAllaHome();
     }
 }
-
 async function incrementaDraftTentatiCloud() {
     if (!currentUser) return;
     try {
