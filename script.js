@@ -2511,6 +2511,13 @@ function avviaModificaFormazioneSalvata() {
     document.getElementById("panchina-panel-container").style.display = "block";
     document.getElementById("conferma-container").style.display = "flex";
 
+   // 🚫 NASCONDIAMO SPECIFICAMENTE IL PULSANTE ROSSO DI CANCELLAZIONE/RICOMINCIA DRAFT
+    const btnCancellaTutto = document.querySelector("#conferma-container button.btn-action-danger");
+    if (btnCancellaTutto) {
+        btnCancellaTutto.style.display = "none";
+    }
+
+
     const btnConferma = document.getElementById("btn-conferma-formazione");
     btnConferma.onclick = salvaModificaFormazioneSuCloud;
     btnConferma.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Salva Modifiche Formazione`;
@@ -2524,6 +2531,13 @@ function avviaModificaFormazioneSalvata() {
 
 async function salvaModificaFormazioneSuCloud() {
     
+   
+    const btnCancellaTutto = document.querySelector("#conferma-container button.btn-action-danger");
+    if (btnCancellaTutto) {
+    btnCancellaTutto.style.display = "inline-flex"; // o "block" a seconda di come è strutturato nel tuo CSS
+}
+
+
     const colonnaSinistraDraft = document.querySelector(".desktop-col-left");
     if (colonnaSinistraDraft) {
     colonnaSinistraDraft.style.display = "block";
