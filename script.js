@@ -2493,17 +2493,17 @@ function avviaModificaFormazioneSalvata() {
     tempNomeSquadra = sq.nomeSquadra;
     isTestMode = false;
 
-    // Nascondiamo solo il box di scelta interattiva del draft, mantenendo visibili i contatori e la rosa
-    const draftPanel = document.getElementById("draft-panel");
-    if (draftPanel) draftPanel.style.display = "none";
-
-    const colonnaSinistra = document.querySelector(".desktop-col-left");
-    if (colonnaSinistra) colonnaSinistra.style.display = "block";
+   // 🚫 NASCONDIAMO INTERAMENTE LA COLONNA DI SINISTRA DEL DRAFT (Crediti, ruoli, box rossi e pulsanti di reset)
+    const colonnaSinistraDraft = document.querySelector(".desktop-col-left");
+    if (colonnaSinistraDraft) {
+        colonnaSinistraDraft.style.display = "none";
+    }
 
     document.getElementById("welcome-screen").style.display = "none";
     document.getElementById("recap-screen").style.display = "none";
     document.getElementById("main-app").style.display = "flex";
     document.getElementById("admin-screen").style.display = "none";
+
     document.getElementById("current-draft-team-title").innerText = `Modifica Formazione: ${sq.nomeSquadra} (G${giornataSquadra})`;
     
     // FORZIAMO LA VISIBILITÀ DEL CAMPO E DELLA PANCHINA (Risolve il problema del campo che sparisce)
@@ -2523,6 +2523,12 @@ function avviaModificaFormazioneSalvata() {
 }
 
 async function salvaModificaFormazioneSuCloud() {
+    
+    const colonnaSinistraDraft = document.querySelector(".desktop-col-left");
+    if (colonnaSinistraDraft) {
+    colonnaSinistraDraft.style.display = "block";
+}
+
     if (!currentRecapSquadraObj) return;
     const giornataSquadra = currentRecapSquadraObj.giornata !== undefined ? currentRecapSquadraObj.giornata : ACTIVE_MATCHDAY;
 
