@@ -2492,7 +2492,11 @@ function avviaModificaFormazioneSalvata() {
     isTestMode = false;
 
     // Nascondiamo la sezione draft dei giocatori (non si rifà l'asta)
-    document.getElementById("draft-panel").style.display = "none";
+	const draftPanel = document.getElementById("draft-panel");
+    if (draftPanel) {
+        draftPanel.style.display = "none";
+    }
+
     document.getElementById("welcome-screen").style.display = "none";
     document.getElementById("recap-screen").style.display = "none";
     document.getElementById("main-app").style.display = "flex";
@@ -2503,8 +2507,9 @@ function avviaModificaFormazioneSalvata() {
     document.getElementById("panchina-panel-container").style.display = "block";
     document.getElementById("conferma-container").style.display = "flex";
 
-    document.getElementById("btn-conferma-formazione").onclick = salvaModificaFormazioneSuCloud;
-    document.getElementById("btn-conferma-formazione").innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Salva Modifiche Formazione`;
+    const btnConferma = document.getElementById("btn-conferma-formazione");
+    btnConferma.onclick = salvaModificaFormazioneSuCloud;
+    btnConferma.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Salva Modifiche Formazione`;
 
     ripristinaCampoTattico();
     renderSlots();
