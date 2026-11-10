@@ -2491,14 +2491,20 @@ function avviaModificaFormazioneSalvata() {
     tempNomeSquadra = sq.nomeSquadra;
     isTestMode = false;
 
-    // Nascondiamo la sezione draft dei giocatori (non si rifà l'asta)
-    document.getElementById("draft-panel").style.display = "none";
+    // Nascondiamo solo il box di scelta interattiva del draft, mantenendo visibili i contatori e la rosa
+    const draftPanel = document.getElementById("draft-panel");
+    if (draftPanel) draftPanel.style.display = "none";
+
+    const colonnaSinistra = document.querySelector(".desktop-col-left");
+    if (colonnaSinistra) colonnaSinistra.style.display = "block";
+
     document.getElementById("welcome-screen").style.display = "none";
     document.getElementById("recap-screen").style.display = "none";
     document.getElementById("main-app").style.display = "flex";
     document.getElementById("admin-screen").style.display = "none";
     document.getElementById("current-draft-team-title").innerText = `Modifica Formazione: ${sq.nomeSquadra} (G${giornataSquadra})`;
     
+    // FORZIAMO LA VISIBILITÀ DEL CAMPO E DELLA PANCHINA (Risolve il problema del campo che sparisce)
     document.getElementById("campo-panel-container").style.display = "block";
     document.getElementById("panchina-panel-container").style.display = "block";
     document.getElementById("conferma-container").style.display = "flex";
@@ -2537,7 +2543,6 @@ async function salvaModificaFormazioneSuCloud() {
 
             let squadreEsistenti = docSnapshot.data().squadre || [];
 
-            // Identifichiamo l'indice esatto della squadra nel cloud
             let indexTarget = currentRecapSquadraIndex;
             if (indexTarget === -1 || indexTarget >= squadreEsistenti.length) {
                 indexTarget = squadreEsistenti.findIndex(s => s.nomeSquadra.toLowerCase() === tempNomeSquadra.toLowerCase() && (s.giornata !== undefined ? s.giornata : ACTIVE_MATCHDAY) === giornataSquadra);
@@ -2548,7 +2553,6 @@ async function salvaModificaFormazioneSuCloud() {
                 return;
             }
 
-            // Aggiorniamo solo la disposizione tattica (titolari e panchina)
             squadreEsistenti[indexTarget].schierati = JSON.parse(JSON.stringify(schierati));
             squadreEsistenti[indexTarget].riserveSelezionate = JSON.parse(JSON.stringify(riserveSelezionate));
             squadreEsistenti[indexTarget].moduloSelezionato = moduloSelezionato;
@@ -2560,11 +2564,11 @@ async function salvaModificaFormazioneSuCloud() {
 
             alert("✅ Formazione aggiornata con successo!");
 
-            // Ripristiniamo il comportamento standard del tasto di conferma per i nuovi draft
+            // Ripristiniamo il comportamento standard per i nuovi draft futuri
             document.getElementById("btn-conferma-formazione").onclick = confermaFormazioneDefinitiva;
-            document.getElementById("draft-panel").style.display = "block";
+            const draftPanel = document.getElementById("draft-panel");
+            if (draftPanel) draftPanel.style.display = "block";
 
-            // Riapriamo il recap aggiornato
             apriRecapSquadraUtenteCorrente(indexTarget);
 
         } catch (err) {
@@ -2572,7 +2576,6 @@ async function salvaModificaFormazioneSuCloud() {
         }
     }
 }
-
 
 // ==========================================
 // LOGICA PANNELLO ADMIN & BACKOFFICE
