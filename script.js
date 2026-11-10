@@ -793,13 +793,32 @@ async function apriProfiloUtente(targetUserId) {
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
+try {
+        // 1. SCARICHIAMO PRIMA I DATI DELL'UTENTE DEL PROFILO TARGET
+        const userDoc = await db.collection("utenti").doc(targetUserId).get();
+        if (!userDoc.exists) {
+            alert("Utente non trovato.");
+            tornaAllaHome();
+            return;
+        }
+
+	const uData = userDoc.data();
+        const username = getRealUsername(uData, null);
+        document.getElementById("profilo-username-title").innerText = `Profilo di ${username}`;
+
+
 // Gestione visibilità icona fotocamera in base ai permessi
+    const profImg = document.getElementById("profilo-avatar-img");
     const cameraOverlay = document.querySelector("#profilo-screen .profilo-header .fa-camera")?.parentElement;
-    const avatarContainer = document.getElementById("profilo-avatar-img")?.parentElement;
+    const uploadTextElement = document.getElementById("upload-foto-label");
     
 
+if (uData && uData.photoURL && uData.photoURL.trim() !== "") {
+            if (profImg) profImg.src = uData.photoURL;
+        } else {
+            if (profImg) profImg.src = "https://via.placeholder.com/60";
+        }
 
-        if (avatarContainer) {
         if (isViewingOwnProfile) {
             avatarContainer.style.cursor = "pointer";
             avatarContainer.title = "Cambia foto profilo";
