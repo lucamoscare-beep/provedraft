@@ -34,7 +34,7 @@ let CURRENT_MATCHDAY_END = null;
 let currentUser = null;
 let customPlayersList = [];
 let availablePlayers = [];
-let budget = 800;
+let budget = 600;
 
 const limits = { Portiere: 3, Difensore: 7, Centrocampista: 8, Attaccante: 6 };
 const roleIcons = {
@@ -823,8 +823,8 @@ async function apriProfiloUtente(targetUserId) {
             puntiTotali += pts;
             if (pts > migliorPunteggio) migliorPunteggio = pts;
 
-            let budgetResiduo = sq.budget !== undefined && sq.budget !== null ? sq.budget : 800;
-            let spesoPerQuestaSquadra = 800 - budgetResiduo;
+            let budgetResiduo = sq.budget !== undefined && sq.budget !== null ? sq.budget : 600;
+            let spesoPerQuestaSquadra = 600 - budgetResiduo;
             if (spesoPerQuestaSquadra < 0) spesoPerQuestaSquadra = 0;
             budgetSpesoTotale += spesoPerQuestaSquadra;
 
@@ -1228,7 +1228,7 @@ async function preparaEAvviaDraft() {
 }
 
 function resetDraftState() {
-    budget = 800;
+    budget = 600;
     turno = 0;
     moduloSelezionato = "";
     rosa = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
@@ -2487,7 +2487,7 @@ function avviaModificaFormazioneSalvata() {
     schierati = JSON.parse(JSON.stringify(sq.schierati || []));
     riserveSelezionate = JSON.parse(JSON.stringify(sq.riserveSelezionate || { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] }));
     moduloSelezionato = sq.moduloSelezionato;
-    budget = sq.budget !== undefined ? sq.budget : 800;
+    budget = sq.budget !== undefined ? sq.budget : 600;
     tempNomeSquadra = sq.nomeSquadra;
     isTestMode = false;
 
