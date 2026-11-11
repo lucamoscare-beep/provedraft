@@ -2714,31 +2714,143 @@ async function adminEseguiRicalcoloGiornata() {
         return;
     }
     
-    // Richiama la funzione di ricalcolo massivo dei voti
-    if (typeof ricalcolaTuttaLaGiornata === 'function') {
-        await ricalcolaTuttaLaGiornata(gInput);
-    } else {
-        alert("Funzione di ricalcolo non ancora definita nel sistema.");
-    }
-}
-
-function adminForzaStatoMercato(apri) {
-    if (apri) {
-        alert("Funzione di override: Mercato forzato APERTO per i test.");
-        // Qui potrai aggiungere eventuali flag globali di test se necessario
-    } else {
-        alert("Funzione di override: Mercato forzato CHIUSO.");
-    }
+    await ricalcolaTuttaLaGiornata(gInput);
 }
 
 async function ricalcolaTuttaLaGiornata(giornata) {
-    if (!confirm(`Vuoi forzare il ricalcolo dei punteggi per tutte le squadre della Giornata ${giornata}?`)) return;
+    if (!confirm(`Vuoi forzare il ricalcolo e la sovrascrittura dei punteggi per TUTTE le squadre della Giornata ${giornata}?`)) return;
+    
     try {
         alert(`🔄 Avvio ricalcolo massivo per la Giornata ${giornata}...`);
-        await verificaECalcolaVotiAutomaticamente();
-        alert("✅ Ricalcolo completato con successo!");
+        
+        // 1. Verifichiamo e carichiamo il file Excel specifico della giornata scelta dall'admin
+        const fileName = `voti_ok${giornata}.xlsx`;
+        let fileResponse;
+        try {
+            fileResponse = await fetch(fileName);
+            if (!fileResponse.ok) throw new Error("File non trovato");
+        } catch (e) {
+            alert(`❌ Impossibile trovare il file "${fileName}" nella directory principale. Assicurati di averlo caricato.`);
+            return;
+        }
+
+        let arrayBuffer = await fileResponse.arrayBuffer();
+        let workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
+        let nomeFoglioVoti = workbook.SheetNames.find(s => s.trim().toLowerCase() === "voti") || workbook.SheetNames[0];
+        let rows = XLSX.utils.sheet_to_json(workbook.Sheets[nomeFoglioVoti]);
+
+        const snapshot = await db.collection("utenti").get();
+        let squadreAggiornateTotali = 0;
+
+        // 2. Scorriamo tutti gli utenti nel database Firebase
+        for (const docUser of snapshot.docs) {
+            let uData = docUser.data();
+            let squadreArr = uData.squadre || [];
+            let modificato = false;
+
+            squadreArr.forEach(sq => {
+                let giornataSquadra = sq.giornata !== undefined ? sq.giornata : 8;
+                
+                // Ricalcoliamo FORZATAMENTE tutte le squadre che corrispondono alla giornata scelta dall'admin
+                if (giornataSquadra === giornata) {
+                    let votiObj = {};
+                    let totaleSquadra = 0;
+                    let riserveGiaSubentrate = new Set();
+
+                    const tutteLeRiserve = Object.values(sq.riserveSelezionate || {}).flat();
+                    const tuttiGiocatori = [...(sq.schierati || []), ...tutteLeRiserve];
+
+                    tuttiGiocatori.forEach(p => {
+                        let nomePulito = p.nome.trim().toLowerCase();
+                        let matchRow = rows.find(row => {
+                            let nomeInRow = String(row.nome || row.Nome || row.NOME || row.calciatore || row.Calciatore || row.Giocatore || "").trim().toLowerCase();
+                            return nomeInRow === nomePulito || nomeInRow.includes(nomePulito) || nomePulito.includes(nomeInRow);
+                        });
+
+                        if (matchRow) {
+                            let rawVotoPuro = parseColumnVal(matchRow, ["voto", "Voto", "VOTO"]);
+                            let rawFanta = parseColumnVal(matchRow, ["fantavoto", "Fantavoto", "FANTAVOTO"]);
+                            let haGiocato = (rawVotoPuro > 0);
+
+                            if (haGiocato) {
+                                votiObj[p.nome] = {
+                                    voto: rawVotoPuro,
+                                    fantavoto: rawFanta,
+                                    sv: false,
+                                    gf: parseColumnVal(matchRow, ["gf"]),
+                                    gs: parseColumnVal(matchRow, ["gs"]),
+                                    ass: parseColumnVal(matchRow, ["ass"]),
+                                    au: parseColumnVal(matchRow, ["au"]),
+                                    esp: parseColumnVal(matchRow, ["esp", "Esp"]),
+                                    amm: parseColumnVal(matchRow, ["amm", "Amm"]),
+                                    rp: parseColumnVal(matchRow, ["rp"]),
+                                    rs: parseColumnVal(matchRow, ["rs"]),
+                                    rf: parseColumnVal(matchRow, ["rf"])
+                                };
+                                return;
+                            }
+                        }
+                        votiObj[p.nome] = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
+                    });
+
+                    // Gestione titolari e subentri panchina
+                    (sq.schierati || []).forEach(tit => {
+                        let vInfo = votiObj[tit.nome];
+                        let eff = vInfo;
+                        let isSenzaVoto = false;
+
+                        if (!vInfo || vInfo.sv === true || vInfo.voto === undefined || vInfo.voto === null || vInfo.voto === 0) {
+                            isSenzaVoto = true;
+                        }
+
+                        if (isSenzaVoto) {
+                            let riserveRuolo = (sq.riserveSelezionate || {})[tit.ruolo] || [];
+                            let riservaValida = null;
+
+                            for (let ris of riserveRuolo) {
+                                if (!riserveGiaSubentrate.has(ris.nome)) {
+                                    let risInfo = votiObj[ris.nome];
+                                    let risHaVotoValido = risInfo && risInfo.sv !== true && risInfo.voto > 0;
+                                    if (risHaVotoValido) {
+                                        riservaValida = { obj: ris, info: risInfo };
+                                        riserveGiaSubentrate.add(ris.nome);
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (riservaValida) {
+                                eff = riservaValida.info;
+                            } else {
+                                eff = { voto: 0, fantavoto: 0, sv: true };
+                            }
+                        }
+                        totaleSquadra += (eff.fantavoto > 0 ? eff.fantavoto : 0);
+                    });
+
+                    // Sovrascriviamo i vecchi dati con quelli nuovi ricalcolati
+                    sq.votiGiornata = votiObj;
+                    sq.punteggioTotale = totaleSquadra;
+                    modificato = true;
+                    squadreAggiornateTotali++;
+                }
+            });
+
+            // Se l'utente ha squadre in quella giornata, aggiorniamo il documento su Firestore
+            if (modificato) {
+                await db.collection("utenti").doc(docUser.id).update({ squadre: squadreArr });
+            }
+        }
+
+        // Ricarichiamo i dati dell'utente corrente se loggato
+        if (currentUser) {
+            await caricaDatiUtenteCloud();
+        }
+
+        alert(`✅ Ricalcolo completato con successo! Aggiornate ${squadreAggiornateTotali} squadre per la Giornata ${giornata}.`);
         caricaStatisticheAdmin();
+
     } catch (err) {
-        alert("❌ Errore durante il ricalcolo: " + err.message);
+        alert("❌ Errore durante il ricalcolo massivo: " + err.message);
     }
 }
