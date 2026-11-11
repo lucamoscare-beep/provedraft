@@ -2555,6 +2555,30 @@ function avviaModificaFormazioneSalvata() {
     document.getElementById("panchina-panel-container").style.display = "block";
     document.getElementById("conferma-container").style.display = "flex";
 
+   // 🟢 INSERIAMO IL TASTO "SVUOTA CAMPO" SOLO DURANTE LA MODIFICA
+    confermaContainer.innerHTML = `
+        <button type="button" onclick="resettaFormazioneCorrente()" class="btn-action-danger" style="flex: 1; padding: 12px; font-size: 11px; font-weight: 800; text-transform: uppercase;">
+            <i class="fa-solid fa-rotate-left"></i> Svuota Campo
+        </button>
+        <button type="button" id="btn-conferma-formazione" onclick="salvaModificaFormazioneSuCloud()" class="btn-action-primary" style="flex: 2; padding: 12px; font-size: 11px;">
+            <i class="fa-solid fa-floppy-disk"></i> Salva Modifiche Formazione
+        </button>
+    `;
+
+    const btnCancellaTutto = document.querySelector("#conferma-container button.btn-action-danger");
+    if (btnCancellaTutto) btnCancellaTutto.style.display = "none";
+
+    ripristinaCampoTattico();
+    renderSlots();
+    renderPanchinaGrafica();
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+
+
+
+
    // 🚫 NASCONDIAMO SPECIFICAMENTE IL PULSANTE ROSSO DI CANCELLAZIONE/RICOMINCIA DRAFT
     const btnCancellaTutto = document.querySelector("#conferma-container button.btn-action-danger");
     if (btnCancellaTutto) {
