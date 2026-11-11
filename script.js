@@ -2854,3 +2854,18 @@ async function ricalcolaTuttaLaGiornata(giornata) {
         alert("❌ Errore durante il ricalcolo massivo: " + err.message);
     }
 }
+
+function resettaFormazioneCorrente() {
+    if (confirm("Vuoi davvero svuotare il campo e la panchina? I giocatori torneranno disponibili nella lista della rosa per essere riposizionati.")) {
+        // Svuotiamo solo i titolari e le riserve schierate, la rosa (i 24 acquistati) resta intatta!
+        schierati = [];
+        riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
+
+        // Aggiorniamo la grafica del campo, delle slot e della panchina
+        ripristinaCampoTattico();
+        renderSlots();
+        renderPanchinaGrafica();
+
+        alert("🔄 Formazione azzerata con successo. Puoi iniziare a rischierare i giocatori.");
+    }
+}
