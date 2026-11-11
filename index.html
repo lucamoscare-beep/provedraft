@@ -614,11 +614,18 @@
             </div>
         </div>
 
-        <!-- PULSANTI FINALI IN BASSO -->
-        <div id="conferma-container" class="bottom-actions-container" style="display: none;">
-            <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-trash-can"></i> Cancella tutto e ricomincia il draft</button>
-            <button id="btn-conferma-formazione" class="btn-action-primary" onclick="confermaFormazioneDefinitiva()"><i class="fa-solid fa-lock"></i> Conferma e salva la tua formazione</button>
-        </div>
+        <div id="conferma-container" style="display: none; gap: 10px; margin-top: 15px; width: 100%;">
+
+    <!-- Pulsante per resettare il campo/panchina -->
+    <button type="button" onclick="resettaFormazioneCorrente()" class="btn-action-danger" style="flex: 1; padding: 12px; font-size: 11px; font-weight: 800; text-transform: uppercase;">
+        <i class="fa-solid fa-rotate-left"></i> Svuota Campo
+    </button>
+    
+    <!-- Pulsante di conferma/salvataggio -->
+    <button type="button" id="btn-conferma-formazione" onclick="confermaFormazioneDefinitiva()" class="btn-action-primary" style="flex: 2; padding: 12px; font-size: 11px;">
+        <i class="fa-solid fa-lock"></i> Conferma Formazione
+    </button>
+	</div>
     </div>
 </div>
 
@@ -664,6 +671,17 @@
             </button>
         </div>
     </div>
+
+
+<div style="display: flex; gap: 10px; margin-top: 15px;">
+    <button onclick="resettaFormazioneCorrente()" class="btn-action-danger" style="flex: 1; padding: 10px; font-size: 11px;">
+        <i class="fa-solid fa-rotate-left"></i> Resetta Formazione
+    </button>
+    <button id="btn-conferma-formazione" onclick="salvaModificaFormazioneSuCloud()" class="btn-action-primary" style="flex: 2; padding: 10px; font-size: 11px;">
+        <i class="fa-solid fa-floppy-disk"></i> Salva Modifiche Formazione
+    </button>
+</div>
+
 
     <div style="text-align: center; margin-bottom: 15px;">
         <p style="color: var(--text-muted); font-size:12px;">Modulo Tattico: <strong id="recap-modulo-title" style="color: #fff;">-</strong></p>
