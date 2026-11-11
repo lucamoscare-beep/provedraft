@@ -2553,7 +2553,8 @@ function avviaModificaFormazioneSalvata() {
     // FORZIAMO LA VISIBILITÀ DEL CAMPO E DELLA PANCHINA (Risolve il problema del campo che sparisce)
     document.getElementById("campo-panel-container").style.display = "block";
     document.getElementById("panchina-panel-container").style.display = "block";
-    document.getElementById("conferma-container").style.display = "flex";
+    const confermaContainer = document.getElementById("conferma-container");
+    confermaContainer.style.display = "flex";
 
    // 🟢 INSERIAMO IL TASTO "SVUOTA CAMPO" SOLO DURANTE LA MODIFICA
     confermaContainer.innerHTML = `
