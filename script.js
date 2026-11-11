@@ -57,8 +57,8 @@ let activeTeamIndex = -1;
 let isVotiOkAvailable = false;
 let currentSelectedMatchday = ACTIVE_MATCHDAY; 
 
-let currentRecapSquadraObj = null; // Memorizza la squadra visualizzata nella schermata recap
-let currentRecapSquadraIndex = -1;  // Memorizza l'indice della squadra dell'utente loggato (-1 se di altri)
+let currentRecapSquadraObj = null;
+let currentRecapSquadraIndex = -1;
 
 let tempNomeSquadra = "";
 let isTestMode = false;
@@ -69,7 +69,6 @@ let riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Atta
 let turno = 0;
 let moduloSelezionato = "";
 
-// Funzione di utilità per attivare il marquee solo se il testo è più lungo del contenitore
 function initMarquee(el, isInline = false) {
     if (!el) return;
     el.classList.add('marquee-container');
@@ -244,18 +243,8 @@ function isMarketOpen() {
 
 function isMarketOpenForMatchday(giornata) {
     if (isTestMode) return true;
-    
-    // Se la giornata della squadra è precedente a quella attiva, il mercato è CHIUSO e immutabile!
-    if (giornata < ACTIVE_MATCHDAY) {
-        return false;
-    }
-    
-    // Se è la giornata corrente, verifica se le partite sono già iniziate
-    if (giornata === ACTIVE_MATCHDAY) {
-        return isMarketOpen();
-    }
-    
-    // Se è una giornata futura rispetto a quella attiva, il mercato è aperto
+    if (giornata < ACTIVE_MATCHDAY) return false;
+    if (giornata === ACTIVE_MATCHDAY) return isMarketOpen();
     return true;
 }
 
@@ -289,13 +278,11 @@ function initCountdown() {
         const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const secs = Math.floor((diff % (1000 * 60)) / 1000);
 
-        // Aggiorna Home
         ["w-cd-days"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(days).padStart(2, '0'); });
         ["w-cd-hours"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(hours).padStart(2, '0'); });
         ["w-cd-mins"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(mins).padStart(2, '0'); });
         ["w-cd-secs"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(secs).padStart(2, '0'); });
         
-        // Aggiorna Recap
         ["recap-cd-days"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(days).padStart(2, '0'); });
         ["recap-cd-hours"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(hours).padStart(2, '0'); });
         ["recap-cd-mins"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(mins).padStart(2, '0'); });
@@ -308,7 +295,6 @@ function initCountdown() {
     updateTimer();
     setInterval(updateTimer, 1000);
 }
-
 
 document.addEventListener("DOMContentLoaded", async () => {
     await inizializzaGiornataEDeadlineDinamica();
@@ -783,10 +769,8 @@ async function apriProfiloUtente(targetUserId) {
     if (!targetUserId && currentUser) targetUserId = currentUser.uid;
     if (!targetUserId) return;
 
-    // 1. Verifichiamo subito se l'utente sta guardando il proprio profilo o quello di un altro
     isViewingOwnProfile = (currentUser && targetUserId === currentUser.uid);
 
-    // 2. Nascondiamo tutte le schermate e mostriamo quella del profilo
     document.getElementById("welcome-screen").style.display = "none";
     document.getElementById("main-app").style.display = "none";
     document.getElementById("recap-screen").style.display = "none";
@@ -797,7 +781,6 @@ async function apriProfiloUtente(targetUserId) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     try {
-        // 3. Scarichiamo i dati dell'utente dal database
         const userDoc = await db.collection("utenti").doc(targetUserId).get();
         if (!userDoc.exists) {
             alert("Utente non trovato.");
@@ -809,10 +792,9 @@ async function apriProfiloUtente(targetUserId) {
         const username = getRealUsername(uData, null);
         document.getElementById("profilo-username-title").innerText = `Profilo di ${username}`;
 
-        // 4. Gestione sicura dell'immagine profilo e dei permessi di modifica
         const profImg = document.getElementById("profilo-avatar-img");
         const cameraOverlay = document.querySelector("#profilo-screen .profilo-header .fa-camera")?.parentElement;
-        const uploadTextElement = document.getElementById("upload-foto-label"); // Opzionale se presente nell'HTML
+        const uploadTextElement = document.getElementById("upload-foto-label");
 
         if (uData && uData.photoURL && uData.photoURL.trim() !== "") {
             if (profImg) profImg.src = uData.photoURL;
@@ -820,7 +802,6 @@ async function apriProfiloUtente(targetUserId) {
             if (profImg) profImg.src = "https://via.placeholder.com/60";
         }
 
-        // Mostriamo o nascondiamo i comandi di modifica foto in base a chi è il proprietario
         if (isViewingOwnProfile) {
             if (cameraOverlay) cameraOverlay.style.display = "flex";
             if (uploadTextElement) uploadTextElement.style.display = "block";
@@ -996,6 +977,7 @@ async function apriProfiloUtente(targetUserId) {
         tornaAllaHome();
     }
 }
+
 async function incrementaDraftTentatiCloud() {
     if (!currentUser) return;
     try {
@@ -1024,14 +1006,13 @@ function renderMatchdayPills(selectedDay) {
     }
 }
 
-
 async function apriRecapSquadraUtenteCorrente(index) {
     const sq = userSquadre[index];
     currentRecapSquadraIndex = index;
     let username = "Fantallenatore";
     let ownerId = currentUser ? currentUser.uid : null;
    
- if (currentUser) {
+    if (currentUser) {
         try {
             const uDoc = await db.collection("utenti").doc(currentUser.uid).get();
             if (uDoc.exists) {
@@ -1087,11 +1068,6 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false, ow
     const btnBackClassifica = document.getElementById("btn-recap-back-classifica");
     btnBackClassifica.style.display = fromClassifica ? "inline-flex" : "none";
 
-    // CONTROLLO RIGIDO PERMESSI MODIFICA:
-    // 1. Deve essere il proprietario della squadra
-    // 2. Non deve essere un draft di test
-    // 3. La giornata della squadra NON deve essere già passata
-    // 4. Il mercato per la giornata di QUESTA squadra deve essere aperto (prima dell'inizio partite)
     const btnModifica = document.getElementById("btn-recap-modifica-formazione");
     const isOwner = currentUser && ownerUserId === currentUser.uid;
     const giornataSquadra = sq.giornata !== undefined ? sq.giornata : ACTIVE_MATCHDAY;
@@ -1155,10 +1131,7 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false, ow
     refreshAllMarquees();
 }
 
-
 function tornaAllaHome() {
-
-// 🟢 ASSICURIAMO CHE IL DRAFT SIA VISIBILE QUANDO SI TORNA ALLA HOME
     const colonnaSinistraDraft = document.querySelector(".desktop-col-left");
     if (colonnaSinistraDraft) colonnaSinistraDraft.style.display = "block";
 
@@ -1266,7 +1239,6 @@ function resetDraftState() {
     riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
     availablePlayers = [...customPlayersList];
     
-    // 🟢 RIPRISTINIAMO SEMPRE LA COLONNA DEL DRAFT E IL TASTO ROSSO QUANDO SI INIZIA UN DRAFT
     const colonnaSinistraDraft = document.querySelector(".desktop-col-left");
     if (colonnaSinistraDraft) colonnaSinistraDraft.style.display = "block";
 
@@ -1462,7 +1434,6 @@ function renderPlayers() {
         container.appendChild(card);
     });
 
-    // 🟢 ATTIVA L'EFFETTO SCORRIMENTO SUI NOMI APPENA GENERATI
     refreshAllMarquees();
 }
 
@@ -1755,28 +1726,6 @@ function assegnaGiocatoreDaModale(nomeGiocatore, ruolo, targetType) {
     renderPanchinaGrafica();
 }
 
-function rimuoviSlotSelezionato(ruolo, targetType, indexTitolare = null) {
-    if (targetType === "campo" || targetType.startsWith("campo_indice_")) {
-        let idx = indexTitolare;
-        if (targetType.startsWith("campo_indice_")) {
-            idx = parseInt(targetType.replace("campo_indice_", ""));
-        }
-        let titolariRuolo = schierati.filter(s => s.ruolo === ruolo);
-        if (idx !== null && !isNaN(idx) && titolariRuolo[idx]) {
-            schierati = schierati.filter(s => s.nome !== titolariRuolo[idx].nome);
-        }
-    } else {
-        let index = parseInt(targetType);
-        if (!isNaN(index) && riserveSelezionate[ruolo][index]) {
-            riserveSelezionate[ruolo].splice(index, 1);
-        }
-    }
-    chiudiModale();
-    ripristinaCampoTattico();
-    renderSlots();
-    renderPanchinaGrafica();
-}
-
 function showModuloSelection() {
     const headerTitle = isTestMode ? `Test Draft Completato!` : `Draft Completato per ${tempNomeSquadra}!`;
     document.getElementById("draft-panel").innerHTML = `
@@ -2058,15 +2007,13 @@ async function verificaECalcolaVotiAutomaticamente() {
                         if (matchRow) {
                             let rawVotoPuro = parseColumnVal(matchRow, ["voto", "Voto", "VOTO"]);
 			    let rawFanta = parseColumnVal(matchRow, ["fantavoto", "Fantavoto", "FANTAVOTO"]);
-
-// 2. Determiniamo se ha giocato basandoci SOLO sul voto in pagella
 		           let haGiocato = (rawVotoPuro > 0);
 
                            if (matchRow && haGiocato) {
-   			   votiObj[p.nome] = {
-        		   voto: rawVotoPuro,
-        		   fantavoto: rawFanta, // Prende il fantavoto reale di Excel (mantiene anche lo 0.0 da malus)
-        		   sv: false,           // Ha giocato, quindi NON è Senza Voto
+   			        votiObj[p.nome] = {
+        		            voto: rawVotoPuro,
+        		            fantavoto: rawFanta,
+        		            sv: false,
                                     gf: parseColumnVal(matchRow, ["gf"]),
                                     gs: parseColumnVal(matchRow, ["gs"]),
                                     ass: parseColumnVal(matchRow, ["ass"]),
@@ -2086,44 +2033,36 @@ async function verificaECalcolaVotiAutomaticamente() {
                     (sq.schierati || []).forEach(tit => {
                         let vInfo = votiObj[tit.nome];
                         let eff = vInfo;
+                        let isSenzaVoto = false;
 
-                       let isSenzaVoto = false;
-if (!vInfo) {
-    isSenzaVoto = true;
-} else if (vInfo.sv === true) {
-    isSenzaVoto = true;
-} else if (vInfo.voto === undefined || vInfo.voto === null || vInfo.voto === 0) {
-    // Se il voto puro in pagella è 0 o assente, significa che non ha giocato / S.V.
-    isSenzaVoto = true;
-}
+                        if (!vInfo || vInfo.sv === true || vInfo.voto === undefined || vInfo.voto === null || vInfo.voto === 0) {
+                            isSenzaVoto = true;
+                        }
 
-if (isSenzaVoto) {
-    let riserveRuolo = (sq.riserveSelezionate || {})[tit.ruolo] || [];
-    let riservaValida = null;
+                        if (isSenzaVoto) {
+                            let riserveRuolo = (sq.riserveSelezionate || {})[tit.ruolo] || [];
+                            let riservaValida = null;
 
-    for (let ris of riserveRuolo) {
-        if (!riserveGiaSubentrate.has(ris.nome)) {
-            let risInfo = votiObj[ris.nome];
-            // Anche per la riserva verifichiamo che abbia un voto valido (non S.V.)
-            let risHaVotoValido = risInfo && risInfo.sv !== true && risInfo.voto > 0;
-            if (risHaVotoValido) {
-                riservaValida = { obj: ris, info: risInfo };
-                riserveGiaSubentrate.add(ris.nome);
-                break;
-            }
-        }
-    }
+                            for (let ris of riserveRuolo) {
+                                if (!riserveGiaSubentrate.has(ris.nome)) {
+                                    let risInfo = votiObj[ris.nome];
+                                    let risHaVotoValido = risInfo && risInfo.sv !== true && risInfo.voto > 0;
+                                    if (risHaVotoValido) {
+                                        riservaValida = { obj: ris, info: risInfo };
+                                        riserveGiaSubentrate.add(ris.nome);
+                                        break;
+                                    }
+                                }
+                            }
 
-    if (riservaValida) {
-        eff = riservaValida.info;
-    } else {
-        eff = { voto: 0, fantavoto: 0, sv: true };
-    }
-}
+                            if (riservaValida) {
+                                eff = riservaValida.info;
+                            } else {
+                                eff = { voto: 0, fantavoto: 0, sv: true };
+                            }
+                        }
                         totaleSquadra += (eff.fantavoto > 0 ? eff.fantavoto : 0);
                     });
-
-
 
                     sq.votiGiornata = votiObj;
                     sq.punteggioTotale = totaleSquadra;
@@ -2182,38 +2121,38 @@ function mostraTabellinoVoti(sq) {
 
     sq.schierati.forEach(tit => {
         let vInfo = sq.votiGiornata[tit.nome];
-let eff = vInfo;
-let note = "<span style='color:var(--accent-green)'>Titolare</span>";
+        let eff = vInfo;
+        let note = "<span style='color:var(--accent-green)'>Titolare</span>";
 
-let isSenzaVoto = false;
-if (!vInfo || vInfo.sv === true || vInfo.voto === undefined || vInfo.voto === null || vInfo.voto === 0) {
-    isSenzaVoto = true;
-}
+        let isSenzaVoto = false;
+        if (!vInfo || vInfo.sv === true || vInfo.voto === undefined || vInfo.voto === null || vInfo.voto === 0) {
+            isSenzaVoto = true;
+        }
 
-if (isSenzaVoto) {
-    let riserveRuolo = sq.riserveSelezionate[tit.ruolo] || [];
-    let riservaValida = null;
+        if (isSenzaVoto) {
+            let riserveRuolo = sq.riserveSelezionate[tit.ruolo] || [];
+            let riservaValida = null;
 
-    for (let ris of riserveRuolo) {
-        if (!riserveGiaSubentrate.has(ris.nome)) {
-            let risInfo = sq.votiGiornata[ris.nome];
-            let risHaVotoValido = risInfo && risInfo.sv !== true && risInfo.voto > 0;
-            if (risHaVotoValido) {
-                riservaValida = { obj: ris, info: risInfo };
-                riserveGiaSubentrate.add(ris.nome);
-                break;
+            for (let ris of riserveRuolo) {
+                if (!riserveGiaSubentrate.has(ris.nome)) {
+                    let risInfo = sq.votiGiornata[ris.nome];
+                    let risHaVotoValido = risInfo && risInfo.sv !== true && risInfo.voto > 0;
+                    if (risHaVotoValido) {
+                        riservaValida = { obj: ris, info: risInfo };
+                        riserveGiaSubentrate.add(ris.nome);
+                        break;
+                    }
+                }
+            }
+
+            if (riservaValida) {
+                eff = riservaValida.info;
+                note = `<span style='color:var(--accent-gold)'>🔁 Subentra (${riservaValida.obj.nome})</span>`;
+            } else {
+                note = "<span style='color:var(--accent-red)'>❌ S.V.</span>";
+                eff = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
             }
         }
-    }
-
-    if (riservaValida) {
-        eff = riservaValida.info;
-        note = `<span style='color:var(--accent-gold)'>🔁 Subentra (${riservaValida.obj.nome})</span>`;
-    } else {
-        note = "<span style='color:var(--accent-red)'>❌ S.V.</span>";
-        eff = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
-    }
-}
 
         totale += (eff.fantavoto > 0 ? eff.fantavoto : 0);
         let iconeHtml = generaIconeBonusMalus(eff);
@@ -2236,20 +2175,14 @@ if (isSenzaVoto) {
     refreshAllMarquees();
 }
 
-// ==========================================
-// GESTIONE FOTO PROFILO (BASE64)
-// ==========================================
-
 async function caricaNuovaFotoProfiloBase64(event) {
-    
-// 🔒 Blocco di sicurezza: se non stiamo guardando il nostro profilo, blocca l'azione
     if (!isViewingOwnProfile) {
         alert("⛔ Non puoi modificare la foto del profilo di un altro utente.");
         event.target.value = "";
         return;
     }
 
-const file = event.target.files[0];
+    const file = event.target.files[0];
     if (!file) return;
 
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
@@ -2295,7 +2228,6 @@ const file = event.target.files[0];
 
                 aggiornaAvatarGrafica(base64String);
                 
-                // Aggiorna subito anche i traguardi nel profilo se l'utente è lì
                 const uDoc = await db.collection("utenti").doc(currentUser.uid).get();
                 if (uDoc.exists) renderizzaTraguardi(uDoc.data());
 
@@ -2360,24 +2292,15 @@ function aggiornaAvatarGrafica(url) {
     }
 }
 
-
-// ==========================================
-// ROUTING RAPIDO DALLA HOME ALLE MISSIONI
-// ==========================================
-
 async function vaiAMissioniProfilo() {
     if (!currentUser) return;
-
-    // 1. Apriamo il profilo dell'utente loggato
     await apriProfiloUtente(currentUser.uid);
 
-    // 2. Facciamo uno scroll fluido diretto alla sezione Traguardi
     setTimeout(() => {
         const targetSection = document.getElementById("badge-grid-container");
         if (targetSection) {
             targetSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
             
-            // Effetto grafico pulsante per far capire all'utente dove si trova
             const parentCard = targetSection.closest('.profilo-section-card') || targetSection.parentElement;
             if (parentCard) {
                 parentCard.style.transition = "transform 0.3s, border-color 0.3s";
@@ -2392,12 +2315,6 @@ async function vaiAMissioniProfilo() {
     }, 150);
 }
 
-
-
-// ==========================================
-// GESTIONE TRAGUARDI (ALTA LEGGIBILITÀ)
-// ==========================================
-
 function renderizzaTraguardi(uData) {
     const container = document.getElementById("badge-grid-container");
     if (!container) return;
@@ -2407,7 +2324,6 @@ function renderizzaTraguardi(uData) {
     const numSquadre = squadre.length;
     const haFoto = uData && uData.photoURL && uData.photoURL.trim() !== "";
 
-    // Lista traguardi con descrizioni chiare ed estese
     const listaTraguardi = [
         {
             id: "primo_scatto",
@@ -2461,7 +2377,6 @@ function renderizzaTraguardi(uData) {
         }
     ];
 
-    // Layout a colonna singola (o doppia su schermi grandi) per dare respiro al testo
     container.style.display = "flex";
     container.style.flexDirection = "column";
     container.style.gap = "10px";
@@ -2478,13 +2393,11 @@ function renderizzaTraguardi(uData) {
         item.style.opacity = t.sbloccato ? "1" : "0.75";
         item.style.gap = "12px";
 
-        // Stato / Progresso ben visibile a destra
         let badgeProgresso = t.sbloccato 
             ? `<div style="background: rgba(16, 185, 129, 0.15); border: 1px solid var(--accent-neon-green); color: var(--accent-neon-green); font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; white-space: nowrap;">✔ SBLOCCATO</div>`
             : `<div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 12px; font-weight: 800; padding: 6px 12px; border-radius: 8px; white-space: nowrap; text-align: center;">${t.attuale} / ${t.target}</div>`;
 
         item.innerHTML = `
-            <!-- Sinistra: Icona + Testi estesi -->
             <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;">
                 <div style="width: 40px; height: 40px; min-width: 40px; border-radius: 8px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 18px; color: ${t.sbloccato ? t.colore : 'var(--text-muted)'};">
                     <i class="${t.icona}"></i>
@@ -2494,21 +2407,13 @@ function renderizzaTraguardi(uData) {
                     <div style="font-size: 11px; color: #94a3b8; line-height: 1.3;">${t.descrizione}</div>
                 </div>
             </div>
-
-            <!-- Destra: Box Avanzamento Stile Draft -->
             <div>
                 ${badgeProgresso}
             </div>
         `;
-        
         container.appendChild(item);
     });
 }
-
-
-// ==========================================
-// LOGICA MODIFICA FORMAZIONE SALVATA
-// ==========================================
 
 function avviaModificaFormazioneSalvata() {
     if (!currentRecapSquadraObj) return;
@@ -2516,19 +2421,16 @@ function avviaModificaFormazioneSalvata() {
     const sq = currentRecapSquadraObj;
     const giornataSquadra = sq.giornata !== undefined ? sq.giornata : ACTIVE_MATCHDAY;
 
-    // 1. Blocco assoluto per giornate trascorse
     if (giornataSquadra < ACTIVE_MATCHDAY) {
         alert("❌ Impossibile modificare le formazioni delle giornate precedenti o concluse.");
         return;
     }
 
-    // 2. Blocco per mercato chiuso sulla giornata della squadra
     if (!isMarketOpenForMatchday(giornataSquadra)) {
         alert("⚠️ Tempo scaduto! Il mercato è chiuso e le formazioni sono bloccate per questo turno.");
         return;
     }
 
-    // Carichiamo la rosa esistente (i 24 giocatori acquistati rimangono FISSI, no redraft)
     rosa = JSON.parse(JSON.stringify(sq.rosa || { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] }));
     schierati = JSON.parse(JSON.stringify(sq.schierati || []));
     riserveSelezionate = JSON.parse(JSON.stringify(sq.riserveSelezionate || { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] }));
@@ -2537,7 +2439,6 @@ function avviaModificaFormazioneSalvata() {
     tempNomeSquadra = sq.nomeSquadra;
     isTestMode = false;
 
-   // 🚫 NASCONDIAMO INTERAMENTE LA COLONNA DI SINISTRA DEL DRAFT (Crediti, ruoli, box rossi e pulsanti di reset)
     const colonnaSinistraDraft = document.querySelector(".desktop-col-left");
     if (colonnaSinistraDraft) {
         colonnaSinistraDraft.style.display = "none";
@@ -2550,17 +2451,9 @@ function avviaModificaFormazioneSalvata() {
 
     document.getElementById("current-draft-team-title").innerText = `Modifica Formazione: ${sq.nomeSquadra} (G${giornataSquadra})`;
     
-    // FORZIAMO LA VISIBILITÀ DEL CAMPO E DELLA PANCHINA (Risolve il problema del campo che sparisce)
     document.getElementById("campo-panel-container").style.display = "block";
     document.getElementById("panchina-panel-container").style.display = "block";
     document.getElementById("conferma-container").style.display = "flex";
-
-   // 🚫 NASCONDIAMO SPECIFICAMENTE IL PULSANTE ROSSO DI CANCELLAZIONE/RICOMINCIA DRAFT
-    const btnCancellaTutto = document.querySelector("#conferma-container button.btn-action-danger");
-    if (btnCancellaTutto) {
-        btnCancellaTutto.style.display = "none";
-    }
-
 
     const btnConferma = document.getElementById("btn-conferma-formazione");
     btnConferma.onclick = salvaModificaFormazioneSuCloud;
@@ -2574,18 +2467,10 @@ function avviaModificaFormazioneSalvata() {
 }
 
 async function salvaModificaFormazioneSuCloud() {
-    
-   
-    const btnCancellaTutto = document.querySelector("#conferma-container button.btn-action-danger");
-    if (btnCancellaTutto) {
-    btnCancellaTutto.style.display = "inline-flex"; // o "block" a seconda di come è strutturato nel tuo CSS
-}
-
-
     const colonnaSinistraDraft = document.querySelector(".desktop-col-left");
     if (colonnaSinistraDraft) {
-    colonnaSinistraDraft.style.display = "block";
-}
+        colonnaSinistraDraft.style.display = "block";
+    }
 
     if (!currentRecapSquadraObj) return;
     const giornataSquadra = currentRecapSquadraObj.giornata !== undefined ? currentRecapSquadraObj.giornata : ACTIVE_MATCHDAY;
@@ -2631,11 +2516,9 @@ async function salvaModificaFormazioneSuCloud() {
 
             alert("✅ Formazione aggiornata con successo!");
 
-            // Ripristiniamo il comportamento standard per i nuovi draft futuri
-
             document.getElementById("btn-conferma-formazione").onclick = confermaFormazioneDefinitiva;
            
-	    const draftPanel = document.getElementById("draft-panel");
+            const draftPanel = document.getElementById("draft-panel");
             if (draftPanel) draftPanel.style.display = "block";
 
             apriRecapSquadraUtenteCorrente(indexTarget);
@@ -2645,10 +2528,6 @@ async function salvaModificaFormazioneSuCloud() {
         }
     }
 }
-
-// ==========================================
-// LOGICA PANNELLO ADMIN & BACKOFFICE
-// ==========================================
 
 async function controllaRuoloAdmin(uData) {
     const adminBtn = document.getElementById("admin-nav-button");
@@ -2662,7 +2541,6 @@ async function controllaRuoloAdmin(uData) {
 async function apriPannelloAdmin() {
     if (!currentUser) return;
     
-    // Controllo di sicurezza sul database
     try {
         const uDoc = await db.collection("utenti").doc(currentUser.uid).get();
         if (!uDoc.exists || uDoc.data().isAdmin !== true) {
@@ -2674,7 +2552,6 @@ async function apriPannelloAdmin() {
         return;
     }
 
-    // Nascondiamo gli altri schermi e mostriamo quello admin
     document.getElementById("welcome-screen").style.display = "none";
     document.getElementById("main-app").style.display = "none";
     document.getElementById("recap-screen").style.display = "none";
@@ -2702,9 +2579,7 @@ async function caricaStatisticheAdmin() {
         
         if (elUtenti) elUtenti.innerText = totaleUtenti;
         if (elSquadre) elSquadre.innerText = totaleSquadre;
-    } catch (e) {
-        console.error("Errore caricamento statistiche admin:", e);
-    }
+    } catch (e) {}
 }
 
 async function adminEseguiRicalcoloGiornata() {
@@ -2723,7 +2598,6 @@ async function ricalcolaTuttaLaGiornata(giornata) {
     try {
         alert(`🔄 Avvio ricalcolo massivo per la Giornata ${giornata}...`);
         
-        // 1. Verifichiamo e carichiamo il file Excel specifico della giornata scelta dall'admin
         const fileName = `voti_ok${giornata}.xlsx`;
         let fileResponse;
         try {
@@ -2742,7 +2616,6 @@ async function ricalcolaTuttaLaGiornata(giornata) {
         const snapshot = await db.collection("utenti").get();
         let squadreAggiornateTotali = 0;
 
-        // 2. Scorriamo tutti gli utenti nel database Firebase
         for (const docUser of snapshot.docs) {
             let uData = docUser.data();
             let squadreArr = uData.squadre || [];
@@ -2751,7 +2624,6 @@ async function ricalcolaTuttaLaGiornata(giornata) {
             squadreArr.forEach(sq => {
                 let giornataSquadra = sq.giornata !== undefined ? sq.giornata : 8;
                 
-                // Ricalcoliamo FORZATAMENTE tutte le squadre che corrispondono alla giornata scelta dall'admin
                 if (giornataSquadra === giornata) {
                     let votiObj = {};
                     let totaleSquadra = 0;
@@ -2793,7 +2665,6 @@ async function ricalcolaTuttaLaGiornata(giornata) {
                         votiObj[p.nome] = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
                     });
 
-                    // Gestione titolari e subentri panchina
                     (sq.schierati || []).forEach(tit => {
                         let vInfo = votiObj[tit.nome];
                         let eff = vInfo;
@@ -2828,7 +2699,6 @@ async function ricalcolaTuttaLaGiornata(giornata) {
                         totaleSquadra += (eff.fantavoto > 0 ? eff.fantavoto : 0);
                     });
 
-                    // Sovrascriviamo i vecchi dati con quelli nuovi ricalcolati
                     sq.votiGiornata = votiObj;
                     sq.punteggioTotale = totaleSquadra;
                     modificato = true;
@@ -2836,13 +2706,11 @@ async function ricalcolaTuttaLaGiornata(giornata) {
                 }
             });
 
-            // Se l'utente ha squadre in quella giornata, aggiorniamo il documento su Firestore
             if (modificato) {
                 await db.collection("utenti").doc(docUser.id).update({ squadre: squadreArr });
             }
         }
 
-        // Ricarichiamo i dati dell'utente corrente se loggato
         if (currentUser) {
             await caricaDatiUtenteCloud();
         }
