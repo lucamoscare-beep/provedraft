@@ -42,6 +42,91 @@
 </header>
 
 <!-- MODALE AUTENTICAZIONE -->
+
+<div class="auth-landing-container">
+        
+        <!-- COLONNA SINISTRA: BRAND & MECCANICHE DI GIOCO -->
+        <div class="auth-landing-info">
+            <div class="landing-brand-header">
+                <!-- Logo SVG Custom DraftXI -->
+                <div class="draftxi-logo-wrapper">
+                    <svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="64" height="64" rx="16" fill="url(#logo_grad)" fill-opacity="0.15" stroke="url(#logo_grad)" stroke-width="2.5"/>
+                        <path d="M20 18H30C37.732 18 44 24.268 44 32C44 39.732 37.732 46 30 46H20V18Z" stroke="#38BDF8" stroke-width="3.5" stroke-linejoin="round"/>
+                        <path d="M26 25L36 39M36 25L26 39" stroke="#10B981" stroke-width="3.5" stroke-linecap="round"/>
+                        <circle cx="48" cy="20" r="3" fill="#FBBF24"/>
+                        <defs>
+                            <linearGradient id="logo_grad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#38BDF8"/>
+                                <stop offset="1" stop-color="#10B981"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <div>
+                        <span class="season-pill">STAGIONE 2026/27</span>
+                        <h1 class="draftxi-title">Draft<span>XI</span></h1>
+                    </div>
+                </div>
+                <p class="landing-subtitle">Dimentica le aste infinite. Costruisci il tuo undici perfetto ogni settimana e sfida la lega a colpo singolo.</p>
+            </div>
+
+            <div class="landing-features-grid">
+                <!-- Feature 1 -->
+                <div class="landing-feature-card">
+                    <div class="feature-icon-box blue-glow">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <div class="feature-text">
+                        <div class="feature-header-row">
+                            <h3>24 Draft da 5 Pick</h3>
+                            <span class="feature-tag">OGNI SETTIMANA</span>
+                        </div>
+                        <p>Scegli 1 giocatore su 5 proposti per 24 turni consecutivi. Gestisci il budget e costruisci la tua rosa da zero.</p>
+                    </div>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="landing-feature-card">
+                    <div class="feature-icon-box green-glow">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <div class="feature-text">
+                        <div class="feature-header-row">
+                            <h3>Sfide Secche</h3>
+                            <span class="feature-tag">ZERO VINCOLI</span>
+                        </div>
+                        <p>Gareggia ogni giornata con una squadra sempre diversa. Si azzera tutto ad ogni turno: vince chi legge meglio la giornata.</p>
+                    </div>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="landing-feature-card">
+                    <div class="feature-icon-box gold-glow">
+                        <i class="fa-solid fa-coins"></i>
+                    </div>
+                    <div class="feature-text">
+                        <div class="feature-header-row">
+                            <h3>3 Gettoni per Turno</h3>
+                            <span class="feature-tag">TRIPLA STRATEGIA</span>
+                        </div>
+                        <p>Hai 3 gettoni a disposizione ogni giornata: schiera fino a 3 formazioni diverse per moltiplicare le tue chance di vittoria.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="landing-footer-note">
+                <span class="live-dot"></span> Mercato aperto per la prossima giornata di Serie A
+            </div>
+        </div>
+
+        <!-- COLONNA DESTRA: PORTALE ACCESSO / REGISTRAZIONE -->
+        <div class="auth-landing-form-side">
+            <div class="auth-box">
+                <div id="auth-tabs-header" class="auth-tabs">
+                    <button id="tab-login-btn" class="active" onclick="switchAuthTab('login')">Accedi</button>
+                    <button id="tab-register-btn" onclick="switchAuthTab('register')">Crea Account</button>
+                </div>
+
 <div id="auth-modal" class="auth-overlay">
   <div class="auth-card">
     <div class="auth-tabs" id="auth-tabs-header">
