@@ -111,12 +111,11 @@ async function inizializzaGiornataEDeadlineDinamica() {
     const keyCache = "draft_seriea_matchday_info";
     const keyTime = "draft_seriea_matchday_time";
     const oraAttuale = new Date().getTime();
-    const durataCache = 30 * 60 * 1000; // 30 minuti di cache
+    const durataCache = 30 * 60 * 1000;
 
     const cacheSalvata = localStorage.getItem(keyCache);
     const timeSalvato = localStorage.getItem(keyTime);
 
-    // 1. Controllo della cache locale per velocità
     if (cacheSalvata && timeSalvato && (oraAttuale - parseInt(timeSalvato) < durataCache)) {
         try {
             const parsed = JSON.parse(cacheSalvata);
@@ -133,7 +132,6 @@ async function inizializzaGiornataEDeadlineDinamica() {
         } catch(e) {}
     }
 
-    // 2. Tentativo di chiamata all'API esterna (protetto da try/catch per evitare blocchi CORS)
     try {
         const response = await fetch("https://api.football-data.org/v4/competitions/SA/matches?status=SCHEDULED,LIVE,IN_PLAY", {
             headers: { "X-Auth-Token": "1803bfcd108f4c2cb2ee7663a7d45761" }
@@ -141,37 +139,63 @@ async function inizializzaGiornataEDeadlineDinamica() {
 
         if (response.ok) {
             const data = await response.json();
-            // Se l'API risponde correttamente, elaboriamo i dati delle partite...
-            // (Manteniamo la logica originale se la risposta è valida)
-            const matches = data.matches || [];
-            // ... [eventuale logica di parsing esistente] ...
-        }
-    } catch (err) {
-        // Se c'è un errore di CORS, di rete o l'API è giù, NON BLOCCHIAMO L'APP
-        console.warn("API esterna non raggiungibile (CORS o rete), passaggio automatico al calendario locale.");
-    }
+            if (data && data.matches && data.matches.length > 0) {
+                let giornataCorrente = data.matches[0].matchday;
 
-    // 3. FALLBACK DI SICUREZZA (Garantisce che l'app funzioni sempre al 100%)
-    const adesso = new Date();
-    let trovata = 9; // Giornata predefinita di sicurezza
-    
-    if (typeof CALENDARIO_FALLBACK !== 'undefined') {
-        for (let [giornata, info] of Object.entries(CALENDARIO_FALLBACK)) {
-            if (adesso < info.fine) {
-                trovata = parseInt(giornata);
-                break;
+                const resMatchday = await fetch(`https://api.football-data.org/v4/competitions/SA/matches?matchday=${giornataCorrente}`, {
+                    headers: { "X-Auth-Token": "1803bfcd108f4c2cb2ee7663a7d45761" }
+                });
+
+                if (resMatchday.ok) {
+                    const dataMatchday = await resMatchday.json();
+                    const matches = dataMatchday.matches;
+
+                    if (matches && matches.length > 0) {
+                        matches.sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate));
+
+                        const primaPartita = matches[0];
+                        const ultimaPartita = matches[matches.length - 1];
+
+                        CURRENT_MATCHDAY_START = new Date(primaPartita.utcDate);
+                        CURRENT_MATCHDAY_END = new Date(new Date(ultimaPartita.utcDate).getTime() + (2.5 * 60 * 60 * 1000));
+
+                        if (new Date() > CURRENT_MATCHDAY_END) {
+                            ACTIVE_MATCHDAY = giornataCorrente + 1;
+                            await inizializzaGiornataEDeadlineDinamica();
+                            return;
+                        }
+
+                        ACTIVE_MATCHDAY = giornataCorrente;
+                        currentSelectedMatchday = Math.max(1, ACTIVE_MATCHDAY - 1);
+
+                        localStorage.setItem(keyCache, JSON.stringify({
+                            giornata: ACTIVE_MATCHDAY,
+                            start: CURRENT_MATCHDAY_START.toISOString(),
+                            end: CURRENT_MATCHDAY_END.toISOString()
+                        }));
+                        localStorage.setItem(keyTime, oraAttuale.toString());
+                        return;
+                    }
+                }
             }
         }
-        ACTIVE_MATCHDAY = trovata;
-        const fallbackInfo = CALENDARIO_FALLBACK[ACTIVE_MATCHDAY] || CALENDARIO_FALLBACK[9];
-        CURRENT_MATCHDAY_START = fallbackInfo.inizio;
-        CURRENT_MATCHDAY_END = fallbackInfo.fine;
-    } else {
-        ACTIVE_MATCHDAY = 9;
+    } catch (err) {}
+
+    const adesso = new Date();
+    let trovata = 9;
+    for (let [giornata, info] of Object.entries(CALENDARIO_FALLBACK)) {
+        if (adesso < info.fine) {
+            trovata = parseInt(giornata);
+            break;
+        }
     }
-    
-    currentSelectedMatchday = (typeof getUltimaGiornataConVoti === 'function') ? getUltimaGiornataConVoti() : ACTIVE_MATCHDAY - 1;
+    ACTIVE_MATCHDAY = trovata;
+    const fallbackInfo = CALENDARIO_FALLBACK[ACTIVE_MATCHDAY] || CALENDARIO_FALLBACK[9];
+    CURRENT_MATCHDAY_START = fallbackInfo.inizio;
+    CURRENT_MATCHDAY_END = fallbackInfo.fine;
+    currentSelectedMatchday = getUltimaGiornataConVoti();
 }
+
 function getUltimaGiornataConVoti() {
     return Math.max(1, ACTIVE_MATCHDAY - 1);
 }

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>DraftXI</title>
+<title>Draft Serie A – Ultimate Edition</title>
 
 <!-- Google Fonts: Poppins -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
@@ -41,183 +41,99 @@
     </div>
 </header>
 
-<!-- SCHERMATA DI BENVENUTO E AUTENTICAZIONE - DRAFTXI -->
-<div id="auth-modal" class="auth-landing-overlay">
-    <!-- Sfondo animato con luci da stadio -->
-    <div class="stadium-glow glow-left"></div>
-    <div class="stadium-glow glow-right"></div>
-
-    <div class="auth-landing-container">
-        
-        <!-- COLONNA SINISTRA: BRAND & MECCANICHE DI GIOCO -->
-        <div class="auth-landing-info">
-            <div class="landing-brand-header">
-                <!-- Logo SVG Custom DraftXI -->
-                <div class="draftxi-logo-wrapper">
-                    <svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="64" height="64" rx="16" fill="url(#logo_grad)" fill-opacity="0.15" stroke="url(#logo_grad)" stroke-width="2.5"/>
-                        <path d="M20 18H30C37.732 18 44 24.268 44 32C44 39.732 37.732 46 30 46H20V18Z" stroke="#38BDF8" stroke-width="3.5" stroke-linejoin="round"/>
-                        <path d="M26 25L36 39M36 25L26 39" stroke="#10B981" stroke-width="3.5" stroke-linecap="round"/>
-                        <circle cx="48" cy="20" r="3" fill="#FBBF24"/>
-                        <defs>
-                            <linearGradient id="logo_grad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-                                <stop stop-color="#38BDF8"/>
-                                <stop offset="1" stop-color="#10B981"/>
-                            </linearGradient>
-                        </defs>
-                    </svg>
-                    <div>
-                        <span class="season-pill">STAGIONE 2026/27</span>
-                        <h1 class="draftxi-title">Draft<span>XI</span></h1>
-                    </div>
-                </div>
-                <p class="landing-subtitle">Dimentica le aste infinite. Costruisci il tuo undici perfetto ogni settimana e sfida la lega a colpo singolo.</p>
-            </div>
-
-            <div class="landing-features-grid">
-                <!-- Feature 1 -->
-                <div class="landing-feature-card">
-                    <div class="feature-icon-box blue-glow">
-                        <i class="fa-solid fa-layer-group"></i>
-                    </div>
-                    <div class="feature-text">
-                        <div class="feature-header-row">
-                            <h3>24 Draft da 5 Pick</h3>
-                            <span class="feature-tag">OGNI SETTIMANA</span>
-                        </div>
-                        <p>Scegli 1 giocatore su 5 proposti per 24 turni consecutivi. Gestisci il budget e costruisci la tua rosa da zero.</p>
-                    </div>
-                </div>
-
-                <!-- Feature 2 -->
-                <div class="landing-feature-card">
-                    <div class="feature-icon-box green-glow">
-                        <i class="fa-solid fa-bolt"></i>
-                    </div>
-                    <div class="feature-text">
-                        <div class="feature-header-row">
-                            <h3>Sfide Secche</h3>
-                            <span class="feature-tag">ZERO VINCOLI</span>
-                        </div>
-                        <p>Gareggia ogni giornata con una squadra sempre diversa. Si azzera tutto ad ogni turno: vince chi legge meglio la giornata.</p>
-                    </div>
-                </div>
-
-                <!-- Feature 3 -->
-                <div class="landing-feature-card">
-                    <div class="feature-icon-box gold-glow">
-                        <i class="fa-solid fa-coins"></i>
-                    </div>
-                    <div class="feature-text">
-                        <div class="feature-header-row">
-                            <h3>3 Gettoni per Turno</h3>
-                            <span class="feature-tag">TRIPLA STRATEGIA</span>
-                        </div>
-                        <p>Hai 3 gettoni a disposizione ogni giornata: schiera fino a 3 formazioni diverse per moltiplicare le tue chance di vittoria.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="landing-footer-note">
-                <span class="live-dot"></span> Mercato aperto per la prossima giornata di Serie A
-            </div>
-        </div>
-
-        <!-- COLONNA DESTRA: PORTALE ACCESSO / REGISTRAZIONE -->
-        <div class="auth-landing-form-side">
-            <div class="auth-box">
-                <div id="auth-tabs-header" class="auth-tabs">
-                    <button id="tab-login-btn" class="active" onclick="switchAuthTab('login')">Accedi</button>
-                    <button id="tab-register-btn" onclick="switchAuthTab('register')">Crea Account</button>
-                </div>
-
-                <!-- Form Login -->
-                <form id="login-form" onsubmit="handleLogin(event)" class="auth-form">
-                    <h2>Entra in campo</h2>
-                    <p class="auth-form-desc">Inserisci le tue credenziali per gestire le tue rose.</p>
-                    
-                    <div class="input-group">
-                        <label><i class="fa-solid fa-envelope"></i> Email</label>
-                        <input type="email" id="login-email" required placeholder="mister@draftxi.it" class="styled-input">
-                    </div>
-                    
-                    <div class="input-group">
-                        <label><i class="fa-solid fa-lock"></i> Password</label>
-                        <div class="password-wrapper">
-                            <input type="password" id="login-password" required placeholder="••••••••" class="styled-input">
-                            <i class="fa-solid fa-eye password-toggle-icon" onclick="togglePasswordVisibility('login-password', this)"></i>
-                        </div>
-                    </div>
-                    
-                    <div style="text-align: right; margin-bottom: 16px;">
-                        <a href="#" onclick="switchAuthTab('forgot')" class="forgot-link">Password dimenticata?</a>
-                    </div>
-
-                    <button type="submit" class="btn-action-primary auth-submit-btn btn-glow-effect">
-                        <span>Scendi in Campo</span> <i class="fa-solid fa-arrow-right"></i>
-                    </button>
-                </form>
-
-                <!-- Form Registrazione -->
-                <form id="register-form" onsubmit="handleRegister(event)" class="auth-form" style="display: none;">
-                    <h2>Diventa un Mister</h2>
-                    <p class="auth-form-desc">Registrati gratis e ricevi subito i tuoi primi 3 gettoni.</p>
-                    
-                    <div class="input-group">
-                        <label><i class="fa-solid fa-shield-halved"></i> Nome Allenatore (Username)</label>
-                        <input type="text" id="reg-username" required placeholder="Es. PepGuardiola99" class="styled-input">
-                    </div>
-
-                    <div style="display: flex; gap: 10px;">
-                        <div class="input-group" style="flex: 1;">
-                            <label>Nome</label>
-                            <input type="text" id="reg-nome" required placeholder="Marco" class="styled-input">
-                        </div>
-                        <div class="input-group" style="flex: 1;">
-                            <label>Cognome</label>
-                            <input type="text" id="reg-cognome" required placeholder="Rossi" class="styled-input">
-                        </div>
-                    </div>
-
-                    <div class="input-group">
-                        <label><i class="fa-solid fa-envelope"></i> Email</label>
-                        <input type="email" id="reg-email" required placeholder="mister@draftxi.it" class="styled-input">
-                    </div>
-                    
-                    <div class="input-group">
-                        <label><i class="fa-solid fa-lock"></i> Password</label>
-                        <div class="password-wrapper">
-                            <input type="password" id="reg-password" required placeholder="Min. 6 caratteri" class="styled-input">
-                            <i class="fa-solid fa-eye password-toggle-icon" onclick="togglePasswordVisibility('reg-password', this)"></i>
-                        </div>
-                    </div>
-                    
-                    <button type="submit" class="btn-action-primary auth-submit-btn btn-glow-effect">
-                        <span>Inizia il Tuo Draft</span> <i class="fa-solid fa-bolt"></i>
-                    </button>
-                </form>
-
-                <!-- Form Password Dimenticata -->
-                <form id="forgot-form" onsubmit="handleForgotPassword(event)" class="auth-form" style="display: none;">
-                    <h2>Recupero Password</h2>
-                    <p class="auth-form-desc">Ti invieremo un link per reimpostare la tua password.</p>
-                    
-                    <div class="input-group">
-                        <label><i class="fa-solid fa-envelope"></i> Email registrata</label>
-                        <input type="email" id="forgot-email" required placeholder="mister@draftxi.it" class="styled-input">
-                    </div>
-                    
-                    <button type="submit" class="btn-action-primary auth-submit-btn">
-                        <i class="fa-solid fa-paper-plane"></i> Invia Link di Reset
-                    </button>
-                    <div style="text-align: center; margin-top: 14px;">
-                        <a href="#" onclick="switchAuthTab('login')" class="forgot-link"><i class="fa-solid fa-arrow-left"></i> Torna all'accesso</a>
-                    </div>
-                </form>
-            </div>
-        </div>
-
+<!-- MODALE AUTENTICAZIONE -->
+<div id="auth-modal" class="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-tabs" id="auth-tabs-header">
+      <button id="tab-login-btn" class="active" onclick="switchAuthTab('login')">Accedi</button>
+      <button id="tab-register-btn" onclick="switchAuthTab('register')">Registrati</button>
     </div>
+
+    <!-- FORM ACCEDI -->
+    <form id="login-form" onsubmit="handleLogin(event)">
+      <h2>Accedi al Fantacalcio</h2>
+      <div class="input-group">
+        <label>Email</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-envelope input-icon"></i>
+          <input type="email" id="login-email" required placeholder="La tua email">
+        </div>
+      </div>
+      <div class="input-group password-wrapper">
+        <label>Password</label>
+        <div class="password-input-container">
+          <div class="input-wrapper" style="width: 100%;">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" id="login-password" required placeholder="••••••••">
+          </div>
+          <i class="fa-solid fa-eye toggle-password" onclick="togglePasswordVisibility('login-password', this)"></i>
+        </div>
+        <span class="forgot-password-link" onclick="switchAuthTab('forgot')">Password dimenticata?</span>
+      </div>
+      <button type="submit" class="btn-auth">ACCEDI</button>
+    </form>
+
+  <!-- FORM REGISTRAZIONE -->
+    <form id="register-form" style="display: none;" onsubmit="handleRegister(event)">
+      <h2>Crea il tuo Account</h2>
+      <div class="input-group">
+        <label>Nome Utente (Username)</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-user-ninja input-icon"></i>
+          <input type="text" id="reg-username" required placeholder="es. Bomber99">
+        </div>
+      </div>
+      <div class="input-group">
+        <label>Nome</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-id-card input-icon"></i>
+          <input type="text" id="reg-nome" required placeholder="Mario">
+        </div>
+      </div>
+      <div class="input-group">
+        <label>Cognome</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-id-card input-icon"></i>
+          <input type="text" id="reg-cognome" required placeholder="Rossi">
+        </div>
+      </div>
+      <div class="input-group">
+        <label>Email</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-envelope input-icon"></i>
+          <input type="email" id="reg-email" required placeholder="mario.rossi@email.com">
+        </div>
+      </div>
+      <div class="input-group password-wrapper">
+        <label>Password</label>
+        <div class="password-input-container">
+          <div class="input-wrapper" style="width: 100%;">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" id="reg-password" required minlength="6" placeholder="Minimo 6 caratteri">
+          </div>
+          <i class="fa-solid fa-eye toggle-password" onclick="togglePasswordVisibility('reg-password', this)"></i>
+        </div>
+      </div>
+      <button type="submit" class="btn-auth">REGISTRATI</button>
+    </form>
+
+  <!-- FORM RECUPERO PASSWORD -->
+    <form id="forgot-form" style="display: none;" onsubmit="handleForgotPassword(event)">
+      <h2>Recupera Password</h2>
+      <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">Inserisci la tua email registrata. Ti invieremo un link per impostare una nuova password.</p>
+      <div class="input-group">
+        <label>Email di registrazione</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-envelope input-icon"></i>
+          <input type="email" id="forgot-email" required placeholder="es. mario.rossi@email.com">
+        </div>
+      </div>
+      <button type="submit" class="btn-auth" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">INVIA LINK DI RECUPERO</button>
+      <div style="text-align: center; margin-top: 12px;">
+        <span class="forgot-password-link" onclick="switchAuthTab('login')">← Torna al Login</span>
+      </div>
+    </form>
+  </div>
 </div>
 
 <!-- LANDING PAGE -->
