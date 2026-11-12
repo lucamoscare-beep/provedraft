@@ -41,68 +41,104 @@
     </div>
 </header>
 
-<!-- SCHERMATA DI BENVENUTO E AUTENTICAZIONE -->
+<!-- SCHERMATA DI BENVENUTO E AUTENTICAZIONE - DRAFTXI -->
 <div id="auth-modal" class="auth-landing-overlay">
+    <!-- Sfondo animato con luci da stadio -->
+    <div class="stadium-glow glow-left"></div>
+    <div class="stadium-glow glow-right"></div>
+
     <div class="auth-landing-container">
         
-        <!-- COLONNA SINISTRA: SPIEGAZIONE DEL GIOCO (ACCATTIVANTE E SINTETICA) -->
+        <!-- COLONNA SINISTRA: BRAND & MECCANICHE DI GIOCO -->
         <div class="auth-landing-info">
             <div class="landing-brand-header">
-                <div class="landing-logo-badge"><i class="fa-solid fa-trophy"></i></div>
-                <h1>DraftXI</h1>
-                <p class="landing-subtitle">Il fantacalcio strategico a rotazione settimanale</p>
+                <!-- Logo SVG Custom DraftXI -->
+                <div class="draftxi-logo-wrapper">
+                    <svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="64" height="64" rx="16" fill="url(#logo_grad)" fill-opacity="0.15" stroke="url(#logo_grad)" stroke-width="2.5"/>
+                        <path d="M20 18H30C37.732 18 44 24.268 44 32C44 39.732 37.732 46 30 46H20V18Z" stroke="#38BDF8" stroke-width="3.5" stroke-linejoin="round"/>
+                        <path d="M26 25L36 39M36 25L26 39" stroke="#10B981" stroke-width="3.5" stroke-linecap="round"/>
+                        <circle cx="48" cy="20" r="3" fill="#FBBF24"/>
+                        <defs>
+                            <linearGradient id="logo_grad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#38BDF8"/>
+                                <stop offset="1" stop-color="#10B981"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <div>
+                        <span class="season-pill">STAGIONE 2026/27</span>
+                        <h1 class="draftxi-title">Draft<span>XI</span></h1>
+                    </div>
+                </div>
+                <p class="landing-subtitle">Dimentica le aste infinite. Costruisci il tuo undici perfetto ogni settimana e sfida la lega a colpo singolo.</p>
             </div>
 
             <div class="landing-features-grid">
-                <!-- Punto 1 -->
+                <!-- Feature 1 -->
                 <div class="landing-feature-card">
-                    <div class="feature-icon-box"><i class="fa-solid fa-users-viewfinder"></i></div>
-                    <div>
-                        <h3>Crea la tua rosa con un Draft</h3>
-                        <p>24 draft da 5 pick l'uno. Scegli solo i migliori e vinci la giornata </p>
+                    <div class="feature-icon-box blue-glow">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <div class="feature-text">
+                        <div class="feature-header-row">
+                            <h3>24 Draft da 5 Pick</h3>
+                            <span class="feature-tag">OGNI SETTIMANA</span>
+                        </div>
+                        <p>Scegli 1 giocatore su 5 proposti per 24 turni consecutivi. Gestisci il budget e costruisci la tua rosa da zero.</p>
                     </div>
                 </div>
 
-                <!-- Punto 2 -->
+                <!-- Feature 2 -->
                 <div class="landing-feature-card">
-                    <div class="feature-icon-box"><i class="fa-solid fa-rotate"></i></div>
-                    <div>
-                        <h3>Squadra Sempre Nuova</h3>
-                        <p>Gareggia ogni giornata con una squadra diversa, azzera le distanze e parti sempre alla pari.</p>
+                    <div class="feature-icon-box green-glow">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <div class="feature-text">
+                        <div class="feature-header-row">
+                            <h3>Sfide Secche</h3>
+                            <span class="feature-tag">ZERO VINCOLI</span>
+                        </div>
+                        <p>Gareggia ogni giornata con una squadra sempre diversa. Si azzera tutto ad ogni turno: vince chi legge meglio la giornata.</p>
                     </div>
                 </div>
 
-                <!-- Punto 3 -->
+                <!-- Feature 3 -->
                 <div class="landing-feature-card">
-                    <div class="feature-icon-box"><i class="fa-solid fa-ticket"></i></div>
-                    <div>
-                        <h3>Fino a 3 chances per Turno</h3>
-                        <p>3 gettoni per creare fino a 3 formazioni differenti per ogni singola giornata.</p>
+                    <div class="feature-icon-box gold-glow">
+                        <i class="fa-solid fa-coins"></i>
+                    </div>
+                    <div class="feature-text">
+                        <div class="feature-header-row">
+                            <h3>3 Gettoni per Turno</h3>
+                            <span class="feature-tag">TRIPLA STRATEGIA</span>
+                        </div>
+                        <p>Hai 3 gettoni a disposizione ogni giornata: schiera fino a 3 formazioni diverse per moltiplicare le tue chance di vittoria.</p>
                     </div>
                 </div>
             </div>
 
             <div class="landing-footer-note">
-                <i class="fa-solid fa-fire"></i> Gioca turno per turno, ogni decisione conta!
+                <span class="live-dot"></span> Mercato aperto per la prossima giornata di Serie A
             </div>
         </div>
 
-        <!-- COLONNA DESTRA: MODULO DI ACCESSO / REGISTRAZIONE -->
+        <!-- COLONNA DESTRA: PORTALE ACCESSO / REGISTRAZIONE -->
         <div class="auth-landing-form-side">
             <div class="auth-box">
                 <div id="auth-tabs-header" class="auth-tabs">
                     <button id="tab-login-btn" class="active" onclick="switchAuthTab('login')">Accedi</button>
-                    <button id="tab-register-btn" onclick="switchAuthTab('register')">Registrati</button>
+                    <button id="tab-register-btn" onclick="switchAuthTab('register')">Crea Account</button>
                 </div>
 
                 <!-- Form Login -->
                 <form id="login-form" onsubmit="handleLogin(event)" class="auth-form">
-                    <h2>Bentornato!</h2>
-                    <p class="auth-form-desc">Accedi per schierare le tue squadre.</p>
+                    <h2>Entra in campo</h2>
+                    <p class="auth-form-desc">Inserisci le tue credenziali per gestire le tue rose.</p>
                     
                     <div class="input-group">
                         <label><i class="fa-solid fa-envelope"></i> Email</label>
-                        <input type="email" id="login-email" required placeholder="tuamail@email.com" class="styled-input">
+                        <input type="email" id="login-email" required placeholder="mister@draftxi.it" class="styled-input">
                     </div>
                     
                     <div class="input-group">
@@ -113,63 +149,69 @@
                         </div>
                     </div>
                     
-                    <div style="text-align: right; margin-bottom: 12px;">
-                        <a href="#" onclick="switchAuthTab('forgot')" style="font-size: 11px; color: var(--accent-blue); text-decoration: none;">Password dimenticata?</a>
+                    <div style="text-align: right; margin-bottom: 16px;">
+                        <a href="#" onclick="switchAuthTab('forgot')" class="forgot-link">Password dimenticata?</a>
                     </div>
 
-                    <button type="submit" class="btn-action-primary auth-submit-btn"><i class="fa-solid fa-right-to-bracket"></i> Accedi al Gioco</button>
+                    <button type="submit" class="btn-action-primary auth-submit-btn btn-glow-effect">
+                        <span>Scendi in Campo</span> <i class="fa-solid fa-arrow-right"></i>
+                    </button>
                 </form>
 
                 <!-- Form Registrazione -->
                 <form id="register-form" onsubmit="handleRegister(event)" class="auth-form" style="display: none;">
-                    <h2>Crea Account</h2>
-                    <p class="auth-form-desc">Unisciti alla community e inizia a draftare.</p>
+                    <h2>Diventa un Mister</h2>
+                    <p class="auth-form-desc">Registrati gratis e ricevi subito i tuoi primi 3 gettoni.</p>
                     
                     <div class="input-group">
-                        <label><i class="fa-solid fa-user"></i> Username</label>
-                        <input type="text" id="reg-username" required placeholder="Il tuo nickname" class="styled-input">
+                        <label><i class="fa-solid fa-shield-halved"></i> Nome Allenatore (Username)</label>
+                        <input type="text" id="reg-username" required placeholder="Es. PepGuardiola99" class="styled-input">
                     </div>
 
-                    <div style="display: flex; gap: 8px;">
+                    <div style="display: flex; gap: 10px;">
                         <div class="input-group" style="flex: 1;">
                             <label>Nome</label>
-                            <input type="text" id="reg-nome" required placeholder="Nome" class="styled-input">
+                            <input type="text" id="reg-nome" required placeholder="Marco" class="styled-input">
                         </div>
                         <div class="input-group" style="flex: 1;">
                             <label>Cognome</label>
-                            <input type="text" id="reg-cognome" required placeholder="Cognome" class="styled-input">
+                            <input type="text" id="reg-cognome" required placeholder="Rossi" class="styled-input">
                         </div>
                     </div>
 
                     <div class="input-group">
                         <label><i class="fa-solid fa-envelope"></i> Email</label>
-                        <input type="email" id="reg-email" required placeholder="tuamail@email.com" class="styled-input">
+                        <input type="email" id="reg-email" required placeholder="mister@draftxi.it" class="styled-input">
                     </div>
                     
                     <div class="input-group">
                         <label><i class="fa-solid fa-lock"></i> Password</label>
                         <div class="password-wrapper">
-                            <input type="password" id="reg-password" required placeholder="••••••••" class="styled-input">
+                            <input type="password" id="reg-password" required placeholder="Min. 6 caratteri" class="styled-input">
                             <i class="fa-solid fa-eye password-toggle-icon" onclick="togglePasswordVisibility('reg-password', this)"></i>
                         </div>
                     </div>
                     
-                    <button type="submit" class="btn-action-primary auth-submit-btn"><i class="fa-solid fa-user-plus"></i> Registrati Subito</button>
+                    <button type="submit" class="btn-action-primary auth-submit-btn btn-glow-effect">
+                        <span>Inizia il Tuo Draft</span> <i class="fa-solid fa-bolt"></i>
+                    </button>
                 </form>
 
                 <!-- Form Password Dimenticata -->
                 <form id="forgot-form" onsubmit="handleForgotPassword(event)" class="auth-form" style="display: none;">
                     <h2>Recupero Password</h2>
-                    <p class="auth-form-desc">Inserisci la tua email per ricevere il link di reset.</p>
+                    <p class="auth-form-desc">Ti invieremo un link per reimpostare la tua password.</p>
                     
                     <div class="input-group">
-                        <label><i class="fa-solid fa-envelope"></i> Email</label>
-                        <input type="email" id="forgot-email" required placeholder="tuamail@email.com" class="styled-input">
+                        <label><i class="fa-solid fa-envelope"></i> Email registrata</label>
+                        <input type="email" id="forgot-email" required placeholder="mister@draftxi.it" class="styled-input">
                     </div>
                     
-                    <button type="submit" class="btn-action-primary auth-submit-btn"><i class="fa-solid fa-paper-plane"></i> Invia Richiesta</button>
-                    <div style="text-align: center; margin-top: 12px;">
-                        <a href="#" onclick="switchAuthTab('login')" style="font-size: 11px; color: var(--text-muted); text-decoration: none;"><i class="fa-solid fa-arrow-left"></i> Torna al Login</a>
+                    <button type="submit" class="btn-action-primary auth-submit-btn">
+                        <i class="fa-solid fa-paper-plane"></i> Invia Link di Reset
+                    </button>
+                    <div style="text-align: center; margin-top: 14px;">
+                        <a href="#" onclick="switchAuthTab('login')" class="forgot-link"><i class="fa-solid fa-arrow-left"></i> Torna all'accesso</a>
                     </div>
                 </form>
             </div>
@@ -177,6 +219,7 @@
 
     </div>
 </div>
+
 <!-- LANDING PAGE -->
 <div id="welcome-screen">
     <!-- 1. COUNTDOWN SCADENZA GIORNATA -->
