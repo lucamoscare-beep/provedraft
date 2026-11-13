@@ -1981,18 +1981,18 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 }
 
 /* Cards delle funzionalità */
-.landing-features-grid, .rules-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 15px;
-    margin: 20px 0;
+.landing-features-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 24px;
 }
 
 .landing-feature-card {
     display: flex;
     align-items: flex-start;
     gap: 14px;
-    padding: 16px;
+    padding: 14px 16px;
     background: rgba(255, 255, 255, 0.025);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 14px;
@@ -2000,7 +2000,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 }
 
 .landing-feature-card:hover {
-    transform: translateY(-2px);
+    transform: translateX(4px);
     background: rgba(255, 255, 255, 0.05);
     border-color: rgba(56, 189, 248, 0.35);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
@@ -2015,6 +2015,28 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     align-items: center;
     justify-content: center;
     font-size: 16px;
+}
+
+.blue-glow {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.green-glow {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.gold-glow {
+    background: rgba(251, 191, 36, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.feature-text {
+    flex: 1;
 }
 
 .feature-header-row {
@@ -2339,59 +2361,4 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     #auth-modal .auth-landing-container {
         flex-direction: column;
     }
-}
-
-/* =========================================================
-   NUOVI BOX REGOLE STILE E-SPORT (Bordi colorati & Icone Oro)
-========================================================= */
-.rules-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 15px;
-    margin: 20px 0;
-}
-
-.rule-box-esport {
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
-    border-radius: 14px;
-    padding: 18px;
-    text-align: left;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.rule-box-esport:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
-}
-
-/* Bordi colorati dedicati per ogni box */
-.rule-box-gold { border: 2px solid #fbbf24; }
-.rule-box-blue { border: 2px solid #38bdf8; }
-.rule-box-green { border: 2px solid #10b981; }
-.rule-box-purple { border: 2px solid #a78bfa; }
-
-/* Icone grandi e rigorosamente color oro */
-.rule-box-esport i {
-    font-size: 32px;
-    color: #fbbf24;
-    margin-bottom: 12px;
-    filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.3));
-}
-
-.rule-box-esport h4 {
-    color: #fff;
-    font-size: 14px;
-    font-weight: 800;
-    margin-bottom: 6px;
-}
-
-.rule-box-esport p {
-    color: #94a3b8;
-    font-size: 11.5px;
-    margin: 0;
-    line-height: 1.45;
 }
