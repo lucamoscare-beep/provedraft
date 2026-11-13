@@ -19,11 +19,9 @@
 </head>
 <body>
 
-<!-- HEADER GLOBALE (Semplice, senza pulsanti superflui) -->
+<!-- HEADER GLOBALE -->
 <header id="global-header-bar" class="global-header" style="display: none;">
-
     <!-- Logo DraftXI cliccabile per tornare alla Home -->
-
     <div class="logo-area" onclick="tornaAllaHome()" title="Torna alla Home">
         <svg width="36" height="36" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect width="64" height="64" rx="16" fill="url(#header_logo_grad)" fill-opacity="0.18" stroke="url(#header_logo_grad)" stroke-width="3"/>
@@ -50,7 +48,7 @@
             <i class="fa-solid fa-user-shield"></i> <span>Admin</span>
         </button>
 
-   <!-- Badge Profilo Utente -->
+        <!-- Badge Profilo Utente -->
         <div class="user-badge" onclick="apriProfiloUtente(currentUser.uid)" title="Il tuo Profilo e Statistiche">
             <img id="user-avatar-navbar" src="" alt="Avatar" style="width: 26px; height: 26px; border-radius: 50%; object-fit: cover; display: none;">
             <div class="user-icon-circle" id="user-icon-fallback">
@@ -59,18 +57,11 @@
             <span id="user-display-name">-</span>
         </div>
 
-
+        <!-- Pulsante Logout -->
         <button class="btn-logout" onclick="logout()" title="Disconnettiti">
             <i class="fa-solid fa-right-from-bracket"></i> Esci
         </button>
-
-<!-- Area Utente & Azioni -->
-    <div class="user-area">
-        <!-- Pulsante Admin (visibile solo agli admin) -->
-        <button id="admin-nav-button" onclick="apriPannelloAdmin()" class="btn-admin-header" style="display: none;">
-            <i class="fa-solid fa-user-shield"></i> <span>Admin</span>
-        </button>   
- </div>
+    </div>
 </header>
 
 <!-- MODALE AUTENTICAZIONE -->
