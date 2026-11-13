@@ -619,7 +619,7 @@ function renderWelcomeScreen() {
 
         const realIndex = userSquadre.indexOf(sq);
 	const nomeSquadra = sq.nomeSquadra || "Squadra Senza Nome";
-        const isLongName = nomeSquadra.length > 16;
+        const isLongName = nomeSquadra.length > 18;
         const infoModulo = sq.moduloSelezionato ? ` • Modulo ${sq.moduloSelezionato}` : "";
 
         item.innerHTML = `
@@ -628,10 +628,10 @@ function renderWelcomeScreen() {
                     <i class="fa-solid fa-shirt"></i>
                 </div>
                 <div class="team-card-info">
-                    <span class="team-card-label">Rosa #${realIndex + 1}${infoModulo}</span>
                     <div class="team-card-name-wrapper ${isLongName ? 'is-scrolling' : ''}">
                         <span class="team-card-name-scroll ${isLongName ? 'scrolling' : ''}">${nomeSquadra}</span>
                     </div>
+                    <span class="team-card-label">${infoModulo}</span>
                     ${punteggioHtml}
                 </div>
             </div>
