@@ -618,16 +618,28 @@ function renderWelcomeScreen() {
         }
 
         const realIndex = userSquadre.indexOf(sq);
+	const nomeSquadra = sq.nomeSquadra || "Squadra Senza Nome";
+        const isLongName = nomeSquadra.length > 16;
+        const infoModulo = sq.moduloSelezionato ? ` • Modulo ${sq.moduloSelezionato}` : "";
 
         item.innerHTML = `
-            <div class="team-card-info">
-                <div class="marquee-container"><span class="marquee-text team-card-name">${sq.nomeSquadra}</span></div>
-                <div style="font-size:10px; color:var(--text-muted);">Modulo: ${sq.moduloSelezionato}</div>
-                ${punteggioHtml}
+            <div class="team-card-left-content">
+                <div class="team-card-icon-box">
+                    <i class="fa-solid fa-shirt"></i>
+                </div>
+                <div class="team-card-info">
+                    <span class="team-card-label">Rosa #${realIndex + 1}${infoModulo}</span>
+                    <div class="team-card-name-wrapper ${isLongName ? 'is-scrolling' : ''}">
+                        <span class="team-card-name-scroll ${isLongName ? 'scrolling' : ''}">${nomeSquadra}</span>
+                    </div>
+                    ${punteggioHtml}
+                </div>
             </div>
-            <button onclick="apriRecapSquadraUtenteCorrente(${realIndex})" class="btn-small-recap">
-                <i class="fa-solid fa-eye"></i> Vedi Squadra
-            </button>
+            <div class="team-card-actions">
+                <button onclick="apriRecapSquadraUtenteCorrente(${realIndex})" class="btn-team-action">
+                    <i class="fa-solid fa-eye"></i> Visualizza
+                </button>
+            </div>
         `;
         container.appendChild(item);
     });
