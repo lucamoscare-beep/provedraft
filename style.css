@@ -72,65 +72,125 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 @keyframes pulseGlowAtt { 0% { box-shadow: 0 0 4px rgba(248, 113, 113, 0.4); } 100% { box-shadow: 0 0 15px rgba(248, 113, 113, 0.8); } }
 
 /* NAVBAR GLOBALE */
-.global-header {
-    max-width: 1450px;
-    margin: 0 auto 15px auto;
-    background: rgba(30, 41, 59, 0.95);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--card-border);
-    border-radius: 14px;
-    padding: 10px 16px;
+width: 100%;
+    max-width: 1100px; /* Allineata esattamente a #welcome-screen */
+    margin: 0 auto 16px auto;
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 10px 18px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transition: max-width 0.3s ease;
 }
 
 .global-header .logo-area {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-weight: 800;
-    font-size: 15px;
-    color: #fff;
+    gap: 11px;
     cursor: pointer;
     transition: transform 0.2s ease;
+    user-select: none;
 }
 
-.global-header .logo-area:hover { transform: scale(1.03); }
+.global-header .logo-area:hover {
+    transform: translateY(-1px);
+}
+.header-brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+}
+
+.header-brand-text .brand-name {
+    font-size: 20px;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: -0.5px;
+}
+
+.header-brand-text .brand-name span {
+    background: linear-gradient(90deg, #38bdf8, #10b981);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.header-brand-text .brand-sub {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: #94a3b8;
+    margin-top: 2px;
+}
 
 .global-header .user-area {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .user-badge {
     display: flex;
     align-items: center;
-    gap: 6px;
-    background: rgba(255, 255, 255, 0.08);
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
+    gap: 8px;
+    background: rgba(15, 23, 42, 0.75);
+    padding: 5px 14px 5px 6px;
+    border-radius: 30px;
+    font-size: 12.5px;
     font-weight: 700;
-    color: var(--accent-blue);
-    border: 1px solid rgba(96, 165, 250, 0.3);
+    color: #f8fafc;
+    border: 1px solid rgba(56, 189, 248, 0.35);
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .user-badge:hover {
-    background: rgba(96, 165, 250, 0.15);
-    border-color: var(--accent-blue);
+    background: rgba(56, 189, 248, 0.15);
+    border-color: #38bdf8;
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
+}
+
+.user-icon-circle {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(56, 189, 248, 0.18);
+    color: #38bdf8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.btn-admin-header {
+    background: rgba(251, 191, 36, 0.15);
+    border: 1px solid rgba(251, 191, 36, 0.45);
+    color: #fbbf24;
+    padding: 7px 12px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-admin-header:hover {
+    background: rgba(251, 191, 36, 0.28);
+    transform: translateY(-1px);
 }
 
 .btn-logout {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(220, 38, 38, 0.4));
-    border: 1px solid var(--accent-red);
-    color: #fff;
-    padding: 6px 14px;
-    border-radius: 8px;
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(248, 113, 113, 0.4);
+    color: #fca5a5;
+    padding: 7px 13px;
+    border-radius: 10px;
     font-size: 11px;
     font-weight: 800;
     cursor: pointer;
@@ -142,11 +202,28 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 }
 
 .btn-logout:hover {
-    background: var(--accent-red);
-    box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+    background: #ef4444;
+    border-color: #ef4444;
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
     transform: translateY(-1px);
 }
 
+/* Ottimizzazione Mobile per non schiacciare il nome utente */
+@media (max-width: 520px) {
+    .global-header {
+        padding: 9px 12px;
+    }
+    .header-brand-text .brand-name {
+        font-size: 18px;
+    }
+    .logout-txt, .btn-admin-header span {
+        display: none;
+    }
+    .btn-logout, .btn-admin-header {
+        padding: 8px 10px;
+    }
+}
 /* COUNTDOWN BANNER */
 .deadline-banner {
     background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
