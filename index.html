@@ -263,7 +263,7 @@
         </div>
     </div>
 
-    <!-- 2. WIDGET RAPIDI (Profilo & Missioni) -->
+   <!-- 2. WIDGET RAPIDI (Profilo & Missioni) -->
     <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
         <div class="home-profile-banner" onclick="apriProfiloUtente(currentUser.uid)" style="flex: 2; min-width: 250px; margin-bottom: 0;">
             <div class="home-profile-left">
@@ -273,7 +273,9 @@
                     <div class="subtitle">Visualizza podi, record personali e storico</div>
                 </div>
             </div>
-            <button class="home-profile-btn">Visualizza <i class="fa-solid fa-arrow-right"></i></button>
+            <div style="color: var(--accent-blue); font-size: 16px; padding-right: 5px;">
+                <i class="fa-solid fa-arrow-right"></i>
+            </div>
         </div>
 
         <div onclick="vaiAMissioniProfilo()" class="home-profile-banner" style="flex: 1; min-width: 180px; margin-bottom: 0; cursor: pointer; background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(79, 70, 229, 0.2)); border: 1px solid #a78bfa;">
