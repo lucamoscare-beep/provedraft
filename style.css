@@ -336,7 +336,8 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 
 /* Stile specifico per il box Gettoni (Oro / Ambra) */
 .top-info-card.tokens-box-inline {
-    border: 1.5px solid rgba(251, 191, 36, 0.4);
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.12), rgba(15, 23, 42, 0.85));
+    border: 1.5px solid rgba(251, 191, 36, 0.45);
     box-shadow: 0 4px 20px rgba(251, 191, 36, 0.1);
 }
 
@@ -361,38 +362,53 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 .top-info-card.global-teams-box i {
     background: rgba(56, 189, 248, 0.15);
     color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.35);
     box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
 }
 
 .top-info-card.tokens-box-inline i {
     background: rgba(251, 191, 36, 0.15);
     color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.35);
     box-shadow: 0 0 15px rgba(251, 191, 36, 0.25);
 }
 
 
 /* Testi interni */
 .top-info-text .title-text {
-    font-size: 0.85rem;
-    font-weight: 700;
+    font-size: 13px;
+    font-weight: 800;
     color: #f8fafc;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .top-info-text .sub-text {
-    font-size: 0.75rem;
+    font-size: 11px;
     color: #94a3b8;
+    margin-top: 2px;
 }
 
 /* Numeri finali (Badge / Contatori) */
-.global-teams-badge-number,
-.tokens-badge-number {
-    font-size: 1.7rem;
-    font-weight: 800;
-    color: #f8fafc;
+.global-teams-badge-number {
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    color: #38bdf8;
+    font-weight: 900;
+    font-size: 20px;
+    padding: 6px 14px;
+    border-radius: 10px;
 }
 
+.tokens-badge-number {
+    background: rgba(251, 191, 36, 0.15);
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    color: #fbbf24;
+    font-weight: 900;
+    font-size: 20px;
+    padding: 6px 14px;
+    border-radius: 10px;
+}
 
 .global-teams-box {
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(15, 23, 42, 0.85));
@@ -530,7 +546,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 
 .rule-box {
     background: rgba(15, 23, 42, 0.75);
-    border: 1,5px solid var(--accent-gold);
+    border: 1.5px solid var(--accent-gold);
     border-radius: 12px;
     padding: 16px;
     text-align: left;
@@ -541,7 +557,7 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-rule-box:hover {
+.rule-box:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(251, 191, 36, 0.28);
 }
