@@ -312,23 +312,87 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 }
 
 /* TOP INFO ROW */
+/* Ridisegniamo i box informativi superiori in stile e-sport */
 .top-info-row {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
 }
 
+
 .top-info-card {
-    flex: 1;
-    min-width: 250px;
-    border-radius: 14px;
-    padding: 14px 18px;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 18px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
+
+/* Stile specifico per il box Gettoni (Oro / Ambra) */
+.top-info-card.tokens-box-inline {
+    border: 1.5px solid rgba(251, 191, 36, 0.4);
+    box-shadow: 0 4px 20px rgba(251, 191, 36, 0.1);
+}
+
+.top-info-card.tokens-box-inline:hover {
+    transform: translateY(-2px);
+    border-color: #fbbf24;
+    box-shadow: 0 6px 22px rgba(251, 191, 36, 0.22);
+}
+
+/* Icone interne con effetto bagliore coerente alla pagina di accesso */
+.top-info-card i.fa-shield-halved,
+.top-info-card i.fa-coins {
+    font-size: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.top-info-card.global-teams-box i {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
+}
+
+.top-info-card.tokens-box-inline i {
+    background: rgba(251, 191, 36, 0.15);
+    color: #fbbf24;
+    box-shadow: 0 0 15px rgba(251, 191, 36, 0.25);
+}
+
+
+/* Testi interni */
+.top-info-text .title-text {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #f8fafc;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.top-info-text .sub-text {
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+/* Numeri finali (Badge / Contatori) */
+.global-teams-badge-number,
+.tokens-badge-number {
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: #f8fafc;
+}
+
 
 .global-teams-box {
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(15, 23, 42, 0.85));
