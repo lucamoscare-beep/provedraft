@@ -788,15 +788,7 @@ async function apriSchermataClassifica(giornata) {
         refreshAllMarquees();
 
     } catch (err) {
-        tableBody.innerHTML = <tr>
-                <td colspan="6" style="text-align:center; padding:18px; color:var(--accent-red);">
-                    <div style="margin-bottom:10px;">⚠️ Connessione instabile durante il caricamento della classifica.</div>
-                    <button onclick="apriSchermataClassifica(${giornata})" class="btn-action-primary" style="padding:7px 14px; font-size:11px;">
-                        <i class="fa-solid fa-rotate-right"></i> Riprova
-                    </button>
-                </td>
-            </tr>
-        `;
+        tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--accent-red);">Errore durante il caricamento della classifica.</td></tr>`;
     }
 }
 
@@ -815,25 +807,15 @@ async function apriProfiloUtente(targetUserId) {
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    const badgeContainer = document.getElementById("badge-grid-container");
-    if (badgeContainer) {
-        badgeContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); font-size:12px; padding:10px;">Caricamento statistiche e traguardi...</div>`;
-    }
-
     try {
-        const snapAll = await db.collection("utenti").get();
-        let targetDoc = null;
-        snapAll.forEach(doc => {
-            if (doc.id === targetUserId) targetDoc = doc;
-        });
-
-        if (!targetDoc || !targetDoc.exists) {
+        const userDoc = await db.collection("utenti").doc(targetUserId).get();
+        if (!userDoc.exists) {
             mostraNotifica("Utente Non Trovato", "Impossibile trovare i dati dell'utente richiesto.", "error");
             tornaAllaHome();
             return;
         }
 
-        const uData = targetDoc.data();
+        const uData = userDoc.data();
         const username = getRealUsername(uData, null);
         document.getElementById("profilo-username-title").innerText = `Profilo di ${username}`;
 
@@ -951,8 +933,9 @@ async function apriProfiloUtente(targetUserId) {
 
         let ori = 0, argenti = 0, bronzi = 0;
         const ultimaGiornataVoti = getUltimaGiornataConVoti();
-
+        
         for (let g = 1; g <= ultimaGiornataVoti; g++) {
+            const snapAll = await db.collection("utenti").get();
             let listaGiornata = [];
             snapAll.forEach(docU => {
                 const dU = docU.data();
@@ -1017,18 +1000,8 @@ async function apriProfiloUtente(targetUserId) {
         renderizzaTraguardi(uData);
 
     } catch (err) {
-        if (badgeContainer) {
-            badgeContainer.innerHTML = `
-                <div style="text-align:center; padding:16px; color:var(--accent-red);">
-                    <div style="margin-bottom:10px;">⚠️ Errore di rete durante il caricamento delle statistiche.</div>
-                    <button onclick="apriProfiloUtente('${targetUserId}')" class="btn-action-primary" style="padding:7px 14px; font-size:11px;">
-                        <i class="fa-solid fa-rotate-right"></i> Riprova
-                    </button>
-                </div>
-            `;
-        } else {
-            mostraNotifica("Errore Statistiche", "Si è verificato un problema nel caricamento delle statistiche utente.", "error");
-        }
+        mostraNotifica("Errore Statistiche", "Si è verificato un problema nel caricamento delle statistiche utente.", "error");
+        tornaAllaHome();
     }
 }
 
@@ -1359,23 +1332,8 @@ async function caricaGiocatoriDaExcel() {
         if (jsonData.length === 0) throw new Error("Il file giocatori.xlsx è vuoto!");
 
         parseAndSetPlayers(jsonData);
-    } catch (error) {
-        if (tentativiRimasti > 0) {
-            setTimeout(() => caricaGiocatoriDaExcel(tentativiRimasti - 1), 1500);
-        }
-    }
+    } catch (error) {}
 }
-
-
-document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible" && currentUser) {
-        if (customPlayersList.length === 0) {
-            caricaGiocatoriDaExcel(1);
-        }
-        calcolaEVisualizzaTotaleSquadreGlobali(ACTIVE_MATCHDAY);
-    }
-});
-
 
 function parseAndSetPlayers(data) {
     customPlayersList = data.map(row => {
