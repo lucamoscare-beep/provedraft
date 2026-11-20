@@ -1928,6 +1928,11 @@ async function confermaFormazioneDefinitiva() {
         return;
     }
 
+    if (!haPanchinaCompleta()) {
+        mostraNotifica("Panchina Incompleta", "Devi schierare <strong>tutte le 8 riserve</strong> (2 Portieri, 2 Difensori, 2      	Centrocampisti e 2 Attaccanti) prima di confermare!", "warning");
+        return;
+    }
+
     if (isTestMode) {
         const squadraTestObj = {
             giornata: ACTIVE_MATCHDAY,
@@ -2591,6 +2596,11 @@ async function salvaModificaFormazioneSuCloud() {
         return;
     }
 
+if (!haPanchinaCompleta()) {
+        mostraNotifica("Panchina Incompleta", "Devi schierare <strong>tutte le 8 riserve</strong> (2 per ruolo) prima di salvare le modifiche!", "warning");
+        return;
+    }
+
     const ok = await mostraConferma(
         "Salva Modifiche",
         `Confermi le modifiche alla formazione di "<strong>${tempNomeSquadra}</strong>"?`,
@@ -2929,4 +2939,9 @@ function rispondiConferma(scelta) {
         confirmResolver = null;
         resolveFn(Boolean(scelta));
     }
+}
+
+function haPanchinaCompleta() {
+    const ruoli = ["Portiere", "Difensore", "Centrocampista", "Attaccante"];
+    return ruoli.every(ruolo => Array.isArray(riserveSelezionate[ruolo]) && riserveSelezionate[ruolo].length >= 2);
 }
