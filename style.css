@@ -861,15 +861,22 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
 }
 
 @media (min-width: 1024px) {
-    .desktop-col-left { order: unset; }
-    .desktop-col-right { order: unset; }
-    .section-rosa { order: unset; }
-    .bottom-actions-container {
-        flex-direction: row;
-        justify-content: space-between;
-        order: unset;
+    body { padding: 20px; }
+
+    .desktop-layout-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        align-items: start;
+    }
+
+    .section-rosa {
+        grid-column: 1 / -1;
+        width: 100%;
+        box-sizing: border-box;
     }
 }
+
 
 .panel {
     background: var(--card-bg);
