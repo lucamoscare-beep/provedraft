@@ -679,7 +679,7 @@ async function apriSchermataClassifica(giornata) {
             const squadreArr = uData.squadre || [];
 
             squadreArr.forEach(sq => {
-                let g = sq.giornata !== undefined ? sq.giornata : 8;
+                let g = sq.giornata !== undefined ? sq.giornata : 8; 
                 if (g === giornata) {
                     let budgetResiduo = sq.budget !== undefined && sq.budget !== null ? sq.budget : 0;
                     tutteSquadreLega.push({
@@ -727,10 +727,10 @@ async function apriSchermataClassifica(giornata) {
                 if (listaGruppo && listaGruppo.length > 0) {
                     const classes = { 1: "gold", 2: "silver", 3: "bronze" };
                     const trophyImages = { 1: "icone/coppa1.png", 2: "icone/coppa2.png", 3: "icone/coppa3.png" };
-
+                    
                     const leaderCard = listaGruppo[0];
                     const puntiLeader = leaderCard.punteggio;
-
+                    
                     const quantiConStessoPunteggio = tutteSquadreLega.filter(x => x.punteggio === puntiLeader).length;
                     const altriPariPunti = quantiConStessoPunteggio - 1;
 
@@ -760,7 +760,7 @@ async function apriSchermataClassifica(giornata) {
         tableBody.innerHTML = "";
         classificaConRango.forEach((item) => {
             const tr = document.createElement("tr");
-
+            
             if (currentUser && item.userId === currentUser.uid) {
                 tr.className = "current-user-row";
             }
@@ -788,16 +788,7 @@ async function apriSchermataClassifica(giornata) {
         refreshAllMarquees();
 
     } catch (err) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="6" style="text-align:center; padding:18px; color:var(--accent-red);">
-                    <div style="margin-bottom:10px;">⚠️ Connessione instabile durante il caricamento della classifica.</div>
-                    <button onclick="apriSchermataClassifica(${giornata})" class="btn-action-primary" style="padding:7px 14px; font-size:11px;">
-                        <i class="fa-solid fa-rotate-right"></i> Riprova
-                    </button>
-                </td>
-            </tr>
-        `;
+        tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--accent-red);">Errore durante il caricamento della classifica.</td></tr>`;
     }
 }
 
@@ -816,25 +807,15 @@ async function apriProfiloUtente(targetUserId) {
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    const badgeContainer = document.getElementById("badge-grid-container");
-    if (badgeContainer) {
-        badgeContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); font-size:12px; padding:10px;">Caricamento statistiche e traguardi...</div>`;
-    }
-
     try {
-        const snapAll = await db.collection("utenti").get();
-        let targetDoc = null;
-        snapAll.forEach(doc => {
-            if (doc.id === targetUserId) targetDoc = doc;
-        });
-
-        if (!targetDoc || !targetDoc.exists) {
+        const userDoc = await db.collection("utenti").doc(targetUserId).get();
+        if (!userDoc.exists) {
             mostraNotifica("Utente Non Trovato", "Impossibile trovare i dati dell'utente richiesto.", "error");
             tornaAllaHome();
             return;
         }
 
-        const uData = targetDoc.data();
+        const uData = userDoc.data();
         const username = getRealUsername(uData, null);
         document.getElementById("profilo-username-title").innerText = `Profilo di ${username}`;
 
@@ -952,8 +933,9 @@ async function apriProfiloUtente(targetUserId) {
 
         let ori = 0, argenti = 0, bronzi = 0;
         const ultimaGiornataVoti = getUltimaGiornataConVoti();
-
+        
         for (let g = 1; g <= ultimaGiornataVoti; g++) {
+            const snapAll = await db.collection("utenti").get();
             let listaGiornata = [];
             snapAll.forEach(docU => {
                 const dU = docU.data();
@@ -1018,21 +1000,10 @@ async function apriProfiloUtente(targetUserId) {
         renderizzaTraguardi(uData);
 
     } catch (err) {
-        if (badgeContainer) {
-            badgeContainer.innerHTML = `
-                <div style="text-align:center; padding:16px; color:var(--accent-red);">
-                    <div style="margin-bottom:10px;">⚠️ Errore di rete durante il caricamento delle statistiche.</div>
-                    <button onclick="apriProfiloUtente('${targetUserId}')" class="btn-action-primary" style="padding:7px 14px; font-size:11px;">
-                        <i class="fa-solid fa-rotate-right"></i> Riprova
-                    </button>
-                </div>
-            `;
-        } else {
-            mostraNotifica("Errore Statistiche", "Si è verificato un problema nel caricamento delle statistiche utente.", "error");
-        }
+        mostraNotifica("Errore Statistiche", "Si è verificato un problema nel caricamento delle statistiche utente.", "error");
+        tornaAllaHome();
     }
 }
-
 
 async function incrementaDraftTentatiCloud() {
     if (!currentUser) return;
@@ -1326,7 +1297,6 @@ async function annullaERicominciaDraft() {
         "Sì, ricomincia",
         "No"
     );
-
     if (ok) {
         incrementaDraftTentatiCloud();
         const titleHtml = isTestMode ? '<h2>Scegli il tuo giocatore (Test)</h2>' : '<h2>Scegli il tuo giocatore</h2>';
@@ -1348,9 +1318,9 @@ async function annullaERicominciaDraft() {
     }
 }
 
-async function caricaGiocatoriDaExcel(tentativiRimasti = 2) {
+async function caricaGiocatoriDaExcel() {
     try {
-        const response = await fetch("giocatori.xlsx", { cache: "no-store" });
+        const response = await fetch("giocatori.xlsx");
         if (!response.ok) throw new Error("File giocatori.xlsx non trovato!");
 
         const arrayBuffer = await response.arrayBuffer();
@@ -1362,21 +1332,30 @@ async function caricaGiocatoriDaExcel(tentativiRimasti = 2) {
         if (jsonData.length === 0) throw new Error("Il file giocatori.xlsx è vuoto!");
 
         parseAndSetPlayers(jsonData);
-    } catch (error) {
-        if (tentativiRimasti > 0) {
-            setTimeout(() => caricaGiocatoriDaExcel(tentativiRimasti - 1), 1500);
-        }
-    }
+    } catch (error) {}
 }
 
-document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible" && currentUser) {
-        if (customPlayersList.length === 0) {
-            caricaGiocatoriDaExcel(1);
-        }
-        calcolaEVisualizzaTotaleSquadreGlobali(ACTIVE_MATCHDAY);
-    }
-});
+function parseAndSetPlayers(data) {
+    customPlayersList = data.map(row => {
+        let r = row.ruolo || row.Ruolo || row.RUOLO || "Centrocampista";
+        let rUpper = String(r).trim().toUpperCase();
+        if (rUpper === 'P' || rUpper === 'PORTIERE') r = 'Portiere';
+        else if (rUpper === 'D' || rUpper === 'DIFENSORE') r = 'Difensore';
+        else if (rUpper === 'C' || rUpper === 'CENTROCAMPISTA') r = 'Centrocampista';
+        else if (rUpper === 'A' || rUpper === 'ATTACCANTE') r = 'Attaccante';
+
+        let val = parseInt(row.valore || row.Valore || row.VALORE || row.costo || 1);
+        if (isNaN(val) || val < 1) val = 1;
+
+        return {
+            nome: row.nome || row.Nome || row.NOME || "Sconosciuto",
+            ruolo: r,
+            squadra: row.squadra || row.Squadra || "N/D",
+            valore: val
+        };
+    });
+}
+
 function updateDashboardCounters() {
     document.getElementById("budget-display").innerText = budget;
 
