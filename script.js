@@ -57,8 +57,8 @@ let activeTeamIndex = -1;
 let isVotiOkAvailable = false;
 let currentSelectedMatchday = ACTIVE_MATCHDAY; 
 
-let currentRecapSquadraObj = null; // Memorizza la squadra visualizzata nella schermata recap
-let currentRecapSquadraIndex = -1;  // Memorizza l'indice della squadra dell'utente loggato (-1 se di altri)
+let currentRecapSquadraObj = null;
+let currentRecapSquadraIndex = -1;
 
 let tempNomeSquadra = "";
 let isTestMode = false;
@@ -87,7 +87,7 @@ function initMarquee(el, isInline = false) {
         if (textWidth > containerWidth && containerWidth > 0) {
             const distance = containerWidth - textWidth - 5;
             textEl.style.setProperty('--scroll-distance', `${distance}px`);
-	    const duration = Math.max(3, Math.abs(distance) * 0.04);
+            const duration = Math.max(3, Math.abs(distance) * 0.04);
             textEl.style.setProperty('--scroll-duration', `${duration}s`);
             textEl.classList.add('scroll-active');
         } else {
@@ -245,17 +245,14 @@ function isMarketOpen() {
 function isMarketOpenForMatchday(giornata) {
     if (isTestMode) return true;
     
-    // Se la giornata della squadra è precedente a quella attiva, il mercato è CHIUSO e immutabile!
     if (giornata < ACTIVE_MATCHDAY) {
         return false;
     }
     
-    // Se è la giornata corrente, verifica se le partite sono già iniziate
     if (giornata === ACTIVE_MATCHDAY) {
         return isMarketOpen();
     }
     
-    // Se è una giornata futura rispetto a quella attiva, il mercato è aperto
     return true;
 }
 
@@ -289,13 +286,11 @@ function initCountdown() {
         const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const secs = Math.floor((diff % (1000 * 60)) / 1000);
 
-        // Aggiorna Home
         ["w-cd-days"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(days).padStart(2, '0'); });
         ["w-cd-hours"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(hours).padStart(2, '0'); });
         ["w-cd-mins"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(mins).padStart(2, '0'); });
         ["w-cd-secs"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(secs).padStart(2, '0'); });
         
-        // Aggiorna Recap
         ["recap-cd-days"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(days).padStart(2, '0'); });
         ["recap-cd-hours"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(hours).padStart(2, '0'); });
         ["recap-cd-mins"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(mins).padStart(2, '0'); });
@@ -308,7 +303,6 @@ function initCountdown() {
     updateTimer();
     setInterval(updateTimer, 1000);
 }
-
 
 document.addEventListener("DOMContentLoaded", async () => {
     await inizializzaGiornataEDeadlineDinamica();
@@ -363,10 +357,10 @@ async function handleForgotPassword(e) {
     const email = document.getElementById('forgot-email').value.trim();
     try {
         await auth.sendPasswordResetEmail(email);
-        alert("✉️ Email di ripristino inviata! Controlla la tua casella di posta.");
+        mostraNotifica("Email Inviata", "✉️ Email di ripristino inviata! Controlla la tua casella di posta.", "success");
         switchAuthTab('login');
     } catch (err) {
-        alert("❌ Errore durante l'invio dell'email: " + err.message);
+        mostraNotifica("Errore Invio", "❌ Errore durante l'invio dell'email: " + err.message, "error");
     }
 }
 
@@ -391,9 +385,9 @@ async function handleRegister(e) {
             draftTentati: 0,
             creatoIl: new Date()
         });
-        alert(`Registrazione completata! Benvenuto, ${username}.`);
+        mostraNotifica("Registrazione Completata", `Registrazione completata! Benvenuto, <strong>${username}</strong>.`, "success");
     } catch (err) {
-        alert("Errore Registrazione: " + err.message);
+        mostraNotifica("Errore Registrazione", err.message, "error");
     }
 }
 
@@ -405,7 +399,7 @@ async function handleLogin(e) {
     try {
         await auth.signInWithEmailAndPassword(email, password);
     } catch (err) {
-        alert("Errore Login: " + err.message);
+        mostraNotifica("Errore Login", err.message, "error");
     }
 }
 
@@ -425,7 +419,7 @@ auth.onAuthStateChanged(async (user) => {
                 const uData = userDoc.data();
                 displayUsername = getRealUsername(uData, user);
                 
-		controllaRuoloAdmin(uData);
+                controllaRuoloAdmin(uData);
 
                 if (uData && uData.photoURL) {
                     aggiornaAvatarGrafica(uData.photoURL);
@@ -618,7 +612,7 @@ function renderWelcomeScreen() {
         }
 
         const realIndex = userSquadre.indexOf(sq);
-	const nomeSquadra = sq.nomeSquadra || "Squadra Senza Nome";
+        const nomeSquadra = sq.nomeSquadra || "Squadra Senza Nome";
         const isLongName = nomeSquadra.length > 18;
         const infoModulo = sq.moduloSelezionato ? ` • Modulo ${sq.moduloSelezionato}` : "";
 
@@ -795,10 +789,8 @@ async function apriProfiloUtente(targetUserId) {
     if (!targetUserId && currentUser) targetUserId = currentUser.uid;
     if (!targetUserId) return;
 
-    // 1. Verifichiamo subito se l'utente sta guardando il proprio profilo o quello di un altro
     isViewingOwnProfile = (currentUser && targetUserId === currentUser.uid);
 
-    // 2. Nascondiamo tutte le schermate e mostriamo quella del profilo
     document.getElementById("welcome-screen").style.display = "none";
     document.getElementById("main-app").style.display = "none";
     document.getElementById("recap-screen").style.display = "none";
@@ -809,10 +801,9 @@ async function apriProfiloUtente(targetUserId) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     try {
-        // 3. Scarichiamo i dati dell'utente dal database
         const userDoc = await db.collection("utenti").doc(targetUserId).get();
         if (!userDoc.exists) {
-            alert("Utente non trovato.");
+            mostraNotifica("Utente Non Trovato", "Impossibile trovare i dati dell'utente richiesto.", "error");
             tornaAllaHome();
             return;
         }
@@ -821,10 +812,9 @@ async function apriProfiloUtente(targetUserId) {
         const username = getRealUsername(uData, null);
         document.getElementById("profilo-username-title").innerText = `Profilo di ${username}`;
 
-        // 4. Gestione sicura dell'immagine profilo e dei permessi di modifica
         const profImg = document.getElementById("profilo-avatar-img");
         const cameraOverlay = document.querySelector("#profilo-screen .profilo-header .fa-camera")?.parentElement;
-        const uploadTextElement = document.getElementById("upload-foto-label"); // Opzionale se presente nell'HTML
+        const uploadTextElement = document.getElementById("upload-foto-label");
 
         if (uData && uData.photoURL && uData.photoURL.trim() !== "") {
             if (profImg) profImg.src = uData.photoURL;
@@ -832,7 +822,6 @@ async function apriProfiloUtente(targetUserId) {
             if (profImg) profImg.src = "https://via.placeholder.com/60";
         }
 
-        // Mostriamo o nascondiamo i comandi di modifica foto in base a chi è il proprietario
         if (isViewingOwnProfile) {
             if (cameraOverlay) cameraOverlay.style.display = "flex";
             if (uploadTextElement) uploadTextElement.style.display = "block";
@@ -1004,10 +993,11 @@ async function apriProfiloUtente(targetUserId) {
         renderizzaTraguardi(uData);
 
     } catch (err) {
-        alert("Errore nel caricamento delle statistiche utente.");
+        mostraNotifica("Errore Statistiche", "Si è verificato un problema nel caricamento delle statistiche utente.", "error");
         tornaAllaHome();
     }
 }
+
 async function incrementaDraftTentatiCloud() {
     if (!currentUser) return;
     try {
@@ -1036,14 +1026,13 @@ function renderMatchdayPills(selectedDay) {
     }
 }
 
-
 async function apriRecapSquadraUtenteCorrente(index) {
     const sq = userSquadre[index];
     currentRecapSquadraIndex = index;
     let username = "Fantallenatore";
     let ownerId = currentUser ? currentUser.uid : null;
    
- if (currentUser) {
+    if (currentUser) {
         try {
             const uDoc = await db.collection("utenti").doc(currentUser.uid).get();
             if (uDoc.exists) {
@@ -1061,14 +1050,20 @@ async function apriRecapSquadraUtenteCorrente(index) {
 async function visualizzaSquadraGenerica(userId, nomeSquadra, giornata) {
     try {
         const doc = await db.collection("utenti").doc(userId).get();
-        if (!doc.exists) return alert("Utente non trovato.");
+        if (!doc.exists) {
+            mostraNotifica("Utente Non Trovato", "Impossibile trovare l'allenatore selezionato.", "error");
+            return;
+        }
 
         const uData = doc.data();
         const username = getRealUsername(uData, null);
         const squadreArr = uData.squadre || [];
 
         const sq = squadreArr.find(s => s.nomeSquadra.toLowerCase() === nomeSquadra.toLowerCase() && (s.giornata !== undefined ? s.giornata : 8) === parseInt(giornata));
-        if (!sq) return alert("Squadra non trovata per questa giornata.");
+        if (!sq) {
+            mostraNotifica("Squadra Non Trovata", "Squadra non trovata per questa giornata.", "warning");
+            return;
+        }
 
         if (currentUser && userId === currentUser.uid) {
             currentRecapSquadraIndex = userSquadre.findIndex(s => s.nomeSquadra.toLowerCase() === nomeSquadra.toLowerCase() && (s.giornata !== undefined ? s.giornata : 8) === parseInt(giornata));
@@ -1078,7 +1073,7 @@ async function visualizzaSquadraGenerica(userId, nomeSquadra, giornata) {
 
         renderRecapScreenReadOnly(sq, username, true, userId);
     } catch (err) {
-        alert("Errore nel caricamento della squadra: " + err.message);
+        mostraNotifica("Errore Caricamento", "Errore nel caricamento della squadra: " + err.message, "error");
     }
 }
 
@@ -1099,11 +1094,6 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false, ow
     const btnBackClassifica = document.getElementById("btn-recap-back-classifica");
     btnBackClassifica.style.display = fromClassifica ? "inline-flex" : "none";
 
-    // CONTROLLO RIGIDO PERMESSI MODIFICA:
-    // 1. Deve essere il proprietario della squadra
-    // 2. Non deve essere un draft di test
-    // 3. La giornata della squadra NON deve essere già passata
-    // 4. Il mercato per la giornata di QUESTA squadra deve essere aperto (prima dell'inizio partite)
     const btnModifica = document.getElementById("btn-recap-modifica-formazione");
     const isOwner = currentUser && ownerUserId === currentUser.uid;
     const giornataSquadra = sq.giornata !== undefined ? sq.giornata : ACTIVE_MATCHDAY;
@@ -1167,10 +1157,7 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false, ow
     refreshAllMarquees();
 }
 
-
 function tornaAllaHome() {
-
-// 🟢 ASSICURIAMO CHE IL DRAFT SIA VISIBILE QUANDO SI TORNA ALLA HOME
     const colonnaSinistraDraft = document.querySelector(".desktop-col-left");
     if (colonnaSinistraDraft) colonnaSinistraDraft.style.display = "block";
 
@@ -1182,7 +1169,7 @@ function tornaAllaHome() {
 
 function avviaTestDraft() {
     if (customPlayersList.length < 24) {
-        alert("Caricamento giocatori in corso o file giocatori.xlsx non valido.");
+        mostraNotifica("Lista Giocatori Non Pronta", "Caricamento giocatori in corso o file <strong>giocatori.xlsx</strong> non valido.", "warning");
         return;
     }
 
@@ -1215,30 +1202,30 @@ function avviaTestDraft() {
 
 async function preparaEAvviaDraft() {
     if (!isMarketOpen()) {
-        alert(`⚠️ Il mercato è chiuso per la Giornata ${ACTIVE_MATCHDAY}.`);
+        mostraNotifica("Mercato Chiuso", `⚠️ Il mercato è chiuso per la <strong>Giornata ${ACTIVE_MATCHDAY}</strong>.`, "warning");
         return;
     }
 
     const squadreGiornataCorrente = userSquadre.filter(sq => (sq.giornata !== undefined ? sq.giornata : 8) === ACTIVE_MATCHDAY);
     if (squadreGiornataCorrente.length >= 3) {
-        alert(`Hai già utilizzato tutti i 3 gettoni disponibili per la Giornata ${ACTIVE_MATCHDAY}!`);
+        mostraNotifica("Gettoni Esauriti", `Hai già utilizzato tutti i 3 gettoni disponibili per la <strong>Giornata ${ACTIVE_MATCHDAY}</strong>!`, "warning");
         return;
     }
 
     const inputName = document.getElementById("new-team-name-input").value.trim();
     if (!inputName) {
-        alert("Inserisci un nome per la tua nuova squadra!");
+        mostraNotifica("Nome Mancante", "Inserisci un nome per la tua nuova squadra prima di avviare il draft!", "warning");
         return;
     }
 
     const nomiEsistentiLega = await ottieniNomiSquadreGlobaliGiornata(ACTIVE_MATCHDAY);
     if (nomiEsistentiLega.includes(inputName.toLowerCase())) {
-        alert(`❌ Il nome "${inputName}" è già stato scelto da un utente per la Giornata ${ACTIVE_MATCHDAY}! Scegli un nome differente.`);
+        mostraNotifica("Nome Già In Uso", `❌ Il nome "<strong>${inputName}</strong>" è già stato scelto da un utente per la Giornata ${ACTIVE_MATCHDAY}! Scegli un nome differente.`, "error");
         return;
     }
 
     if (customPlayersList.length < 24) {
-        alert("Caricamento giocatori in corso o file giocatori.xlsx non valido.");
+        mostraNotifica("Lista Giocatori Non Pronta", "Caricamento giocatori in corso o file <strong>giocatori.xlsx</strong> non valido.", "warning");
         return;
     }
 
@@ -1278,7 +1265,6 @@ function resetDraftState() {
     riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
     availablePlayers = [...customPlayersList];
     
-    // 🟢 RIPRISTINIAMO SEMPRE LA COLONNA DEL DRAFT E IL TASTO ROSSO QUANDO SI INIZIA UN DRAFT
     const colonnaSinistraDraft = document.querySelector(".desktop-col-left");
     if (colonnaSinistraDraft) colonnaSinistraDraft.style.display = "block";
 
@@ -1414,7 +1400,7 @@ function renderPlayers() {
     }
 
     if (candidates.length === 0) {
-        alert(`Attenzione: Impossibile trovare giocatori compatibili con il budget residuo!`);
+        mostraNotifica("Budget Esaurito", "Impossibile trovare giocatori compatibili con il budget residuo.", "warning");
         showModuloSelection();
         return;
     }
@@ -1474,13 +1460,12 @@ function renderPlayers() {
         container.appendChild(card);
     });
 
-    // 🟢 ATTIVA L'EFFETTO SCORRIMENTO SUI NOMI APPENA GENERATI
     refreshAllMarquees();
 }
 
 function draft(nome) {
     if (!isTestMode && !isMarketOpen()) {
-        alert("⚠️ Tempo scaduto! Il mercato è chiuso per questa giornata.");
+        mostraNotifica("Mercato Chiuso", "⚠️ Tempo scaduto! Il mercato è chiuso per questa giornata.", "warning");
         return;
     }
 
@@ -1488,12 +1473,12 @@ function draft(nome) {
     if (!p) return;
 
     if (rosa[p.ruolo].length >= limits[p.ruolo]) {
-        alert(`Hai già raggiunto il limite massimo di ${limits[p.ruolo]} giocatori per il ruolo ${p.ruolo}!`);
+        mostraNotifica("Limite Ruolo Raggiunto", `Hai già raggiunto il limite massimo di <strong>${limits[p.ruolo]}</strong> giocatori per il ruolo <strong>${p.ruolo}</strong>!`, "warning");
         return;
     }
 
     if (p.valore > budget) {
-        alert(`Non hai abbastanza crediti per acquistare ${p.nome}! Budget residuo: ${budget}`);
+        mostraNotifica("Crediti Insufficienti", `Non hai abbastanza crediti per acquistare <strong>${p.nome}</strong>! Budget residuo: <strong>${budget}</strong>`, "error");
         return;
     }
 
@@ -1562,7 +1547,7 @@ function renderSlots() {
 function schieraGiocatoreDaLista(playerObj, ruolo) {
     if (!isTestMode && !isMarketOpen()) return;
     if (!moduloSelezionato) {
-        alert("Scegli prima il modulo tattico");
+        mostraNotifica("Modulo Mancante", "Scegli prima il modulo tattico prima di schierare i giocatori!", "warning");
         return;
     }
 
@@ -1584,7 +1569,7 @@ function schieraGiocatoreDaLista(playerObj, ruolo) {
             if (riserveSelezionate[ruolo].length < 2) {
                 riserveSelezionate[ruolo].push(playerObj);
             } else {
-                alert(`Hai già esaurito i posti in campo e le 2 riserve per il ruolo ${ruolo}!`);
+                mostraNotifica("Posti Esauriti", `Hai già esaurito i posti in campo e le 2 riserve per il ruolo <strong>${ruolo}</strong>!`, "warning");
             }
         }
     }
@@ -1597,13 +1582,13 @@ function schieraGiocatoreDaLista(playerObj, ruolo) {
 function apriModaleScelta(ruolo, targetType, indexTitolare = null) {
     if (!isTestMode && !isMarketOpen()) return;
     if (!moduloSelezionato) {
-        alert("Scegli prima il modulo tattico");
+        mostraNotifica("Modulo Mancante", "Scegli prima il modulo tattico prima di schierare i giocatori!", "warning");
         return;
     }
 
     const giocatoriRuolo = rosa[ruolo];
     if (giocatoriRuolo.length === 0) {
-        alert(`Non hai acquistato alcun giocatore nel ruolo: ${ruolo}`);
+        mostraNotifica("Nessun Giocatore", `Non hai acquistato alcun giocatore nel ruolo: <strong>${ruolo}</strong>`, "warning");
         return;
     }
 
@@ -1813,7 +1798,7 @@ function showModuloSelection() {
 
 function setModulo() {
     if (!isTestMode && !isMarketOpen()) {
-        alert("⚠️ Tempo scaduto! Impossibile impostare la formazione.");
+        mostraNotifica("Mercato Chiuso", "⚠️ Tempo scaduto! Impossibile impostare la formazione.", "warning");
         return;
     }
 
@@ -1924,7 +1909,10 @@ function renderPanchinaGrafica() {
 }
 
 async function confermaFormazioneDefinitiva() {
-    if (schierati.length < 11) return alert("Devi schierare tutti gli 11 titolari!");
+    if (schierati.length < 11) {
+        mostraNotifica("Formazione Incompleta", "Devi schierare tutti gli <strong>11 titolari</strong> prima di confermare!", "warning");
+        return;
+    }
 
     if (isTestMode) {
         const squadraTestObj = {
@@ -1953,7 +1941,7 @@ async function confermaFormazioneDefinitiva() {
     }
 
     if (!isMarketOpen()) {
-        alert("⚠️ Tempo scaduto! Non è più possibile confermare la formazione.");
+        mostraNotifica("Mercato Chiuso", "⚠️ Tempo scaduto! Non è più possibile confermare la formazione.", "warning");
         return;
     }
 
@@ -1961,7 +1949,7 @@ async function confermaFormazioneDefinitiva() {
         try {
             const nomiEsistentiLega = await ottieniNomiSquadreGlobaliGiornata(ACTIVE_MATCHDAY);
             if (nomiEsistentiLega.includes(tempNomeSquadra.toLowerCase().trim())) {
-                alert(`❌ Un altro utente ha già registrato una squadra chiamata "${tempNomeSquadra}" per la Giornata ${ACTIVE_MATCHDAY}! Scegli un nome differente.`);
+                mostraNotifica("Nome Già In Uso", `❌ Un altro utente ha già registrato una squadra chiamata "<strong>${tempNomeSquadra}</strong>" per la Giornata ${ACTIVE_MATCHDAY}! Scegli un nome differente.`, "error");
                 return;
             }
 
@@ -1975,7 +1963,7 @@ async function confermaFormazioneDefinitiva() {
 
             const squadreGiornataCorrente = squadreEsistenti.filter(s => (s.giornata !== undefined ? s.giornata : 8) === ACTIVE_MATCHDAY);
             if (squadreGiornataCorrente.length >= 3) {
-                alert(`⚠️ Hai già utilizzato tutti i 3 gettoni disponibili per la Giornata ${ACTIVE_MATCHDAY}!`);
+                mostraNotifica("Gettoni Esauriti", `⚠️ Hai già utilizzato tutti i 3 gettoni disponibili per la <strong>Giornata ${ACTIVE_MATCHDAY}</strong>!`, "warning");
                 return;
             }
 
@@ -2000,13 +1988,13 @@ async function confermaFormazioneDefinitiva() {
                 squadre: userSquadre
             }, { merge: true });
 
-            alert(`🎉 Squadra "${tempNomeSquadra}" convalidata e salvata con successo per la Giornata ${ACTIVE_MATCHDAY}!`);
+            mostraNotifica("Formazione Salvata!", `🎉 Squadra "<strong>${tempNomeSquadra}</strong>" convalidata e salvata con successo per la Giornata ${ACTIVE_MATCHDAY}!`, "success");
             document.getElementById("new-team-name-input").value = "";
             await calcolaEVisualizzaTotaleSquadreGlobali(ACTIVE_MATCHDAY);
             renderWelcomeScreen();
 
         } catch (err) {
-            alert("❌ Errore durante il salvataggio: " + err.message);
+            mostraNotifica("Errore Salvataggio", "❌ Errore durante il salvataggio: " + err.message, "error");
         }
     }
 }
@@ -2069,16 +2057,14 @@ async function verificaECalcolaVotiAutomaticamente() {
 
                         if (matchRow) {
                             let rawVotoPuro = parseColumnVal(matchRow, ["voto", "Voto", "VOTO"]);
-			    let rawFanta = parseColumnVal(matchRow, ["fantavoto", "Fantavoto", "FANTAVOTO"]);
+                            let rawFanta = parseColumnVal(matchRow, ["fantavoto", "Fantavoto", "FANTAVOTO"]);
+                            let haGiocato = (rawVotoPuro > 0);
 
-// 2. Determiniamo se ha giocato basandoci SOLO sul voto in pagella
-		           let haGiocato = (rawVotoPuro > 0);
-
-                           if (matchRow && haGiocato) {
-   			   votiObj[p.nome] = {
-        		   voto: rawVotoPuro,
-        		   fantavoto: rawFanta, // Prende il fantavoto reale di Excel (mantiene anche lo 0.0 da malus)
-        		   sv: false,           // Ha giocato, quindi NON è Senza Voto
+                            if (matchRow && haGiocato) {
+                                votiObj[p.nome] = {
+                                    voto: rawVotoPuro,
+                                    fantavoto: rawFanta,
+                                    sv: false,
                                     gf: parseColumnVal(matchRow, ["gf"]),
                                     gs: parseColumnVal(matchRow, ["gs"]),
                                     ass: parseColumnVal(matchRow, ["ass"]),
@@ -2099,43 +2085,39 @@ async function verificaECalcolaVotiAutomaticamente() {
                         let vInfo = votiObj[tit.nome];
                         let eff = vInfo;
 
-                       let isSenzaVoto = false;
-if (!vInfo) {
-    isSenzaVoto = true;
-} else if (vInfo.sv === true) {
-    isSenzaVoto = true;
-} else if (vInfo.voto === undefined || vInfo.voto === null || vInfo.voto === 0) {
-    // Se il voto puro in pagella è 0 o assente, significa che non ha giocato / S.V.
-    isSenzaVoto = true;
-}
+                        let isSenzaVoto = false;
+                        if (!vInfo) {
+                            isSenzaVoto = true;
+                        } else if (vInfo.sv === true) {
+                            isSenzaVoto = true;
+                        } else if (vInfo.voto === undefined || vInfo.voto === null || vInfo.voto === 0) {
+                            isSenzaVoto = true;
+                        }
 
-if (isSenzaVoto) {
-    let riserveRuolo = (sq.riserveSelezionate || {})[tit.ruolo] || [];
-    let riservaValida = null;
+                        if (isSenzaVoto) {
+                            let riserveRuolo = (sq.riserveSelezionate || {})[tit.ruolo] || [];
+                            let riservaValida = null;
 
-    for (let ris of riserveRuolo) {
-        if (!riserveGiaSubentrate.has(ris.nome)) {
-            let risInfo = votiObj[ris.nome];
-            // Anche per la riserva verifichiamo che abbia un voto valido (non S.V.)
-            let risHaVotoValido = risInfo && risInfo.sv !== true && risInfo.voto > 0;
-            if (risHaVotoValido) {
-                riservaValida = { obj: ris, info: risInfo };
-                riserveGiaSubentrate.add(ris.nome);
-                break;
-            }
-        }
-    }
+                            for (let ris of riserveRuolo) {
+                                if (!riserveGiaSubentrate.has(ris.nome)) {
+                                    let risInfo = votiObj[ris.nome];
+                                    let risHaVotoValido = risInfo && risInfo.sv !== true && risInfo.voto > 0;
+                                    if (risHaVotoValido) {
+                                        riservaValida = { obj: ris, info: risInfo };
+                                        riserveGiaSubentrate.add(ris.nome);
+                                        break;
+                                    }
+                                }
+                            }
 
-    if (riservaValida) {
-        eff = riservaValida.info;
-    } else {
-        eff = { voto: 0, fantavoto: 0, sv: true };
-    }
-}
+                            if (riservaValida) {
+                                eff = riservaValida.info;
+                            } else {
+                                eff = { voto: 0, fantavoto: 0, sv: true };
+                            }
+                        }
                         totaleSquadra += (eff.fantavoto > 0 ? eff.fantavoto : 0);
                     });
-
-
 
                     sq.votiGiornata = votiObj;
                     sq.punteggioTotale = totaleSquadra;
@@ -2194,38 +2176,38 @@ function mostraTabellinoVoti(sq) {
 
     sq.schierati.forEach(tit => {
         let vInfo = sq.votiGiornata[tit.nome];
-let eff = vInfo;
-let note = "<span style='color:var(--accent-green)'>Titolare</span>";
+        let eff = vInfo;
+        let note = "<span style='color:var(--accent-green)'>Titolare</span>";
 
-let isSenzaVoto = false;
-if (!vInfo || vInfo.sv === true || vInfo.voto === undefined || vInfo.voto === null || vInfo.voto === 0) {
-    isSenzaVoto = true;
-}
+        let isSenzaVoto = false;
+        if (!vInfo || vInfo.sv === true || vInfo.voto === undefined || vInfo.voto === null || vInfo.voto === 0) {
+            isSenzaVoto = true;
+        }
 
-if (isSenzaVoto) {
-    let riserveRuolo = sq.riserveSelezionate[tit.ruolo] || [];
-    let riservaValida = null;
+        if (isSenzaVoto) {
+            let riserveRuolo = sq.riserveSelezionate[tit.ruolo] || [];
+            let riservaValida = null;
 
-    for (let ris of riserveRuolo) {
-        if (!riserveGiaSubentrate.has(ris.nome)) {
-            let risInfo = sq.votiGiornata[ris.nome];
-            let risHaVotoValido = risInfo && risInfo.sv !== true && risInfo.voto > 0;
-            if (risHaVotoValido) {
-                riservaValida = { obj: ris, info: risInfo };
-                riserveGiaSubentrate.add(ris.nome);
-                break;
+            for (let ris of riserveRuolo) {
+                if (!riserveGiaSubentrate.has(ris.nome)) {
+                    let risInfo = sq.votiGiornata[ris.nome];
+                    let risHaVotoValido = risInfo && risInfo.sv !== true && risInfo.voto > 0;
+                    if (risHaVotoValido) {
+                        riservaValida = { obj: ris, info: risInfo };
+                        riserveGiaSubentrate.add(ris.nome);
+                        break;
+                    }
+                }
+            }
+
+            if (riservaValida) {
+                eff = riservaValida.info;
+                note = `<span style='color:var(--accent-gold)'>🔁 Subentra (${riservaValida.obj.nome})</span>`;
+            } else {
+                note = "<span style='color:var(--accent-red)'>❌ S.V.</span>";
+                eff = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
             }
         }
-    }
-
-    if (riservaValida) {
-        eff = riservaValida.info;
-        note = `<span style='color:var(--accent-gold)'>🔁 Subentra (${riservaValida.obj.nome})</span>`;
-    } else {
-        note = "<span style='color:var(--accent-red)'>❌ S.V.</span>";
-        eff = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
-    }
-}
 
         totale += (eff.fantavoto > 0 ? eff.fantavoto : 0);
         let iconeHtml = generaIconeBonusMalus(eff);
@@ -2253,19 +2235,17 @@ if (isSenzaVoto) {
 // ==========================================
 
 async function caricaNuovaFotoProfiloBase64(event) {
-    
-// 🔒 Blocco di sicurezza: se non stiamo guardando il nostro profilo, blocca l'azione
     if (!isViewingOwnProfile) {
-        alert("⛔ Non puoi modificare la foto del profilo di un altro utente.");
+        mostraNotifica("Azione Non Consentita", "⛔ Non puoi modificare la foto del profilo di un altro utente.", "error");
         event.target.value = "";
         return;
     }
 
-const file = event.target.files[0];
+    const file = event.target.files[0];
     if (!file) return;
 
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-        alert("Formato non valido! Puoi caricare solo immagini JPG, PNG o WEBP.");
+        mostraNotifica("Formato Non Valido", "Puoi caricare solo immagini <strong>JPG</strong>, <strong>PNG</strong> o <strong>WEBP</strong>.", "warning");
         event.target.value = "";
         return;
     }
@@ -2297,7 +2277,7 @@ const file = event.target.files[0];
 
             try {
                 if (!currentUser) {
-                    alert("Errore: utente non autenticato.");
+                    mostraNotifica("Sessione Scaduta", "Errore: utente non autenticato.", "error");
                     return;
                 }
 
@@ -2307,14 +2287,13 @@ const file = event.target.files[0];
 
                 aggiornaAvatarGrafica(base64String);
                 
-                // Aggiorna subito anche i traguardi nel profilo se l'utente è lì
                 const uDoc = await db.collection("utenti").doc(currentUser.uid).get();
                 if (uDoc.exists) renderizzaTraguardi(uDoc.data());
 
-                alert("📸 Foto profilo aggiornata con successo!");
+                mostraNotifica("Foto Aggiornata", "📸 Foto profilo aggiornata con successo!", "success");
 
             } catch (err) {
-                alert("Errore nel salvataggio sul database: " + err.message);
+                mostraNotifica("Errore Salvataggio", "Errore nel salvataggio sul database: " + err.message, "error");
             }
         };
     };
@@ -2372,7 +2351,6 @@ function aggiornaAvatarGrafica(url) {
     }
 }
 
-
 // ==========================================
 // ROUTING RAPIDO DALLA HOME ALLE MISSIONI
 // ==========================================
@@ -2380,16 +2358,13 @@ function aggiornaAvatarGrafica(url) {
 async function vaiAMissioniProfilo() {
     if (!currentUser) return;
 
-    // 1. Apriamo il profilo dell'utente loggato
     await apriProfiloUtente(currentUser.uid);
 
-    // 2. Facciamo uno scroll fluido diretto alla sezione Traguardi
     setTimeout(() => {
         const targetSection = document.getElementById("badge-grid-container");
         if (targetSection) {
             targetSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
             
-            // Effetto grafico pulsante per far capire all'utente dove si trova
             const parentCard = targetSection.closest('.profilo-section-card') || targetSection.parentElement;
             if (parentCard) {
                 parentCard.style.transition = "transform 0.3s, border-color 0.3s";
@@ -2404,8 +2379,6 @@ async function vaiAMissioniProfilo() {
     }, 150);
 }
 
-
-
 // ==========================================
 // GESTIONE TRAGUARDI (ALTA LEGGIBILITÀ)
 // ==========================================
@@ -2419,7 +2392,6 @@ function renderizzaTraguardi(uData) {
     const numSquadre = squadre.length;
     const haFoto = uData && uData.photoURL && uData.photoURL.trim() !== "";
 
-    // Lista traguardi con descrizioni chiare ed estese
     const listaTraguardi = [
         {
             id: "primo_scatto",
@@ -2473,7 +2445,6 @@ function renderizzaTraguardi(uData) {
         }
     ];
 
-    // Layout a colonna singola (o doppia su schermi grandi) per dare respiro al testo
     container.style.display = "flex";
     container.style.flexDirection = "column";
     container.style.gap = "10px";
@@ -2490,13 +2461,11 @@ function renderizzaTraguardi(uData) {
         item.style.opacity = t.sbloccato ? "1" : "0.75";
         item.style.gap = "12px";
 
-        // Stato / Progresso ben visibile a destra
         let badgeProgresso = t.sbloccato 
             ? `<div style="background: rgba(16, 185, 129, 0.15); border: 1px solid var(--accent-neon-green); color: var(--accent-neon-green); font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; white-space: nowrap;">✔ SBLOCCATO</div>`
             : `<div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 12px; font-weight: 800; padding: 6px 12px; border-radius: 8px; white-space: nowrap; text-align: center;">${t.attuale} / ${t.target}</div>`;
 
         item.innerHTML = `
-            <!-- Sinistra: Icona + Testi estesi -->
             <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;">
                 <div style="width: 40px; height: 40px; min-width: 40px; border-radius: 8px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 18px; color: ${t.sbloccato ? t.colore : 'var(--text-muted)'};">
                     <i class="${t.icona}"></i>
@@ -2507,7 +2476,6 @@ function renderizzaTraguardi(uData) {
                 </div>
             </div>
 
-            <!-- Destra: Box Avanzamento Stile Draft -->
             <div>
                 ${badgeProgresso}
             </div>
@@ -2516,7 +2484,6 @@ function renderizzaTraguardi(uData) {
         container.appendChild(item);
     });
 }
-
 
 // ==========================================
 // LOGICA MODIFICA FORMAZIONE SALVATA
@@ -2528,19 +2495,16 @@ function avviaModificaFormazioneSalvata() {
     const sq = currentRecapSquadraObj;
     const giornataSquadra = sq.giornata !== undefined ? sq.giornata : ACTIVE_MATCHDAY;
 
-    // 1. Blocco assoluto per giornate trascorse
     if (giornataSquadra < ACTIVE_MATCHDAY) {
-        alert("❌ Impossibile modificare le formazioni delle giornate precedenti o concluse.");
+        mostraNotifica("Giornata Conclusa", "❌ Impossibile modificare le formazioni delle giornate precedenti o concluse.", "error");
         return;
     }
 
-    // 2. Blocco per mercato chiuso sulla giornata della squadra
     if (!isMarketOpenForMatchday(giornataSquadra)) {
-        alert("⚠️ Tempo scaduto! Il mercato è chiuso e le formazioni sono bloccate per questo turno.");
+        mostraNotifica("Mercato Chiuso", "⚠️ Tempo scaduto! Il mercato è chiuso e le formazioni sono bloccate per questo turno.", "warning");
         return;
     }
 
-    // Carichiamo la rosa esistente (i 24 giocatori acquistati rimangono FISSI, no redraft)
     rosa = JSON.parse(JSON.stringify(sq.rosa || { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] }));
     schierati = JSON.parse(JSON.stringify(sq.schierati || []));
     riserveSelezionate = JSON.parse(JSON.stringify(sq.riserveSelezionate || { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] }));
@@ -2549,7 +2513,6 @@ function avviaModificaFormazioneSalvata() {
     tempNomeSquadra = sq.nomeSquadra;
     isTestMode = false;
 
-   // 🚫 NASCONDIAMO INTERAMENTE LA COLONNA DI SINISTRA DEL DRAFT (Crediti, ruoli, box rossi e pulsanti di reset)
     const colonnaSinistraDraft = document.querySelector(".desktop-col-left");
     if (colonnaSinistraDraft) {
         colonnaSinistraDraft.style.display = "none";
@@ -2562,17 +2525,14 @@ function avviaModificaFormazioneSalvata() {
 
     document.getElementById("current-draft-team-title").innerText = `Modifica Formazione: ${sq.nomeSquadra} (G${giornataSquadra})`;
     
-    // FORZIAMO LA VISIBILITÀ DEL CAMPO E DELLA PANCHINA (Risolve il problema del campo che sparisce)
     document.getElementById("campo-panel-container").style.display = "block";
     document.getElementById("panchina-panel-container").style.display = "block";
     document.getElementById("conferma-container").style.display = "flex";
 
-   // 🚫 NASCONDIAMO SPECIFICAMENTE IL PULSANTE ROSSO DI CANCELLAZIONE/RICOMINCIA DRAFT
     const btnCancellaTutto = document.querySelector("#conferma-container button.btn-action-danger");
     if (btnCancellaTutto) {
         btnCancellaTutto.style.display = "none";
     }
-
 
     const btnConferma = document.getElementById("btn-conferma-formazione");
     btnConferma.onclick = salvaModificaFormazioneSuCloud;
@@ -2586,30 +2546,27 @@ function avviaModificaFormazioneSalvata() {
 }
 
 async function salvaModificaFormazioneSuCloud() {
-    
-   
     const btnCancellaTutto = document.querySelector("#conferma-container button.btn-action-danger");
     if (btnCancellaTutto) {
-    btnCancellaTutto.style.display = "inline-flex"; // o "block" a seconda di come è strutturato nel tuo CSS
-}
-
+        btnCancellaTutto.style.display = "inline-flex";
+    }
 
     const colonnaSinistraDraft = document.querySelector(".desktop-col-left");
     if (colonnaSinistraDraft) {
-    colonnaSinistraDraft.style.display = "block";
-}
+        colonnaSinistraDraft.style.display = "block";
+    }
 
     if (!currentRecapSquadraObj) return;
     const giornataSquadra = currentRecapSquadraObj.giornata !== undefined ? currentRecapSquadraObj.giornata : ACTIVE_MATCHDAY;
 
     if (!isMarketOpenForMatchday(giornataSquadra)) {
-        alert("⚠️ Tempo scaduto! Il mercato ha chiuso durante le tue modifiche. Le modifiche non sono state salvate.");
+        mostraNotifica("Mercato Chiuso", "⚠️ Tempo scaduto! Il mercato ha chiuso durante le tue modifiche. Le modifiche non sono state salvate.", "warning");
         tornaAllaHome();
         return;
     }
 
     if (schierati.length < 11) {
-        alert("Devi schierare tutti gli 11 titolari!");
+        mostraNotifica("Formazione Incompleta", "Devi schierare tutti gli <strong>11 titolari</strong>!", "warning");
         return;
     }
 
@@ -2618,7 +2575,10 @@ async function salvaModificaFormazioneSuCloud() {
             const userDocRef = db.collection("utenti").doc(currentUser.uid);
             const docSnapshot = await userDocRef.get();
             
-            if (!docSnapshot.exists) return alert("Utente non trovato.");
+            if (!docSnapshot.exists) {
+                mostraNotifica("Errore Utente", "Utente non trovato nel database.", "error");
+                return;
+            }
 
             let squadreEsistenti = docSnapshot.data().squadre || [];
 
@@ -2628,7 +2588,7 @@ async function salvaModificaFormazioneSuCloud() {
             }
 
             if (indexTarget === -1) {
-                alert("Errore: Squadra non trovata nel database.");
+                mostraNotifica("Squadra Non Trovata", "Errore: Squadra non trovata nel database.", "error");
                 return;
             }
 
@@ -2641,19 +2601,17 @@ async function salvaModificaFormazioneSuCloud() {
 
             await userDocRef.update({ squadre: userSquadre });
 
-            alert("✅ Formazione aggiornata con successo!");
-
-            // Ripristiniamo il comportamento standard per i nuovi draft futuri
+            mostraNotifica("Modifiche Salvate", "✅ Formazione aggiornata con successo!", "success");
 
             document.getElementById("btn-conferma-formazione").onclick = confermaFormazioneDefinitiva;
            
-	    const draftPanel = document.getElementById("draft-panel");
+            const draftPanel = document.getElementById("draft-panel");
             if (draftPanel) draftPanel.style.display = "block";
 
             apriRecapSquadraUtenteCorrente(indexTarget);
 
         } catch (err) {
-            alert("❌ Errore durante l'aggiornamento: " + err.message);
+            mostraNotifica("Errore Aggiornamento", "❌ Errore durante l'aggiornamento: " + err.message, "error");
         }
     }
 }
@@ -2674,19 +2632,17 @@ async function controllaRuoloAdmin(uData) {
 async function apriPannelloAdmin() {
     if (!currentUser) return;
     
-    // Controllo di sicurezza sul database
     try {
         const uDoc = await db.collection("utenti").doc(currentUser.uid).get();
         if (!uDoc.exists || uDoc.data().isAdmin !== true) {
-            alert("⛔ Accesso Negato: Non disponi dei privilegi di amministratore.");
+            mostraNotifica("Accesso Negato", "⛔ Non disponi dei privilegi di amministratore.", "error");
             return;
         }
     } catch (e) {
-        alert("Errore di verifica permessi.");
+        mostraNotifica("Errore Permessi", "Errore di verifica permessi.", "error");
         return;
     }
 
-    // Nascondiamo gli altri schermi e mostriamo quello admin
     document.getElementById("welcome-screen").style.display = "none";
     document.getElementById("main-app").style.display = "none";
     document.getElementById("recap-screen").style.display = "none";
@@ -2722,7 +2678,7 @@ async function caricaStatisticheAdmin() {
 async function adminEseguiRicalcoloGiornata() {
     const gInput = parseInt(document.getElementById("admin-input-giornata").value);
     if (isNaN(gInput) || gInput < 1) {
-        alert("Inserisci un numero di giornata valido.");
+        mostraNotifica("Giornata Non Valida", "Inserisci un numero di giornata valido.", "warning");
         return;
     }
     
@@ -2733,16 +2689,15 @@ async function ricalcolaTuttaLaGiornata(giornata) {
     if (!confirm(`Vuoi forzare il ricalcolo e la sovrascrittura dei punteggi per TUTTE le squadre della Giornata ${giornata}?`)) return;
     
     try {
-        alert(`🔄 Avvio ricalcolo massivo per la Giornata ${giornata}...`);
+        mostraNotifica("Ricalcolo In Corso", `🔄 Avvio ricalcolo massivo per la <strong>Giornata ${giornata}</strong>...`, "info");
         
-        // 1. Verifichiamo e carichiamo il file Excel specifico della giornata scelta dall'admin
         const fileName = `voti_ok${giornata}.xlsx`;
         let fileResponse;
         try {
             fileResponse = await fetch(fileName);
             if (!fileResponse.ok) throw new Error("File non trovato");
         } catch (e) {
-            alert(`❌ Impossibile trovare il file "${fileName}" nella directory principale. Assicurati di averlo caricato.`);
+            mostraNotifica("File Voti Mancante", `❌ Impossibile trovare il file "<strong>${fileName}</strong>" nella directory principale. Assicurati di averlo caricato.`, "error");
             return;
         }
 
@@ -2754,7 +2709,6 @@ async function ricalcolaTuttaLaGiornata(giornata) {
         const snapshot = await db.collection("utenti").get();
         let squadreAggiornateTotali = 0;
 
-        // 2. Scorriamo tutti gli utenti nel database Firebase
         for (const docUser of snapshot.docs) {
             let uData = docUser.data();
             let squadreArr = uData.squadre || [];
@@ -2763,7 +2717,6 @@ async function ricalcolaTuttaLaGiornata(giornata) {
             squadreArr.forEach(sq => {
                 let giornataSquadra = sq.giornata !== undefined ? sq.giornata : 8;
                 
-                // Ricalcoliamo FORZATAMENTE tutte le squadre che corrispondono alla giornata scelta dall'admin
                 if (giornataSquadra === giornata) {
                     let votiObj = {};
                     let totaleSquadra = 0;
@@ -2805,7 +2758,6 @@ async function ricalcolaTuttaLaGiornata(giornata) {
                         votiObj[p.nome] = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
                     });
 
-                    // Gestione titolari e subentri panchina
                     (sq.schierati || []).forEach(tit => {
                         let vInfo = votiObj[tit.nome];
                         let eff = vInfo;
@@ -2840,7 +2792,6 @@ async function ricalcolaTuttaLaGiornata(giornata) {
                         totaleSquadra += (eff.fantavoto > 0 ? eff.fantavoto : 0);
                     });
 
-                    // Sovrascriviamo i vecchi dati con quelli nuovi ricalcolati
                     sq.votiGiornata = votiObj;
                     sq.punteggioTotale = totaleSquadra;
                     modificato = true;
@@ -2848,22 +2799,20 @@ async function ricalcolaTuttaLaGiornata(giornata) {
                 }
             });
 
-            // Se l'utente ha squadre in quella giornata, aggiorniamo il documento su Firestore
             if (modificato) {
                 await db.collection("utenti").doc(docUser.id).update({ squadre: squadreArr });
             }
         }
 
-        // Ricarichiamo i dati dell'utente corrente se loggato
         if (currentUser) {
             await caricaDatiUtenteCloud();
         }
 
-        alert(`✅ Ricalcolo completato con successo! Aggiornate ${squadreAggiornateTotali} squadre per la Giornata ${giornata}.`);
+        mostraNotifica("Ricalcolo Completato", `✅ Ricalcolo completato con successo! Aggiornate <strong>${squadreAggiornateTotali}</strong> squadre per la Giornata ${giornata}.`, "success");
         caricaStatisticheAdmin();
 
     } catch (err) {
-        alert("❌ Errore durante il ricalcolo massivo: " + err.message);
+        mostraNotifica("Errore Ricalcolo", "❌ Errore durante il ricalcolo massivo: " + err.message, "error");
     }
 }
 
@@ -2874,11 +2823,9 @@ function mostraNotifica(titolo, messaggio, tipo = 'info') {
     const titleEl = document.getElementById('custom-alert-title');
     const msgEl = document.getElementById('custom-alert-message');
 
-    // Reset classi tema
     box.classList.remove('alert-type-error', 'alert-type-success', 'alert-type-warning', 'alert-type-info');
     box.classList.add(`alert-type-${tipo}`);
 
-    // Imposta icona in base al tipo
     if (tipo === 'error') {
         icon.className = 'fa-solid fa-triangle-exclamation';
     } else if (tipo === 'success') {
@@ -2890,7 +2837,7 @@ function mostraNotifica(titolo, messaggio, tipo = 'info') {
     }
 
     titleEl.textContent = titolo;
-    msgEl.innerHTML = messaggio; // Permette anche grassetti <strong> nel testo
+    msgEl.innerHTML = messaggio;
     modal.style.display = 'flex';
 }
 
