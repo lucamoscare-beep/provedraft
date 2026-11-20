@@ -2449,3 +2449,72 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
         flex-direction: column;
     }
 }
+
+/* STILI MODALE DI SERVIZIO PERSONALIZZATA */
+.custom-alert-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin: 0 auto 14px auto;
+}
+
+/* Tema Errore (Rosso) */
+.custom-modal-card.alert-type-error {
+    border: 2px solid #ef4444;
+    box-shadow: 0 10px 35px rgba(239, 68, 68, 0.25);
+}
+.custom-modal-card.alert-type-error .custom-alert-icon {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+}
+.custom-modal-card.alert-type-error .btn-action-primary {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+}
+
+/* Tema Successo (Verde) */
+.custom-modal-card.alert-type-success {
+    border: 2px solid #10b981;
+    box-shadow: 0 10px 35px rgba(16, 185, 129, 0.25);
+}
+.custom-modal-card.alert-type-success .custom-alert-icon {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+/* Tema Avviso / Attenzione (Oro) */
+.custom-modal-card.alert-type-warning {
+    border: 2px solid #fbbf24;
+    box-shadow: 0 10px 35px rgba(251, 191, 36, 0.25);
+}
+.custom-modal-card.alert-type-warning .custom-alert-icon {
+    background: rgba(251, 191, 36, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.4);
+}
+.custom-modal-card.alert-type-warning .btn-action-primary {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #0f172a;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+}
+
+/* Tema Info (Blu) */
+.custom-modal-card.alert-type-info {
+    border: 2px solid #38bdf8;
+    box-shadow: 0 10px 35px rgba(56, 189, 248, 0.25);
+}
+.custom-modal-card.alert-type-info .custom-alert-icon {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.4);
+}
+.custom-modal-card.alert-type-info .btn-action-primary {
+    background: linear-gradient(135deg, #0284c7, #38bdf8);
+    box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);
+}

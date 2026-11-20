@@ -799,6 +799,21 @@
     </div>
 </div>
 
+<!-- MODALE DI SERVIZIO PERSONALIZZATA DRAFTXI -->
+<div id="custom-alert-modal" class="custom-modal-overlay" style="display: none;">
+    <div id="custom-alert-box" class="custom-modal-card alert-type-info">
+        <div id="custom-alert-icon-wrapper" class="custom-alert-icon">
+            <i id="custom-alert-icon" class="fa-solid fa-circle-info"></i>
+        </div>
+        <h3 id="custom-alert-title" style="color: #fff; font-size: 18px; margin-bottom: 8px; text-transform: uppercase;">Avviso</h3>
+        <p id="custom-alert-message" style="color: var(--text-muted); font-size: 13px; line-height: 1.5; margin-bottom: 20px;">Messaggio di servizio</p>
+        <button onclick="chiudiNotificaPersonalizzata()" id="custom-alert-btn" class="btn-action-primary" style="width: 100%; justify-content: center;">
+            Ho Capito
+        </button>
+    </div>
+</div>
+
+
 <!-- SDK Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -806,5 +821,7 @@
 
 <!-- Collegamento al file JavaScript esterno -->
 <script src="script.js"></script>
+
+
 </body>
 </html>

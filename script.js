@@ -2866,3 +2866,34 @@ async function ricalcolaTuttaLaGiornata(giornata) {
         alert("❌ Errore durante il ricalcolo massivo: " + err.message);
     }
 }
+
+function mostraNotifica(titolo, messaggio, tipo = 'info') {
+    const modal = document.getElementById('custom-alert-modal');
+    const box = document.getElementById('custom-alert-box');
+    const icon = document.getElementById('custom-alert-icon');
+    const titleEl = document.getElementById('custom-alert-title');
+    const msgEl = document.getElementById('custom-alert-message');
+
+    // Reset classi tema
+    box.classList.remove('alert-type-error', 'alert-type-success', 'alert-type-warning', 'alert-type-info');
+    box.classList.add(`alert-type-${tipo}`);
+
+    // Imposta icona in base al tipo
+    if (tipo === 'error') {
+        icon.className = 'fa-solid fa-triangle-exclamation';
+    } else if (tipo === 'success') {
+        icon.className = 'fa-solid fa-circle-check';
+    } else if (tipo === 'warning') {
+        icon.className = 'fa-solid fa-circle-exclamation';
+    } else {
+        icon.className = 'fa-solid fa-circle-info';
+    }
+
+    titleEl.textContent = titolo;
+    msgEl.innerHTML = messaggio; // Permette anche grassetti <strong> nel testo
+    modal.style.display = 'flex';
+}
+
+function chiudiNotificaPersonalizzata() {
+    document.getElementById('custom-alert-modal').style.display = 'none';
+}
