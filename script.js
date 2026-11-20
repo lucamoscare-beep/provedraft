@@ -439,8 +439,15 @@ auth.onAuthStateChanged(async (user) => {
     }
 });
 
-function logout() {
-    if (confirm("Vuoi davvero disconnetterti dal tuo account?")) {
+async function logout() {
+    const ok = await mostraConferma(
+        "Disconnessione",
+        "Vuoi davvero disconnetterti dal tuo account?",
+        "warning",
+        "Sì, esci",
+        "No"
+    );
+    if (ok) {
         auth.signOut().then(() => location.reload());
     }
 }
@@ -1282,8 +1289,15 @@ function resetDraftState() {
     updateDashboardCounters();
 }
 
-function annullaERicominciaDraft() {
-    if (confirm("Vuoi davvero ricominciare il draft? I giocatori selezionati verranno azzerati.")) {
+async function annullaERicominciaDraft() {
+    const ok = await mostraConferma(
+        "Ricomincia Draft",
+        "Vuoi davvero ricominciare il draft? I giocatori selezionati verranno azzerati.",
+        "warning",
+        "Sì, ricomincia",
+        "No"
+    );
+    if (ok) {
         incrementaDraftTentatiCloud();
         const titleHtml = isTestMode ? '<h2>Scegli il tuo giocatore (Test)</h2>' : '<h2>Scegli il tuo giocatore</h2>';
         const btnText = isTestMode ? 'Ricomincia Test' : 'Ricomincia Draft';
@@ -1945,57 +1959,64 @@ async function confermaFormazioneDefinitiva() {
         return;
     }
 
-    if (confirm(`Confermi la squadra "${tempNomeSquadra}" per la Giornata ${ACTIVE_MATCHDAY}? Questa operazione scalerà 1 Gettone ed è definitiva.`)) {
-        try {
-            const nomiEsistentiLega = await ottieniNomiSquadreGlobaliGiornata(ACTIVE_MATCHDAY);
-            if (nomiEsistentiLega.includes(tempNomeSquadra.toLowerCase().trim())) {
-                mostraNotifica("Nome Già In Uso", `❌ Un altro utente ha già registrato una squadra chiamata "<strong>${tempNomeSquadra}</strong>" per la Giornata ${ACTIVE_MATCHDAY}! Scegli un nome differente.`, "error");
-                return;
-            }
+    const ok = await mostraConferma(
+        "Conferma Formazione",
+        `Confermi la squadra "<strong>${tempNomeSquadra}</strong>" per la Giornata ${ACTIVE_MATCHDAY}? Questa operazione scalerà 1 Gettone ed è definitiva.`,
+        "info",
+        "Sì, conferma",
+        "No"
+    );
+    if (!ok) return;
 
-            const userDocRef = db.collection("utenti").doc(currentUser.uid);
-            const docSnapshot = await userDocRef.get();
-            
-            let squadreEsistenti = [];
-            if (docSnapshot.exists && docSnapshot.data().squadre) {
-                squadreEsistenti = docSnapshot.data().squadre;
-            }
-
-            const squadreGiornataCorrente = squadreEsistenti.filter(s => (s.giornata !== undefined ? s.giornata : 8) === ACTIVE_MATCHDAY);
-            if (squadreGiornataCorrente.length >= 3) {
-                mostraNotifica("Gettoni Esauriti", `⚠️ Hai già utilizzato tutti i 3 gettoni disponibili per la <strong>Giornata ${ACTIVE_MATCHDAY}</strong>!`, "warning");
-                return;
-            }
-
-            const nuovaSquadra = {
-                giornata: ACTIVE_MATCHDAY,
-                nomeSquadra: tempNomeSquadra,
-                rosa: JSON.parse(JSON.stringify(rosa)),
-                schierati: JSON.parse(JSON.stringify(schierati)),
-                riserveSelezionate: JSON.parse(JSON.stringify(riserveSelezionate)),
-                budget: budget,
-                moduloSelezionato: moduloSelezionato,
-                formazioneBloccata: true,
-                votiGiornata: {},
-                punteggioTotale: null,
-                creataIl: new Date()
-            };
-
-            squadreEsistenti.push(nuovaSquadra);
-            userSquadre = squadreEsistenti;
-
-            await userDocRef.set({
-                squadre: userSquadre
-            }, { merge: true });
-
-            mostraNotifica("Formazione Salvata!", `🎉 Squadra "<strong>${tempNomeSquadra}</strong>" convalidata e salvata con successo per la Giornata ${ACTIVE_MATCHDAY}!`, "success");
-            document.getElementById("new-team-name-input").value = "";
-            await calcolaEVisualizzaTotaleSquadreGlobali(ACTIVE_MATCHDAY);
-            renderWelcomeScreen();
-
-        } catch (err) {
-            mostraNotifica("Errore Salvataggio", "❌ Errore durante il salvataggio: " + err.message, "error");
+    try {
+        const nomiEsistentiLega = await ottieniNomiSquadreGlobaliGiornata(ACTIVE_MATCHDAY);
+        if (nomiEsistentiLega.includes(tempNomeSquadra.toLowerCase().trim())) {
+            mostraNotifica("Nome Già In Uso", `❌ Un altro utente ha già registrato una squadra chiamata "<strong>${tempNomeSquadra}</strong>" per la Giornata ${ACTIVE_MATCHDAY}! Scegli un nome differente.`, "error");
+            return;
         }
+
+        const userDocRef = db.collection("utenti").doc(currentUser.uid);
+        const docSnapshot = await userDocRef.get();
+        
+        let squadreEsistenti = [];
+        if (docSnapshot.exists && docSnapshot.data().squadre) {
+            squadreEsistenti = docSnapshot.data().squadre;
+        }
+
+        const squadreGiornataCorrente = squadreEsistenti.filter(s => (s.giornata !== undefined ? s.giornata : 8) === ACTIVE_MATCHDAY);
+        if (squadreGiornataCorrente.length >= 3) {
+            mostraNotifica("Gettoni Esauriti", `⚠️ Hai già utilizzato tutti i 3 gettoni disponibili per la <strong>Giornata ${ACTIVE_MATCHDAY}</strong>!`, "warning");
+            return;
+        }
+
+        const nuovaSquadra = {
+            giornata: ACTIVE_MATCHDAY,
+            nomeSquadra: tempNomeSquadra,
+            rosa: JSON.parse(JSON.stringify(rosa)),
+            schierati: JSON.parse(JSON.stringify(schierati)),
+            riserveSelezionate: JSON.parse(JSON.stringify(riserveSelezionate)),
+            budget: budget,
+            moduloSelezionato: moduloSelezionato,
+            formazioneBloccata: true,
+            votiGiornata: {},
+            punteggioTotale: null,
+            creataIl: new Date()
+        };
+
+        squadreEsistenti.push(nuovaSquadra);
+        userSquadre = squadreEsistenti;
+
+        await userDocRef.set({
+            squadre: userSquadre
+        }, { merge: true });
+
+        mostraNotifica("Formazione Salvata!", `🎉 Squadra "<strong>${tempNomeSquadra}</strong>" convalidata e salvata con successo per la Giornata ${ACTIVE_MATCHDAY}!`, "success");
+        document.getElementById("new-team-name-input").value = "";
+        await calcolaEVisualizzaTotaleSquadreGlobali(ACTIVE_MATCHDAY);
+        renderWelcomeScreen();
+
+    } catch (err) {
+        mostraNotifica("Errore Salvataggio", "❌ Errore durante il salvataggio: " + err.message, "error");
     }
 }
 
@@ -2570,49 +2591,56 @@ async function salvaModificaFormazioneSuCloud() {
         return;
     }
 
-    if (confirm(`Confermi le modifiche alla formazione di "${tempNomeSquadra}"?`)) {
-        try {
-            const userDocRef = db.collection("utenti").doc(currentUser.uid);
-            const docSnapshot = await userDocRef.get();
-            
-            if (!docSnapshot.exists) {
-                mostraNotifica("Errore Utente", "Utente non trovato nel database.", "error");
-                return;
-            }
+    const ok = await mostraConferma(
+        "Salva Modifiche",
+        `Confermi le modifiche alla formazione di "<strong>${tempNomeSquadra}</strong>"?`,
+        "info",
+        "Sì, salva",
+        "No"
+    );
+    if (!ok) return;
 
-            let squadreEsistenti = docSnapshot.data().squadre || [];
-
-            let indexTarget = currentRecapSquadraIndex;
-            if (indexTarget === -1 || indexTarget >= squadreEsistenti.length) {
-                indexTarget = squadreEsistenti.findIndex(s => s.nomeSquadra.toLowerCase() === tempNomeSquadra.toLowerCase() && (s.giornata !== undefined ? s.giornata : ACTIVE_MATCHDAY) === giornataSquadra);
-            }
-
-            if (indexTarget === -1) {
-                mostraNotifica("Squadra Non Trovata", "Errore: Squadra non trovata nel database.", "error");
-                return;
-            }
-
-            squadreEsistenti[indexTarget].schierati = JSON.parse(JSON.stringify(schierati));
-            squadreEsistenti[indexTarget].riserveSelezionate = JSON.parse(JSON.stringify(riserveSelezionate));
-            squadreEsistenti[indexTarget].moduloSelezionato = moduloSelezionato;
-            squadreEsistenti[indexTarget].modificataIl = new Date();
-
-            userSquadre = squadreEsistenti;
-
-            await userDocRef.update({ squadre: userSquadre });
-
-            mostraNotifica("Modifiche Salvate", "✅ Formazione aggiornata con successo!", "success");
-
-            document.getElementById("btn-conferma-formazione").onclick = confermaFormazioneDefinitiva;
-           
-            const draftPanel = document.getElementById("draft-panel");
-            if (draftPanel) draftPanel.style.display = "block";
-
-            apriRecapSquadraUtenteCorrente(indexTarget);
-
-        } catch (err) {
-            mostraNotifica("Errore Aggiornamento", "❌ Errore durante l'aggiornamento: " + err.message, "error");
+    try {
+        const userDocRef = db.collection("utenti").doc(currentUser.uid);
+        const docSnapshot = await userDocRef.get();
+        
+        if (!docSnapshot.exists) {
+            mostraNotifica("Errore Utente", "Utente non trovato nel database.", "error");
+            return;
         }
+
+        let squadreEsistenti = docSnapshot.data().squadre || [];
+
+        let indexTarget = currentRecapSquadraIndex;
+        if (indexTarget === -1 || indexTarget >= squadreEsistenti.length) {
+            indexTarget = squadreEsistenti.findIndex(s => s.nomeSquadra.toLowerCase() === tempNomeSquadra.toLowerCase() && (s.giornata !== undefined ? s.giornata : ACTIVE_MATCHDAY) === giornataSquadra);
+        }
+
+        if (indexTarget === -1) {
+            mostraNotifica("Squadra Non Trovata", "Errore: Squadra non trovata nel database.", "error");
+            return;
+        }
+
+        squadreEsistenti[indexTarget].schierati = JSON.parse(JSON.stringify(schierati));
+        squadreEsistenti[indexTarget].riserveSelezionate = JSON.parse(JSON.stringify(riserveSelezionate));
+        squadreEsistenti[indexTarget].moduloSelezionato = moduloSelezionato;
+        squadreEsistenti[indexTarget].modificataIl = new Date();
+
+        userSquadre = squadreEsistenti;
+
+        await userDocRef.update({ squadre: userSquadre });
+
+        mostraNotifica("Modifiche Salvate", "✅ Formazione aggiornata con successo!", "success");
+
+        document.getElementById("btn-conferma-formazione").onclick = confermaFormazioneDefinitiva;
+       
+        const draftPanel = document.getElementById("draft-panel");
+        if (draftPanel) draftPanel.style.display = "block";
+
+        apriRecapSquadraUtenteCorrente(indexTarget);
+
+    } catch (err) {
+        mostraNotifica("Errore Aggiornamento", "❌ Errore durante l'aggiornamento: " + err.message, "error");
     }
 }
 
@@ -2686,7 +2714,14 @@ async function adminEseguiRicalcoloGiornata() {
 }
 
 async function ricalcolaTuttaLaGiornata(giornata) {
-    if (!confirm(`Vuoi forzare il ricalcolo e la sovrascrittura dei punteggi per TUTTE le squadre della Giornata ${giornata}?`)) return;
+    const ok = await mostraConferma(
+        "Forza Ricalcolo",
+        `Vuoi forzare il ricalcolo e la sovrascrittura dei punteggi per <strong>TUTTE</strong> le squadre della Giornata ${giornata}?`,
+        "warning",
+        "Sì, ricalcola",
+        "No"
+    );
+    if (!ok) return;
     
     try {
         mostraNotifica("Ricalcolo In Corso", `🔄 Avvio ricalcolo massivo per la <strong>Giornata ${giornata}</strong>...`, "info");
@@ -2843,4 +2878,55 @@ function mostraNotifica(titolo, messaggio, tipo = 'info') {
 
 function chiudiNotificaPersonalizzata() {
     document.getElementById('custom-alert-modal').style.display = 'none';
+}
+
+// ==========================================
+// MODALE DI CONFERMA SÌ / NO PERSONALIZZATA
+// ==========================================
+
+let confirmResolver = null;
+
+function mostraConferma(titolo, messaggio, tipo = 'warning', testoSi = 'Sì', testoNo = 'No') {
+    return new Promise((resolve) => {
+        confirmResolver = resolve;
+
+        const modal = document.getElementById('custom-confirm-modal');
+        const box = document.getElementById('custom-confirm-box');
+        const icon = document.getElementById('custom-confirm-icon');
+        const titleEl = document.getElementById('custom-confirm-title');
+        const msgEl = document.getElementById('custom-confirm-message');
+        const btnYes = document.getElementById('custom-confirm-yes');
+        const btnNo = document.getElementById('custom-confirm-no');
+
+        box.classList.remove('alert-type-error', 'alert-type-success', 'alert-type-warning', 'alert-type-info');
+        box.classList.add(`alert-type-${tipo}`);
+
+        if (tipo === 'error') {
+            icon.className = 'fa-solid fa-triangle-exclamation';
+        } else if (tipo === 'success') {
+            icon.className = 'fa-solid fa-circle-check';
+        } else if (tipo === 'warning') {
+            icon.className = 'fa-solid fa-circle-question';
+        } else {
+            icon.className = 'fa-solid fa-circle-info';
+        }
+
+        titleEl.textContent = titolo;
+        msgEl.innerHTML = messaggio;
+        btnYes.innerHTML = `<i class="fa-solid fa-check"></i> ${testoSi}`;
+        btnNo.innerHTML = `<i class="fa-solid fa-xmark"></i> ${testoNo}`;
+
+        modal.style.display = 'flex';
+    });
+}
+
+function rispondiConferma(scelta) {
+    const modal = document.getElementById('custom-confirm-modal');
+    if (modal) modal.style.display = 'none';
+
+    if (typeof confirmResolver === 'function') {
+        const resolveFn = confirmResolver;
+        confirmResolver = null;
+        resolveFn(Boolean(scelta));
+    }
 }
