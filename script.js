@@ -13,7 +13,7 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 // ----------------------------------------------------
-// CALENDARIO DI SICUREZZA (FALLBACK IN CASO DI RETE ASSENTE)
+// CALENDARIO MANUALE DI RIFERIMENTO (SENZA API ESTERNE)
 // ----------------------------------------------------
 const CALENDARIO_FALLBACK = {
     8: { inizio: new Date("2026-10-20T18:30:00"), fine: new Date("2026-10-22T23:00:00") },
@@ -27,7 +27,7 @@ const CALENDARIO_FALLBACK = {
     16: { inizio: new Date("2026-12-18T18:30:00"), fine: new Date("2026-12-20T23:00:00") }
 };
 
-let ACTIVE_MATCHDAY = 9; 
+let ACTIVE_MATCHDAY = 13; 
 let CURRENT_MATCHDAY_START = null;
 let CURRENT_MATCHDAY_END = null;
 
@@ -108,89 +108,25 @@ window.addEventListener('resize', () => {
 });
 
 async function inizializzaGiornataEDeadlineDinamica() {
-    const keyCache = "draft_seriea_matchday_info";
-    const keyTime = "draft_seriea_matchday_time";
-    const oraAttuale = new Date().getTime();
-    const durataCache = 30 * 60 * 1000;
-
-    const cacheSalvata = localStorage.getItem(keyCache);
-    const timeSalvato = localStorage.getItem(keyTime);
-
-    if (cacheSalvata && timeSalvato && (oraAttuale - parseInt(timeSalvato) < durataCache)) {
-        try {
-            const parsed = JSON.parse(cacheSalvata);
-            const startCache = new Date(parsed.start);
-            const endCache = new Date(parsed.end);
-            
-            if (endCache > new Date()) {
-                ACTIVE_MATCHDAY = parsed.giornata;
-                CURRENT_MATCHDAY_START = startCache;
-                CURRENT_MATCHDAY_END = endCache;
-                currentSelectedMatchday = Math.max(1, ACTIVE_MATCHDAY - 1);
-                return;
-            }
-        } catch(e) {}
-    }
-
-    try {
-        const response = await fetch("https://api.football-data.org/v4/competitions/SA/matches?status=SCHEDULED,LIVE,IN_PLAY", {
-            headers: { "X-Auth-Token": "1803bfcd108f4c2cb2ee7663a7d45761" }
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            if (data && data.matches && data.matches.length > 0) {
-                let giornataCorrente = data.matches[0].matchday;
-
-                const resMatchday = await fetch(`https://api.football-data.org/v4/competitions/SA/matches?matchday=${giornataCorrente}`, {
-                    headers: { "X-Auth-Token": "1803bfcd108f4c2cb2ee7663a7d45761" }
-                });
-
-                if (resMatchday.ok) {
-                    const dataMatchday = await resMatchday.json();
-                    const matches = dataMatchday.matches;
-
-                    if (matches && matches.length > 0) {
-                        matches.sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate));
-
-                        const primaPartita = matches[0];
-                        const ultimaPartita = matches[matches.length - 1];
-
-                        CURRENT_MATCHDAY_START = new Date(primaPartita.utcDate);
-                        CURRENT_MATCHDAY_END = new Date(new Date(ultimaPartita.utcDate).getTime() + (2.5 * 60 * 60 * 1000));
-
-                        if (new Date() > CURRENT_MATCHDAY_END) {
-                            ACTIVE_MATCHDAY = giornataCorrente + 1;
-                            await inizializzaGiornataEDeadlineDinamica();
-                            return;
-                        }
-
-                        ACTIVE_MATCHDAY = giornataCorrente;
-                        currentSelectedMatchday = Math.max(1, ACTIVE_MATCHDAY - 1);
-
-                        localStorage.setItem(keyCache, JSON.stringify({
-                            giornata: ACTIVE_MATCHDAY,
-                            start: CURRENT_MATCHDAY_START.toISOString(),
-                            end: CURRENT_MATCHDAY_END.toISOString()
-                        }));
-                        localStorage.setItem(keyTime, oraAttuale.toString());
-                        return;
-                    }
-                }
-            }
-        }
-    } catch (err) {}
+    localStorage.removeItem("draft_seriea_matchday_info");
+    localStorage.removeItem("draft_seriea_matchday_time");
 
     const adesso = new Date();
-    let trovata = 9;
-    for (let [giornata, info] of Object.entries(CALENDARIO_FALLBACK)) {
-        if (adesso < info.fine) {
-            trovata = parseInt(giornata);
+    const giornateOrdinate = Object.keys(CALENDARIO_FALLBACK)
+        .map(n => parseInt(n, 10))
+        .sort((a, b) => a - b);
+
+    let trovata = giornateOrdinate[giornateOrdinate.length - 1] || 13;
+    for (const giornata of giornateOrdinate) {
+        const info = CALENDARIO_FALLBACK[giornata];
+        if (adesso <= info.fine) {
+            trovata = giornata;
             break;
         }
     }
+
     ACTIVE_MATCHDAY = trovata;
-    const fallbackInfo = CALENDARIO_FALLBACK[ACTIVE_MATCHDAY] || CALENDARIO_FALLBACK[9];
+    const fallbackInfo = CALENDARIO_FALLBACK[ACTIVE_MATCHDAY] || CALENDARIO_FALLBACK[13];
     CURRENT_MATCHDAY_START = fallbackInfo.inizio;
     CURRENT_MATCHDAY_END = fallbackInfo.fine;
     currentSelectedMatchday = getUltimaGiornataConVoti();
@@ -1136,11 +1072,53 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false, ow
     const panchinaDiv = document.getElementById("recap-panchina");
     panchinaDiv.innerHTML = "";
 
+    const hasVoti = !!(sq.votiGiornata && Object.keys(sq.votiGiornata).length > 0);
+    const subentratiSet = new Set();
+    if (hasVoti) {
+        (sq.schierati || []).forEach(tit => {
+            const vInfo = sq.votiGiornata[tit.nome];
+            const isSenzaVoto = !vInfo || vInfo.sv === true || vInfo.voto === undefined || vInfo.voto === null || vInfo.voto === 0;
+            if (isSenzaVoto) {
+                const riserveRuolo = (sq.riserveSelezionate && sq.riserveSelezionate[tit.ruolo]) || [];
+                for (const ris of riserveRuolo) {
+                    if (!subentratiSet.has(ris.nome)) {
+                        const risInfo = sq.votiGiornata[ris.nome];
+                        if (risInfo && risInfo.sv !== true && risInfo.voto > 0) {
+                            subentratiSet.add(ris.nome);
+                            break;
+                        }
+                    }
+                }
+            }
+        });
+    }
+
     ["Portiere", "Difensore", "Centrocampista", "Attaccante"].forEach(ruolo => {
-        const riserve = sq.riserveSelezionate[ruolo] || [];
+        const riserve = (sq.riserveSelezionate && sq.riserveSelezionate[ruolo]) || [];
         riserve.forEach((ris, i) => {
             const card = document.createElement("div");
             card.className = "recap-bench-card";
+
+            let voteBadgeHtml = "";
+            if (hasVoti) {
+                const rInfo = sq.votiGiornata[ris.nome];
+                const haVoto = rInfo && rInfo.sv !== true && rInfo.voto > 0;
+                const votoTxt = haVoto ? `Voto ${rInfo.voto}` : "S.V.";
+                const fantaVal = haVoto ? (rInfo.fantavoto > 0 ? rInfo.fantavoto : 0) : 0;
+                const fantaTxt = haVoto ? `FV ${fantaVal}` : "FV 0";
+                const statoSub = subentratiSet.has(ris.nome)
+                    ? `<span style="color:var(--accent-gold); font-weight:700; margin-left:4px;">• Subentrato</span>`
+                    : `<span style="color:var(--text-muted); margin-left:4px;">• In panchina</span>`;
+
+                voteBadgeHtml = `
+                    <div style="margin-top:4px; font-size:11px; display:flex; align-items:center; flex-wrap:wrap; gap:6px;">
+                        <span style="font-weight:800; color:${haVoto ? '#e2e8f0' : 'var(--accent-red)'};">${votoTxt}</span>
+                        <span style="font-weight:800; color:var(--accent-blue);">${fantaTxt}</span>
+                        ${statoSub}
+                    </div>
+                `;
+            }
+
             card.innerHTML = `
                 <div>
                     <div class="bench-player-meta">
@@ -1149,6 +1127,7 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false, ow
                     <div class="bench-player-name">
                         <div class="marquee-container" style="max-width:220px;"><span class="marquee-text">${ris.nome}</span></div>
                     </div>
+                    ${voteBadgeHtml}
                 </div>
             `;
             panchinaDiv.appendChild(card);
@@ -2200,10 +2179,11 @@ function mostraTabellinoVoti(sq) {
     let totale = 0;
     let riserveGiaSubentrate = new Set();
 
-    sq.schierati.forEach(tit => {
+    (sq.schierati || []).forEach(tit => {
         let vInfo = sq.votiGiornata[tit.nome];
         let eff = vInfo;
         let note = "<span style='color:var(--accent-green)'>Titolare</span>";
+        let subentratoSenzaVoto = null;
 
         let isSenzaVoto = false;
         if (!vInfo || vInfo.sv === true || vInfo.voto === undefined || vInfo.voto === null || vInfo.voto === 0) {
@@ -2211,7 +2191,7 @@ function mostraTabellinoVoti(sq) {
         }
 
         if (isSenzaVoto) {
-            let riserveRuolo = sq.riserveSelezionate[tit.ruolo] || [];
+            let riserveRuolo = (sq.riserveSelezionate && sq.riserveSelezionate[tit.ruolo]) || [];
             let riservaValida = null;
 
             for (let ris of riserveRuolo) {
@@ -2232,6 +2212,17 @@ function mostraTabellinoVoti(sq) {
             } else {
                 note = "<span style='color:var(--accent-red)'>❌ S.V.</span>";
                 eff = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
+
+                // Se il titolare è S.V. e non c'è una riserva valida, verifica se una riserva del ruolo è subentrata senza voto (S.V.)
+                const riservaSv = riserveRuolo.find(ris => {
+                    if (riserveGiaSubentrate.has(ris.nome)) return false;
+                    const rInfo = sq.votiGiornata[ris.nome];
+                    return !rInfo || rInfo.sv === true || rInfo.voto === undefined || rInfo.voto === null || rInfo.voto === 0;
+                });
+                if (riservaSv) {
+                    riserveGiaSubentrate.add(riservaSv.nome);
+                    subentratoSenzaVoto = riservaSv;
+                }
             }
         }
 
@@ -2247,6 +2238,17 @@ function mostraTabellinoVoti(sq) {
             <td>${iconeHtml}</td>
             <td><strong style="color:var(--accent-blue);">${eff.fantavoto > 0 ? eff.fantavoto : 0}</strong></td>
         </tr>`;
+
+        if (subentratoSenzaVoto) {
+            html += `<tr style="background: rgba(245, 158, 11, 0.06);">
+                <td><i class="${roleIcons[tit.ruolo]}"></i></td>
+                <td><div class="marquee-container" style="max-width: 140px;"><span class="marquee-text"><strong>${subentratoSenzaVoto.nome}</strong></span></div></td>
+                <td><span style='color:var(--accent-gold)'>🔁 Subentrato (S.V.)</span></td>
+                <td><strong style="color:var(--accent-red);">S.V.</strong></td>
+                <td><span style="color:var(--text-muted); font-size:10px;">-</span></td>
+                <td><strong style="color:var(--accent-blue);">0</strong></td>
+            </tr>`;
+        }
     });
 
     html += `</tbody></table>
