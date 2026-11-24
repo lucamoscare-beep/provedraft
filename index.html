@@ -317,29 +317,44 @@
     <!-- ================================================= -->
     <!-- 4. IN PRIMO PIANO: CREAZIONE NUOVA SQUADRA (DRAFT) -->
     <!-- ================================================= -->
-    <div class="welcome-card" style="border: 1px solid var(--accent-gold); background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95)); margin-bottom: 15px;">
-        <h3 style="font-size: 15px; color: var(--accent-gold); margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
-            <i class="fa-solid fa-shirt"></i> Crea Nuova Formazione / Inizia Draft
-        </h3>
-        <p style="color:var(--text-muted); font-size:12px; margin-bottom:12px;">
-            Inserisci il nome della tua squadra e scendi in campo sfruttando i gettoni a disposizione per questo turno.
-        </p>
+    <div class="welcome-card stadium-draft-box" id="crea-formazione-box">
+  <div class="stadium-draft-header">
+    <span class="stadium-badge"><i class="fa-solid fa-futbol"></i> Nuova Rosa</span>
+    <span class="stadium-counter" id="team-name-counter">0 / 25</span>
+  </div>
 
-        <div class="tokens-status-box" style="padding: 0; background: transparent; border: none;">
-            <div id="new-team-creation-area">
-                <div style="display:flex; justify-content:center; gap:10px; margin:0 auto; flex-wrap:wrap;">
-                    <div class="input-wrapper" style="flex:1; min-width:220px;">
-                        <i class="fa-solid fa-signature input-icon"></i>
-                        <input type="text" id="new-team-name-input" class="styled-input" placeholder="es. Real Fanta 1" style="padding-left: 36px;">
-                    </div>
-                    <button onclick="preparaEAvviaDraft()" class="btn-action-primary" style="padding: 10px 20px;"><i class="fa-solid fa-play"></i> INIZIA DRAFT</button>
-                </div>
-            </div>
-            <div id="tokens-exhausted-msg" style="display:none; color:var(--accent-gold); font-weight:700; font-size:13px; text-align: center;">
-                ⚠️ Hai utilizzato tutti i 3 gettoni a disposizione per questa giornata!
-            </div>
-        </div>
+  <h3 class="stadium-draft-title">
+    <i class="fa-solid fa-shirt"></i> Crea Nuova Formazione / Inizia Draft
+  </h3>
+  <p class="stadium-draft-subtitle">
+    Inserisci il nome della tua squadra e scendi in campo sfruttando i gettoni a disposizione per questo turno.
+  </p>
+
+  <div class="tokens-status-box" style="padding: 0; background: transparent; border: none; margin-top: 0;">
+    <div id="new-team-creation-area">
+      <div class="stadium-pill-bar" id="stadium-pill-bar">
+        <span class="stadium-input-icon" id="stadium-input-icon">
+          <i class="fa-regular fa-futbol"></i>
+        </span>
+        <input
+          type="text"
+          id="new-team-name-input"
+          class="stadium-team-input"
+          maxlength="25"
+          placeholder="es. Real Fanta 1"
+          autocomplete="off"
+        />
+        <button type="button" onclick="preparaEAvviaDraft()" id="btn-inizia-draft" class="stadium-start-btn">
+          <i class="fa-solid fa-play"></i>
+          <span>Inizia Draft</span>
+        </button>
+      </div>
     </div>
+    <div id="tokens-exhausted-msg" style="display:none; color:var(--accent-gold); font-weight:700; font-size:13px; text-align: center;">
+      ⚠️ Hai utilizzato tutti i 3 gettoni a disposizione per questa giornata!
+    </div>
+  </div>
+</div>
 
     <!-- ================================================= -->
     <!-- 5. IN PRIMO PIANO: BANNER VOTI AGGIORNATI         -->

@@ -2525,3 +2525,145 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     background: linear-gradient(135deg, #0284c7, #38bdf8);
     box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);
 }
+
+.welcome-card.stadium-draft-box {
+  background: linear-gradient(145deg, rgba(20, 48, 38, 0.94), rgba(9, 13, 22, 0.97));
+  border: 1.5px solid rgba(74, 222, 128, 0.45);
+  border-radius: 18px;
+  padding: 20px;
+  margin-bottom: 15px;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.5), 0 0 24px rgba(16, 185, 129, 0.14);
+}
+
+.stadium-draft-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.stadium-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #4ade80;
+  background: rgba(16, 185, 129, 0.16);
+  border: 1px solid rgba(74, 222, 128, 0.35);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.stadium-counter {
+  font-size: 12px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.stadium-draft-title {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  color: #4ade80;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stadium-draft-subtitle {
+  margin: 0 0 14px 0;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.stadium-pill-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(9, 13, 22, 0.88);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 6px 6px 6px 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stadium-pill-bar.is-ready {
+  border-color: #4ade80;
+  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.18);
+}
+
+.stadium-input-icon {
+  color: #94a3b8;
+  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.stadium-pill-bar.is-ready .stadium-input-icon {
+  color: #4ade80;
+}
+
+.stadium-team-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: #f8fafc;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 6px;
+}
+
+.stadium-team-input:focus {
+  outline: none;
+}
+
+.stadium-start-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  border-radius: 999px;
+  padding: 11px 18px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+  background: linear-gradient(135deg, #10b981, #4ade80);
+  color: #062116;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.stadium-start-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(74, 222, 128, 0.35);
+}
+
+@media (max-width: 520px) {
+  .stadium-pill-bar {
+    border-radius: 14px;
+    flex-wrap: wrap;
+    padding: 8px;
+  }
+
+  .stadium-start-btn {
+    width: 100%;
+    justify-content: center;
+    border-radius: 10px;
+  }
+}
+3. JavaScript (script_3.js / script.js)
+Dentro DOMContentLoaded, aggiungi l'aggiornamento del contatore e del bordo verde mentre scrivi il nome:
+
+JavaScript
+const teamInput = document.getElementById("new-team-name-input");
+const teamCounter = document.getElementById("team-name-counter");
+const pillBar = document.getElementById("stadium-pill-bar");
+if (teamInput && teamCounter && pillBar) {
+    teamInput.addEventListener("input", () => {
+        const len = teamInput.value.trim().length;
+        teamCounter.textContent = `${teamInput.value.length} / 25`;
+        pillBar.classList.toggle("is-ready", len >= 3);
+    });
+}

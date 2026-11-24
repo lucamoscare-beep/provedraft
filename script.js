@@ -1233,6 +1233,13 @@ async function preparaEAvviaDraft() {
         mostraNotifica("Nome Mancante", "Inserisci un nome per la tua nuova squadra prima di avviare il draft!", "warning");
         return;
     }
+    const teamCounter = document.getElementById("team-name-counter");
+    const pillBar = document.getElementById("stadium-pill-bar");
+if (teamInput && teamCounter && pillBar) {
+    teamInput.addEventListener("input", () => {
+        const len = teamInput.value.trim().length;
+        teamCounter.textContent = `${teamInput.value.length} / 25`;
+        pillBar.classList.toggle("is-ready", len >= 3);	
 
     const nomiEsistentiLega = await ottieniNomiSquadreGlobaliGiornata(ACTIVE_MATCHDAY);
     if (nomiEsistentiLega.includes(inputName.toLowerCase())) {
