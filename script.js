@@ -1139,9 +1139,39 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false, ow
     } else {
         document.getElementById("tabellino-container").innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:12px;">I voti per questa squadra non sono ancora stati calcolati.</p>`;
     }
-    
+
+    aggiornaOrdineRecapMobile(hasVoti);
     refreshAllMarquees();
 }
+
+function aggiornaOrdineRecapMobile(hasVoti) {
+    const recapScreen = document.getElementById("recap-screen");
+    const recapContent = recapScreen ? recapScreen.querySelector(".recap-content") : null;
+    const votiBox = recapScreen ? recapScreen.querySelector(".voti-box") : null;
+    if (!recapScreen || !recapContent || !votiBox) return;
+
+    const isMobile = window.innerWidth <= 768;
+
+    if (isMobile && hasVoti) {
+        // Su mobile dopo l'uscita dei voti: prima .voti-box (tabellino + totale), poi .recap-content (campo sopra e panchina sotto)
+        if (votiBox.nextElementSibling !== recapContent) {
+            recapScreen.insertBefore(votiBox, recapContent);
+        }
+    } else {
+        // Ordine standard: prima .recap-content (campo e panchina), poi .voti-box
+        if (recapContent.nextElementSibling !== votiBox) {
+            recapScreen.insertBefore(recapContent, votiBox);
+        }
+    }
+}
+
+window.addEventListener("resize", () => {
+    const recapScreen = document.getElementById("recap-screen");
+    if (recapScreen && recapScreen.style.display !== "none" && currentRecapSquadraObj) {
+        const hasVoti = !!(currentRecapSquadraObj.votiGiornata && Object.keys(currentRecapSquadraObj.votiGiornata).length > 0);
+        aggiornaOrdineRecapMobile(hasVoti);
+    }
+});
 
 function tornaAllaHome() {
     const colonnaSinistraDraft = document.querySelector(".desktop-col-left");
