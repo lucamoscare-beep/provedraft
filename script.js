@@ -545,42 +545,21 @@ function renderWelcomeScreen() {
         return;
     }
 
-    squadreGiornataCorrente.forEach((sq, idx) => {
+    squadreGiornataCorrente.forEach((sq) => {
         const item = document.createElement("div");
         item.className = "team-card-item";
+        
+        let punteggioHtml = "";
+        if (sq.punteggioTotale !== undefined && sq.punteggioTotale !== null) {
+            punteggioHtml = `<div style="font-size:11px; font-weight:900; color:var(--accent-gold); margin-top:2px;">🏆 Punteggio: ${sq.punteggioTotale} pt</div>`;
+        }
 
         const realIndex = userSquadre.indexOf(sq);
         const nomeSquadra = sq.nomeSquadra || "Squadra Senza Nome";
         const isLongName = nomeSquadra.length > 18;
-        const moduloTxt = sq.moduloSelezionato ? sq.moduloSelezionato : "N/D";
-        const hasScore = sq.punteggioTotale !== undefined && sq.punteggioTotale !== null;
-
-        const scoreBadgeHtml = hasScore
-            ? `<div class="gold-score-badge"><i class="fa-solid fa-trophy"></i> <span>${sq.punteggioTotale} <small>PT</small></span></div>`
-            : `<div class="pending-score-badge"><i class="fa-solid fa-clock"></i> <span>IN ATTESA</span></div>`;
-
-        const titolari = Array.isArray(sq.schierati) ? sq.schierati : [];
-        const por = titolari.find(p => p.ruolo === "Portiere");
-        const difCen = titolari.filter(p => p.ruolo === "Difensore" || p.ruolo === "Centrocampista").slice(0, 2);
-        const att = titolari.filter(p => p.ruolo === "Attaccante").slice(0, 2);
-
-        const previewHtml = titolari.length > 0 ? `
-            <div class="team-roster-preview">
-                ${por ? `<div class="preview-player"><i class="fa-solid fa-hand"></i> ${por.nome}</div>` : ""}
-                ${difCen.length > 0 ? `<div class="preview-player"><i class="fa-solid fa-shield-halved"></i> ${difCen.map(p => p.nome).join(" · ")}</div>` : ""}
-                ${att.length > 0 ? `<div class="preview-player"><i class="fa-solid fa-futbol"></i> ${att.map(p => p.nome).join(" · ")}</div>` : ""}
-            </div>
-        ` : "";
+        const infoModulo = sq.moduloSelezionato ? ` • Modulo ${sq.moduloSelezionato}` : "";
 
         item.innerHTML = `
-            <div class="team-card-top">
-                <div class="team-badge-info">
-                    <span class="token-pill"><i class="fa-solid fa-coins"></i> Gettone #${idx + 1}</span>
-                    <span class="module-pill">${moduloTxt}</span>
-                </div>
-                ${scoreBadgeHtml}
-            </div>
-
             <div class="team-card-left-content">
                 <div class="team-card-icon-box">
                     <i class="fa-solid fa-shirt"></i>
@@ -589,15 +568,13 @@ function renderWelcomeScreen() {
                     <div class="team-card-name-wrapper ${isLongName ? 'is-scrolling' : ''}">
                         <span class="team-card-name-scroll ${isLongName ? 'scrolling' : ''}">${nomeSquadra}</span>
                     </div>
-                    <span class="team-card-label">Giornata ${ACTIVE_MATCHDAY} • Budget residuo: ${sq.budget ?? 0} cr</span>
+                    <span class="team-card-label">${infoModulo}</span>
+                    ${punteggioHtml}
                 </div>
             </div>
-
-            ${previewHtml}
-
             <div class="team-card-actions">
-                <button onclick="apriRecapSquadraUtenteCorrente(${realIndex})" class="btn-team-action" style="width: 100%; justify-content: center;">
-                    <i class="fa-solid fa-eye"></i> Visualizza Formazione
+                <button onclick="apriRecapSquadraUtenteCorrente(${realIndex})" class="btn-team-action">
+                    <i class="fa-solid fa-eye"></i> Visualizza
                 </button>
             </div>
         `;
