@@ -2525,3 +2525,213 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     background: linear-gradient(135deg, #0284c7, #38bdf8);
     box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);
 }
+
+/* =========================================================
+   HOME DRAFTXI - RESTYLING GLASSMORPHISM & E-SPORT
+========================================================= */
+
+#welcome-screen .deadline-banner {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.88) 0%, rgba(15, 23, 42, 0.96) 100%);
+    backdrop-filter: blur(14px);
+    border: 1.5px solid rgba(251, 191, 36, 0.55);
+    border-radius: 18px;
+    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.45), 0 0 24px rgba(251, 191, 36, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+#welcome-screen .home-profile-banner {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.82) 0%, rgba(15, 23, 42, 0.94) 100%);
+    backdrop-filter: blur(14px);
+    border-radius: 16px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+#welcome-screen .home-profile-banner:not([onclick*="vaiAMissioniProfilo"]) {
+    border: 1.5px solid rgba(96, 165, 250, 0.45);
+}
+
+#welcome-screen .home-profile-banner[onclick*="vaiAMissioniProfilo"] {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.22) 0%, rgba(15, 23, 42, 0.94) 100%);
+    border: 1.5px solid rgba(167, 139, 250, 0.55);
+}
+
+#welcome-screen .top-info-card {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.82) 0%, rgba(15, 23, 42, 0.95) 100%);
+    backdrop-filter: blur(14px);
+    border-radius: 16px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+#welcome-screen .top-info-card.global-teams-box {
+    border: 1.5px solid rgba(74, 222, 128, 0.5);
+}
+
+#welcome-screen .top-info-card.tokens-box-inline {
+    border: 1.5px solid rgba(251, 191, 36, 0.5);
+}
+
+#welcome-screen .welcome-card {
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.82) 0%, rgba(15, 23, 42, 0.95) 100%);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+#welcome-screen .rule-box {
+    background: linear-gradient(145deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 41, 59, 0.65) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    border-radius: 14px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+#welcome-screen .rule-box:hover {
+    border-color: var(--accent-gold);
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.45), 0 0 18px rgba(251, 191, 36, 0.22);
+}
+
+#welcome-screen .home-status-banner {
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* --- CARD SQUADRE CREATE IN STILE E-SPORT GLASSMORPHISM --- */
+#welcome-screen .created-teams-list {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+}
+
+#welcome-screen .team-card-item {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.78) 0%, rgba(15, 23, 42, 0.96) 100%);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    border-radius: 18px;
+    padding: 18px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.09);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#welcome-screen .team-card-item:hover {
+    transform: translateY(-4px);
+    border-color: rgba(56, 189, 248, 0.65);
+    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.6), 0 0 22px rgba(56, 189, 248, 0.18);
+}
+
+#welcome-screen .team-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+#welcome-screen .team-badge-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+#welcome-screen .token-pill {
+    background: rgba(251, 191, 36, 0.12);
+    border: 1px solid rgba(251, 191, 36, 0.35);
+    color: #fbbf24;
+    font-size: 10.5px;
+    font-weight: 800;
+    padding: 3px 9px;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#welcome-screen .module-pill {
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    color: #38bdf8;
+    font-size: 10.5px;
+    font-weight: 800;
+    padding: 3px 9px;
+    border-radius: 20px;
+}
+
+#welcome-screen .gold-score-badge {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.22), rgba(217, 119, 6, 0.34));
+    border: 1px solid #fbbf24;
+    color: #ffffff;
+    padding: 5px 11px;
+    border-radius: 10px;
+    font-weight: 900;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.25);
+    white-space: nowrap;
+}
+
+#welcome-screen .gold-score-badge i {
+    color: #fbbf24;
+    font-size: 12px;
+}
+
+#welcome-screen .gold-score-badge small {
+    font-size: 9px;
+    color: #fde68a;
+}
+
+#welcome-screen .pending-score-badge {
+    background: rgba(148, 163, 184, 0.12);
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    color: #cbd5e1;
+    padding: 4px 9px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+#welcome-screen .team-roster-preview {
+    background: rgba(9, 13, 22, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 9px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+#welcome-screen .preview-player {
+    font-size: 11px;
+    color: #cbd5e1;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#welcome-screen .preview-player i {
+    color: #38bdf8;
+    font-size: 10px;
+    width: 12px;
+    text-align: center;
+}
+
+#welcome-screen .team-card-actions {
+    width: 100%;
+    margin-top: 2px;
+}
+
+#welcome-screen .team-card-actions .btn-team-action {
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 11.5px;
+}
