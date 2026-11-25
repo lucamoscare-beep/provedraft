@@ -1822,6 +1822,7 @@ function showModuloSelection() {
         { codice: "3-4-3", label: "Trazione Anteriore", desc: "3 Dif • 4 Cen • 3 Att" },
         { codice: "4-5-1", label: "Copertura", desc: "4 Dif • 5 Cen • 1 Att" },
         { codice: "3-5-2", label: "Centrocampo Folto", desc: "3 Dif • 5 Cen • 2 Att" }
+        { codice: "5-3-2", label: "Difesa a oltranza", desc: "5 Dif • 3 Cen • 2 Att" }
     ];
 
     const cardsHtml = moduliDisponibili.map(m => `
