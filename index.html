@@ -59,7 +59,7 @@
 
         <!-- Pulsante Logout -->
         <button class="btn-logout" onclick="logout()" title="Disconnettiti">
-            <i class="fa-solid fa-right-from-bracket"></i> Esci
+            <i class="fa-solid fa-right-from-bracket"></i> <span class="logout-txt">Esci</span>
         </button>
     </div>
 </header>
@@ -110,7 +110,8 @@
                             <h3>24 Draft da 5 Pick</h3>
                             <span class="feature-tag">OGNI SETTIMANA</span>
                         </div>
-                        <p>Componi la tua rosa scegliendo i pick migliori per ruolo, schiera la formazione ideale e scala la classifica ogni giornata.</div>
+                        <p>Componi la tua rosa scegliendo i pick migliori per ruolo, schiera la formazione ideale e scala la classifica ogni giornata.</p>
+                    </div>
                 </div>
 
                 <!-- Feature 2 -->
@@ -761,7 +762,7 @@
         </div>
         <div style="display:flex; gap:8px; flex-wrap: wrap;">
             
-            <!-- NUOVO PULSANTE MODIFICA FORMAZIONE (Visibile SOLO all'autore a mercato aperto) -->
+            <!-- PULSANTE MODIFICA FORMAZIONE (Visibile SOLO all'autore a mercato aperto) -->
             <button id="btn-recap-modifica-formazione" onclick="avviaModificaFormazioneSalvata()" class="btn-action-primary" style="display:none; background: linear-gradient(135deg, #8b5cf6, #6d28d9); padding:8px 14px; font-size:12px;">
                 <i class="fa-solid fa-pen-to-square"></i> Modifica Formazione
             </button>
@@ -832,6 +833,25 @@
     </div>
 </div>
 
+<!-- MODALE SCELTA MODULO TATTICO A CARD CLICCABILI -->
+<div id="custom-module-modal" class="custom-modal-overlay" style="display: none;">
+    <div class="custom-modal-card module-picker-card">
+        <div class="custom-alert-icon" style="background: rgba(56, 189, 248, 0.15); color: var(--accent-blue); border: 1px solid rgba(56, 189, 248, 0.4);">
+            <i class="fa-solid fa-chess-board"></i>
+        </div>
+        <h3 id="custom-module-title" style="color: #fff; font-size: 18px; margin-bottom: 6px; text-transform: uppercase;">Scegli il Modulo Tattico</h3>
+        <p id="custom-module-subtitle" class="module-picker-subtitle">Tocca una scheda per selezionare lo schieramento e poi conferma.</p>
+        <div id="custom-module-grid" class="module-picker-grid"></div>
+        <div class="module-picker-actions">
+            <button onclick="annullaSceltaModulo()" type="button" class="btn-action-danger" style="flex: 1; padding: 11px 14px;">
+                <i class="fa-solid fa-xmark"></i> Annulla
+            </button>
+            <button onclick="confermaSceltaModulo()" type="button" class="btn-action-primary" style="flex: 1.4; padding: 11px 14px;">
+                <i class="fa-solid fa-check"></i> Conferma Modulo
+            </button>
+        </div>
+    </div>
+</div>
 
 <!-- SDK Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -840,7 +860,6 @@
 
 <!-- Collegamento al file JavaScript esterno -->
 <script src="script.js"></script>
-
 
 </body>
 </html>
