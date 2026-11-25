@@ -1,4 +1,131 @@
-ACTIVE_MATCHDAY = trovata;
+const firebaseConfig = {
+    apiKey: "AIzaSyAURiTLIXNg6fFkL1fnHkiHafMytsDHW8I",
+    authDomain: "draft-serie-a-4aadd.firebaseapp.com",
+    projectId: "draft-serie-a-4aadd",
+    storageBucket: "draft-serie-a-4aadd.firebasestorage.app",
+    messagingSenderId: "382868267295",
+    appId: "1:382868267295:web:f958edb9ffb50fc984102a",
+    measurementId: "G-THYVRMRWWH"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ----------------------------------------------------
+// CALENDARIO MANUALE DI RIFERIMENTO (SENZA API ESTERNE)
+// ----------------------------------------------------
+const CALENDARIO_FALLBACK = {
+    8: { inizio: new Date("2026-10-20T18:30:00"), fine: new Date("2026-10-22T23:00:00") },
+    9: { inizio: new Date("2026-10-27T18:30:00"), fine: new Date("2026-10-29T23:00:00") },
+    10: { inizio: new Date("2026-10-31T15:30:00"), fine: new Date("2026-11-02T23:00:00") },
+    11: { inizio: new Date("2026-11-06T20:45:00"), fine: new Date("2026-11-08T23:00:00") },
+    12: { inizio: new Date("2026-11-21T15:00:00"), fine: new Date("2026-11-23T23:00:00") },
+    13: { inizio: new Date("2026-11-27T20:45:00"), fine: new Date("2026-11-30T23:00:00") },
+    14: { inizio: new Date("2026-12-04T20:45:00"), fine: new Date("2026-12-07T23:00:00") },
+    15: { inizio: new Date("2026-12-11T12:45:00"), fine: new Date("2026-12-14T23:00:00") },
+    16: { inizio: new Date("2026-12-18T18:30:00"), fine: new Date("2026-12-20T23:00:00") }
+};
+
+let ACTIVE_MATCHDAY = 13; 
+let CURRENT_MATCHDAY_START = null;
+let CURRENT_MATCHDAY_END = null;
+
+let currentUser = null;
+let customPlayersList = [];
+let availablePlayers = [];
+let budget = 800;
+let isViewingOwnProfile = false;
+
+const limits = { Portiere: 3, Difensore: 7, Centrocampista: 8, Attaccante: 6 };
+const roleIcons = {
+    Portiere: "fa-solid fa-hand",
+    Difensore: "fa-solid fa-shield-halved",
+    Centrocampista: "fa-solid fa-person-running",
+    Attaccante: "fa-solid fa-futbol"
+};
+
+const roleColors = {
+    Portiere: "var(--role-por)",
+    Difensore: "var(--role-dif)",
+    Centrocampista: "var(--role-cen)",
+    Attaccante: "var(--role-att)"
+};
+
+let userSquadre = []; 
+let activeTeamIndex = -1; 
+let isVotiOkAvailable = false;
+let currentSelectedMatchday = ACTIVE_MATCHDAY; 
+
+let currentRecapSquadraObj = null;
+let currentRecapSquadraIndex = -1;
+
+let tempNomeSquadra = "";
+let isTestMode = false;
+let rosa = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
+let schierati = [];
+let riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
+
+let turno = 0;
+let moduloSelezionato = "";
+
+// Funzione di utilità per attivare il marquee solo se il testo è più lungo del contenitore
+function initMarquee(el, isInline = false) {
+    if (!el) return;
+    el.classList.add('marquee-container');
+    if (isInline) el.classList.add('inline');
+    
+    const textEl = el.querySelector('.marquee-text');
+    if (!textEl) return;
+    
+    textEl.classList.remove('scroll-active');
+    
+    requestAnimationFrame(() => {
+        const containerWidth = el.clientWidth;
+        const textWidth = textEl.scrollWidth;
+        
+        if (textWidth > containerWidth && containerWidth > 0) {
+            const distance = containerWidth - textWidth - 5;
+            textEl.style.setProperty('--scroll-distance', `${distance}px`);
+            const duration = Math.max(3, Math.abs(distance) * 0.04);
+            textEl.style.setProperty('--scroll-duration', `${duration}s`);
+            textEl.classList.add('scroll-active');
+        } else {
+            textEl.style.removeProperty('--scroll-distance');
+        }
+    });
+}
+
+function refreshAllMarquees() {
+    document.querySelectorAll('.marquee-container').forEach(el => {
+        const isInline = el.classList.contains('inline');
+        initMarquee(el, isInline);
+    });
+}
+
+window.addEventListener('resize', () => {
+    refreshAllMarquees();
+});
+
+async function inizializzaGiornataEDeadlineDinamica() {
+    localStorage.removeItem("draft_seriea_matchday_info");
+    localStorage.removeItem("draft_seriea_matchday_time");
+
+    const adesso = new Date();
+    const giornateOrdinate = Object.keys(CALENDARIO_FALLBACK)
+        .map(n => parseInt(n, 10))
+        .sort((a, b) => a - b);
+
+    let trovata = giornateOrdinate[giornateOrdinate.length - 1] || 13;
+    for (const giornata of giornateOrdinate) {
+        const info = CALENDARIO_FALLBACK[giornata];
+        if (adesso <= info.fine) {
+            trovata = giornata;
+            break;
+        }
+    }
+
+    ACTIVE_MATCHDAY = trovata;
     const fallbackInfo = CALENDARIO_FALLBACK[ACTIVE_MATCHDAY] || CALENDARIO_FALLBACK[13];
     CURRENT_MATCHDAY_START = fallbackInfo.inizio;
     CURRENT_MATCHDAY_END = fallbackInfo.fine;
@@ -239,10 +366,9 @@ auth.onAuthStateChanged(async (user) => {
         } catch(e) {}
 
         document.getElementById('user-display-name').innerText = displayUsername;
+        document.getElementById('welcome-greeting').innerText = `Bentornato Mister ${displayUsername}!`;
         const introGreetingEl = document.getElementById('welcome-intro-greeting');
-        if (introGreetingEl) {
-            introGreetingEl.innerHTML = `<i class="fa-solid fa-crown"></i><span>Bentornato Mister ${displayUsername}!</span>`;
-        }
+        if (introGreetingEl) introGreetingEl.innerText = `Bentornato Mister ${displayUsername}!`;
         await caricaDatiUtenteCloud();
     } else {
         currentUser = null;
@@ -2115,7 +2241,7 @@ function mostraTabellinoVoti(sq) {
         }
 
         if (isSenzaVoto) {
-            let riserveRuolo = (sq.riserveSelezionate || {})[tit.ruolo] || [];
+            let riserveRuolo = (sq.riserveSelezionate && sq.riserveSelezionate[tit.ruolo]) || [];
             let riservaValida = null;
 
             for (let ris of riserveRuolo) {
