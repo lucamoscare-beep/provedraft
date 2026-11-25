@@ -13,7 +13,7 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 // ----------------------------------------------------
-// CALENDARIO DI SICUREZZA (FALLBACK IN CASO DI RETE ASSENTE)
+// CALENDARIO MANUALE DI RIFERIMENTO (SENZA API ESTERNE)
 // ----------------------------------------------------
 const CALENDARIO_FALLBACK = {
     8: { inizio: new Date("2026-10-20T18:30:00"), fine: new Date("2026-10-22T23:00:00") },
@@ -27,14 +27,15 @@ const CALENDARIO_FALLBACK = {
     16: { inizio: new Date("2026-12-18T18:30:00"), fine: new Date("2026-12-20T23:00:00") }
 };
 
-let ACTIVE_MATCHDAY = 9; 
+let ACTIVE_MATCHDAY = 13; 
 let CURRENT_MATCHDAY_START = null;
 let CURRENT_MATCHDAY_END = null;
 
 let currentUser = null;
 let customPlayersList = [];
 let availablePlayers = [];
-let budget = 600;
+let budget = 800;
+let isViewingOwnProfile = false;
 
 const limits = { Portiere: 3, Difensore: 7, Centrocampista: 8, Attaccante: 6 };
 const roleIcons = {
@@ -56,8 +57,8 @@ let activeTeamIndex = -1;
 let isVotiOkAvailable = false;
 let currentSelectedMatchday = ACTIVE_MATCHDAY; 
 
-let currentRecapSquadraObj = null; // Memorizza la squadra visualizzata nella schermata recap
-let currentRecapSquadraIndex = -1;  // Memorizza l'indice della squadra dell'utente loggato (-1 se di altri)
+let currentRecapSquadraObj = null;
+let currentRecapSquadraIndex = -1;
 
 let tempNomeSquadra = "";
 let isTestMode = false;
@@ -86,6 +87,8 @@ function initMarquee(el, isInline = false) {
         if (textWidth > containerWidth && containerWidth > 0) {
             const distance = containerWidth - textWidth - 5;
             textEl.style.setProperty('--scroll-distance', `${distance}px`);
+            const duration = Math.max(3, Math.abs(distance) * 0.04);
+            textEl.style.setProperty('--scroll-duration', `${duration}s`);
             textEl.classList.add('scroll-active');
         } else {
             textEl.style.removeProperty('--scroll-distance');
@@ -105,89 +108,25 @@ window.addEventListener('resize', () => {
 });
 
 async function inizializzaGiornataEDeadlineDinamica() {
-    const keyCache = "draft_seriea_matchday_info";
-    const keyTime = "draft_seriea_matchday_time";
-    const oraAttuale = new Date().getTime();
-    const durataCache = 30 * 60 * 1000;
-
-    const cacheSalvata = localStorage.getItem(keyCache);
-    const timeSalvato = localStorage.getItem(keyTime);
-
-    if (cacheSalvata && timeSalvato && (oraAttuale - parseInt(timeSalvato) < durataCache)) {
-        try {
-            const parsed = JSON.parse(cacheSalvata);
-            const startCache = new Date(parsed.start);
-            const endCache = new Date(parsed.end);
-            
-            if (endCache > new Date()) {
-                ACTIVE_MATCHDAY = parsed.giornata;
-                CURRENT_MATCHDAY_START = startCache;
-                CURRENT_MATCHDAY_END = endCache;
-                currentSelectedMatchday = Math.max(1, ACTIVE_MATCHDAY - 1);
-                return;
-            }
-        } catch(e) {}
-    }
-
-    try {
-        const response = await fetch("https://api.football-data.org/v4/competitions/SA/matches?status=SCHEDULED,LIVE,IN_PLAY", {
-            headers: { "X-Auth-Token": "1803bfcd108f4c2cb2ee7663a7d45761" }
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            if (data && data.matches && data.matches.length > 0) {
-                let giornataCorrente = data.matches[0].matchday;
-
-                const resMatchday = await fetch(`https://api.football-data.org/v4/competitions/SA/matches?matchday=${giornataCorrente}`, {
-                    headers: { "X-Auth-Token": "1803bfcd108f4c2cb2ee7663a7d45761" }
-                });
-
-                if (resMatchday.ok) {
-                    const dataMatchday = await resMatchday.json();
-                    const matches = dataMatchday.matches;
-
-                    if (matches && matches.length > 0) {
-                        matches.sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate));
-
-                        const primaPartita = matches[0];
-                        const ultimaPartita = matches[matches.length - 1];
-
-                        CURRENT_MATCHDAY_START = new Date(primaPartita.utcDate);
-                        CURRENT_MATCHDAY_END = new Date(new Date(ultimaPartita.utcDate).getTime() + (2.5 * 60 * 60 * 1000));
-
-                        if (new Date() > CURRENT_MATCHDAY_END) {
-                            ACTIVE_MATCHDAY = giornataCorrente + 1;
-                            await inizializzaGiornataEDeadlineDinamica();
-                            return;
-                        }
-
-                        ACTIVE_MATCHDAY = giornataCorrente;
-                        currentSelectedMatchday = Math.max(1, ACTIVE_MATCHDAY - 1);
-
-                        localStorage.setItem(keyCache, JSON.stringify({
-                            giornata: ACTIVE_MATCHDAY,
-                            start: CURRENT_MATCHDAY_START.toISOString(),
-                            end: CURRENT_MATCHDAY_END.toISOString()
-                        }));
-                        localStorage.setItem(keyTime, oraAttuale.toString());
-                        return;
-                    }
-                }
-            }
-        }
-    } catch (err) {}
+    localStorage.removeItem("draft_seriea_matchday_info");
+    localStorage.removeItem("draft_seriea_matchday_time");
 
     const adesso = new Date();
-    let trovata = 9;
-    for (let [giornata, info] of Object.entries(CALENDARIO_FALLBACK)) {
-        if (adesso < info.fine) {
-            trovata = parseInt(giornata);
+    const giornateOrdinate = Object.keys(CALENDARIO_FALLBACK)
+        .map(n => parseInt(n, 10))
+        .sort((a, b) => a - b);
+
+    let trovata = giornateOrdinate[giornateOrdinate.length - 1] || 13;
+    for (const giornata of giornateOrdinate) {
+        const info = CALENDARIO_FALLBACK[giornata];
+        if (adesso <= info.fine) {
+            trovata = giornata;
             break;
         }
     }
+
     ACTIVE_MATCHDAY = trovata;
-    const fallbackInfo = CALENDARIO_FALLBACK[ACTIVE_MATCHDAY] || CALENDARIO_FALLBACK[9];
+    const fallbackInfo = CALENDARIO_FALLBACK[ACTIVE_MATCHDAY] || CALENDARIO_FALLBACK[13];
     CURRENT_MATCHDAY_START = fallbackInfo.inizio;
     CURRENT_MATCHDAY_END = fallbackInfo.fine;
     currentSelectedMatchday = getUltimaGiornataConVoti();
@@ -239,6 +178,20 @@ function isMarketOpen() {
     return true;
 }
 
+function isMarketOpenForMatchday(giornata) {
+    if (isTestMode) return true;
+    
+    if (giornata < ACTIVE_MATCHDAY) {
+        return false;
+    }
+    
+    if (giornata === ACTIVE_MATCHDAY) {
+        return isMarketOpen();
+    }
+    
+    return true;
+}
+
 function initCountdown() {
     function updateTimer() {
         const now = new Date();
@@ -269,13 +222,11 @@ function initCountdown() {
         const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const secs = Math.floor((diff % (1000 * 60)) / 1000);
 
-        // Aggiorna Home
         ["w-cd-days"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(days).padStart(2, '0'); });
         ["w-cd-hours"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(hours).padStart(2, '0'); });
         ["w-cd-mins"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(mins).padStart(2, '0'); });
         ["w-cd-secs"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(secs).padStart(2, '0'); });
         
-        // Aggiorna Recap
         ["recap-cd-days"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(days).padStart(2, '0'); });
         ["recap-cd-hours"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(hours).padStart(2, '0'); });
         ["recap-cd-mins"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(mins).padStart(2, '0'); });
@@ -288,7 +239,6 @@ function initCountdown() {
     updateTimer();
     setInterval(updateTimer, 1000);
 }
-
 
 document.addEventListener("DOMContentLoaded", async () => {
     await inizializzaGiornataEDeadlineDinamica();
@@ -343,10 +293,10 @@ async function handleForgotPassword(e) {
     const email = document.getElementById('forgot-email').value.trim();
     try {
         await auth.sendPasswordResetEmail(email);
-        alert("✉️ Email di ripristino inviata! Controlla la tua casella di posta.");
+        mostraNotifica("Email Inviata", "✉️ Email di ripristino inviata! Controlla la tua casella di posta.", "success");
         switchAuthTab('login');
     } catch (err) {
-        alert("❌ Errore durante l'invio dell'email: " + err.message);
+        mostraNotifica("Errore Invio", "❌ Errore durante l'invio dell'email: " + err.message, "error");
     }
 }
 
@@ -371,9 +321,9 @@ async function handleRegister(e) {
             draftTentati: 0,
             creatoIl: new Date()
         });
-        alert(`Registrazione completata! Benvenuto, ${username}.`);
+        mostraNotifica("Registrazione Completata", `Registrazione completata! Benvenuto, <strong>${username}</strong>.`, "success");
     } catch (err) {
-        alert("Errore Registrazione: " + err.message);
+        mostraNotifica("Errore Registrazione", err.message, "error");
     }
 }
 
@@ -385,7 +335,7 @@ async function handleLogin(e) {
     try {
         await auth.signInWithEmailAndPassword(email, password);
     } catch (err) {
-        alert("Errore Login: " + err.message);
+        mostraNotifica("Errore Login", err.message, "error");
     }
 }
 
@@ -405,6 +355,8 @@ auth.onAuthStateChanged(async (user) => {
                 const uData = userDoc.data();
                 displayUsername = getRealUsername(uData, user);
                 
+                controllaRuoloAdmin(uData);
+
                 if (uData && uData.photoURL) {
                     aggiornaAvatarGrafica(uData.photoURL);
                 } else {
@@ -414,7 +366,7 @@ auth.onAuthStateChanged(async (user) => {
         } catch(e) {}
 
         document.getElementById('user-display-name').innerText = displayUsername;
-        document.getElementById('welcome-greeting').innerText = `Bentornato, ${displayUsername}!`;
+        document.getElementById('welcome-greeting').innerText = `Bentornato Mister ${displayUsername}!`;
         await caricaDatiUtenteCloud();
     } else {
         currentUser = null;
@@ -423,8 +375,15 @@ auth.onAuthStateChanged(async (user) => {
     }
 });
 
-function logout() {
-    if (confirm("Vuoi davvero disconnetterti dal tuo account?")) {
+async function logout() {
+    const ok = await mostraConferma(
+        "Disconnessione",
+        "Vuoi davvero disconnetterti dal tuo account?",
+        "warning",
+        "Sì, esci",
+        "No"
+    );
+    if (ok) {
         auth.signOut().then(() => location.reload());
     }
 }
@@ -554,6 +513,7 @@ function renderWelcomeScreen() {
     document.getElementById("recap-screen").style.display = "none";
     document.getElementById("classifica-screen").style.display = "none";
     document.getElementById("profilo-screen").style.display = "none";
+    document.getElementById("admin-screen").style.display = "none";
 
     const squadreGiornataCorrente = userSquadre.filter(sq => (sq.giornata !== undefined ? sq.giornata : 8) === ACTIVE_MATCHDAY);
 
@@ -595,16 +555,28 @@ function renderWelcomeScreen() {
         }
 
         const realIndex = userSquadre.indexOf(sq);
+        const nomeSquadra = sq.nomeSquadra || "Squadra Senza Nome";
+        const isLongName = nomeSquadra.length > 18;
+        const infoModulo = sq.moduloSelezionato ? ` • Modulo ${sq.moduloSelezionato}` : "";
 
         item.innerHTML = `
-            <div class="team-card-info">
-                <div class="marquee-container"><span class="marquee-text team-card-name">${sq.nomeSquadra}</span></div>
-                <div style="font-size:10px; color:var(--text-muted);">Modulo: ${sq.moduloSelezionato}</div>
-                ${punteggioHtml}
+            <div class="team-card-left-content">
+                <div class="team-card-icon-box">
+                    <i class="fa-solid fa-shirt"></i>
+                </div>
+                <div class="team-card-info">
+                    <div class="team-card-name-wrapper ${isLongName ? 'is-scrolling' : ''}">
+                        <span class="team-card-name-scroll ${isLongName ? 'scrolling' : ''}">${nomeSquadra}</span>
+                    </div>
+                    <span class="team-card-label">${infoModulo}</span>
+                    ${punteggioHtml}
+                </div>
             </div>
-            <button onclick="apriRecapSquadraUtenteCorrente(${realIndex})" class="btn-small-recap">
-                <i class="fa-solid fa-eye"></i> Vedi Squadra
-            </button>
+            <div class="team-card-actions">
+                <button onclick="apriRecapSquadraUtenteCorrente(${realIndex})" class="btn-team-action">
+                    <i class="fa-solid fa-eye"></i> Visualizza
+                </button>
+            </div>
         `;
         container.appendChild(item);
     });
@@ -623,7 +595,7 @@ async function apriSchermataClassifica(giornata) {
     document.getElementById("recap-screen").style.display = "none";
     document.getElementById("profilo-screen").style.display = "none";
     document.getElementById("classifica-screen").style.display = "block";
-
+    document.getElementById("admin-screen").style.display = "none";
     document.getElementById("classifica-heading-text").innerText = `Classifica della giornata n°${giornata}`;
 
     renderMatchdayPills(giornata);
@@ -757,21 +729,24 @@ async function apriSchermataClassifica(giornata) {
 }
 
 async function apriProfiloUtente(targetUserId) {
-   if (!targetUserId && currentUser) targetUserId = currentUser.uid;
+    if (!targetUserId && currentUser) targetUserId = currentUser.uid;
     if (!targetUserId) return;
+
+    isViewingOwnProfile = (currentUser && targetUserId === currentUser.uid);
 
     document.getElementById("welcome-screen").style.display = "none";
     document.getElementById("main-app").style.display = "none";
     document.getElementById("recap-screen").style.display = "none";
     document.getElementById("classifica-screen").style.display = "none";
     document.getElementById("profilo-screen").style.display = "block";
+    document.getElementById("admin-screen").style.display = "none";
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     try {
         const userDoc = await db.collection("utenti").doc(targetUserId).get();
         if (!userDoc.exists) {
-            alert("Utente non trovato.");
+            mostraNotifica("Utente Non Trovato", "Impossibile trovare i dati dell'utente richiesto.", "error");
             tornaAllaHome();
             return;
         }
@@ -780,10 +755,22 @@ async function apriProfiloUtente(targetUserId) {
         const username = getRealUsername(uData, null);
         document.getElementById("profilo-username-title").innerText = `Profilo di ${username}`;
 
-        if (uData && uData.photoURL) {
-            aggiornaAvatarGrafica(uData.photoURL);
+        const profImg = document.getElementById("profilo-avatar-img");
+        const cameraOverlay = document.querySelector("#profilo-screen .profilo-header .fa-camera")?.parentElement;
+        const uploadTextElement = document.getElementById("upload-foto-label");
+
+        if (uData && uData.photoURL && uData.photoURL.trim() !== "") {
+            if (profImg) profImg.src = uData.photoURL;
         } else {
-            aggiornaAvatarGrafica(null);
+            if (profImg) profImg.src = "https://via.placeholder.com/60";
+        }
+
+        if (isViewingOwnProfile) {
+            if (cameraOverlay) cameraOverlay.style.display = "flex";
+            if (uploadTextElement) uploadTextElement.style.display = "block";
+        } else {
+            if (cameraOverlay) cameraOverlay.style.display = "none";
+            if (uploadTextElement) uploadTextElement.style.display = "none";
         }
 
         const squadre = uData.squadre || [];
@@ -802,8 +789,8 @@ async function apriProfiloUtente(targetUserId) {
             puntiTotali += pts;
             if (pts > migliorPunteggio) migliorPunteggio = pts;
 
-            let budgetResiduo = sq.budget !== undefined && sq.budget !== null ? sq.budget : 600;
-            let spesoPerQuestaSquadra = 600 - budgetResiduo;
+            let budgetResiduo = sq.budget !== undefined && sq.budget !== null ? sq.budget : 800;
+            let spesoPerQuestaSquadra = 800 - budgetResiduo;
             if (spesoPerQuestaSquadra < 0) spesoPerQuestaSquadra = 0;
             budgetSpesoTotale += spesoPerQuestaSquadra;
 
@@ -946,11 +933,10 @@ async function apriProfiloUtente(targetUserId) {
         document.getElementById("stat-podi-argento").innerText = argenti;
         document.getElementById("stat-podi-bronzo").innerText = bronzi;
 
-        // Renderizziamo i traguardi (es. Primo Scatto)
         renderizzaTraguardi(uData);
 
     } catch (err) {
-        alert("Errore nel caricamento delle statistiche utente.");
+        mostraNotifica("Errore Statistiche", "Si è verificato un problema nel caricamento delle statistiche utente.", "error");
         tornaAllaHome();
     }
 }
@@ -983,28 +969,12 @@ function renderMatchdayPills(selectedDay) {
     }
 }
 
-async function visualizzaSquadraGenerica(userId, nomeSquadra, giornata) {
-    try {
-        const doc = await db.collection("utenti").doc(userId).get();
-        if (!doc.exists) return alert("Utente non trovato.");
-
-        const uData = doc.data();
-        const username = getRealUsername(uData, null);
-        const squadreArr = uData.squadre || [];
-
-        const sq = squadreArr.find(s => s.nomeSquadra.toLowerCase() === nomeSquadra.toLowerCase() && (s.giornata !== undefined ? s.giornata : 8) === giornata);
-        if (!sq) return alert("Squadra non trovata per questa giornata.");
-
-        renderRecapScreenReadOnly(sq, username, true);
-    } catch (err) {
-        alert("Errore nel caricamento della squadra: " + err.message);
-    }
-}
-
 async function apriRecapSquadraUtenteCorrente(index) {
     const sq = userSquadre[index];
+    currentRecapSquadraIndex = index;
     let username = "Fantallenatore";
     let ownerId = currentUser ? currentUser.uid : null;
+   
     if (currentUser) {
         try {
             const uDoc = await db.collection("utenti").doc(currentUser.uid).get();
@@ -1017,20 +987,26 @@ async function apriRecapSquadraUtenteCorrente(index) {
             username = getRealUsername(null, currentUser);
         }
     }
-    renderRecapScreenReadOnly(sq, username, false);
+    renderRecapScreenReadOnly(sq, username, false, ownerId);
 }
 
 async function visualizzaSquadraGenerica(userId, nomeSquadra, giornata) {
     try {
         const doc = await db.collection("utenti").doc(userId).get();
-        if (!doc.exists) return alert("Utente non trovato.");
+        if (!doc.exists) {
+            mostraNotifica("Utente Non Trovato", "Impossibile trovare l'allenatore selezionato.", "error");
+            return;
+        }
 
         const uData = doc.data();
         const username = getRealUsername(uData, null);
         const squadreArr = uData.squadre || [];
 
         const sq = squadreArr.find(s => s.nomeSquadra.toLowerCase() === nomeSquadra.toLowerCase() && (s.giornata !== undefined ? s.giornata : 8) === parseInt(giornata));
-        if (!sq) return alert("Squadra non trovata per questa giornata.");
+        if (!sq) {
+            mostraNotifica("Squadra Non Trovata", "Squadra non trovata per questa giornata.", "warning");
+            return;
+        }
 
         if (currentUser && userId === currentUser.uid) {
             currentRecapSquadraIndex = userSquadre.findIndex(s => s.nomeSquadra.toLowerCase() === nomeSquadra.toLowerCase() && (s.giornata !== undefined ? s.giornata : 8) === parseInt(giornata));
@@ -1040,7 +1016,7 @@ async function visualizzaSquadraGenerica(userId, nomeSquadra, giornata) {
 
         renderRecapScreenReadOnly(sq, username, true, userId);
     } catch (err) {
-        alert("Errore nel caricamento della squadra: " + err.message);
+        mostraNotifica("Errore Caricamento", "Errore nel caricamento della squadra: " + err.message, "error");
     }
 }
 
@@ -1050,6 +1026,7 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false, ow
     document.getElementById("classifica-screen").style.display = "none";
     document.getElementById("profilo-screen").style.display = "none";
     document.getElementById("recap-screen").style.display = "block";
+    document.getElementById("admin-screen").style.display = "none";
 
     currentRecapSquadraObj = sq;
 
@@ -1060,12 +1037,12 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false, ow
     const btnBackClassifica = document.getElementById("btn-recap-back-classifica");
     btnBackClassifica.style.display = fromClassifica ? "inline-flex" : "none";
 
-    // PERMESSI MODIFICA: Il pulsante viene mostrato SOLO se l'utente loggato è l'autore E il mercato è aperto
     const btnModifica = document.getElementById("btn-recap-modifica-formazione");
     const isOwner = currentUser && ownerUserId === currentUser.uid;
-    const marketIsOpen = isMarketOpen();
+    const giornataSquadra = sq.giornata !== undefined ? sq.giornata : ACTIVE_MATCHDAY;
+    const isMarketOpenForThisTeam = isMarketOpenForMatchday(giornataSquadra);
 
-    if (isOwner && marketIsOpen && !sq.isTest) {
+    if (isOwner && isMarketOpenForThisTeam && !sq.isTest) {
         btnModifica.style.display = "inline-flex";
     } else {
         btnModifica.style.display = "none";
@@ -1081,7 +1058,7 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false, ow
         recapBadge.style.background = "rgba(16, 185, 129, 0.2)";
         recapBadge.style.borderColor = "var(--accent-neon-green)";
         recapBadge.style.color = "var(--accent-neon-green)";
-        recapBadge.innerText = `🔒 SQUADRA SALVATA (GIORNATA ${sq.giornata || 8})`;
+        recapBadge.innerText = `🔒 SQUADRA SALVATA (GIORNATA ${giornataSquadra})`;
     }
 
     const recapCampo = document.getElementById("recap-campo");
@@ -1095,11 +1072,53 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false, ow
     const panchinaDiv = document.getElementById("recap-panchina");
     panchinaDiv.innerHTML = "";
 
+    const hasVoti = !!(sq.votiGiornata && Object.keys(sq.votiGiornata).length > 0);
+    const subentratiSet = new Set();
+    if (hasVoti) {
+        (sq.schierati || []).forEach(tit => {
+            const vInfo = sq.votiGiornata[tit.nome];
+            const isSenzaVoto = !vInfo || vInfo.sv === true || vInfo.voto === undefined || vInfo.voto === null || vInfo.voto === 0;
+            if (isSenzaVoto) {
+                const riserveRuolo = (sq.riserveSelezionate && sq.riserveSelezionate[tit.ruolo]) || [];
+                for (const ris of riserveRuolo) {
+                    if (!subentratiSet.has(ris.nome)) {
+                        const risInfo = sq.votiGiornata[ris.nome];
+                        if (risInfo && risInfo.sv !== true && risInfo.voto > 0) {
+                            subentratiSet.add(ris.nome);
+                            break;
+                        }
+                    }
+                }
+            }
+        });
+    }
+
     ["Portiere", "Difensore", "Centrocampista", "Attaccante"].forEach(ruolo => {
-        const riserve = sq.riserveSelezionate[ruolo] || [];
+        const riserve = (sq.riserveSelezionate && sq.riserveSelezionate[ruolo]) || [];
         riserve.forEach((ris, i) => {
             const card = document.createElement("div");
             card.className = "recap-bench-card";
+
+            let voteBadgeHtml = "";
+            if (hasVoti) {
+                const rInfo = sq.votiGiornata[ris.nome];
+                const haVoto = rInfo && rInfo.sv !== true && rInfo.voto > 0;
+                const votoTxt = haVoto ? `Voto ${rInfo.voto}` : "S.V.";
+                const fantaVal = haVoto ? (rInfo.fantavoto > 0 ? rInfo.fantavoto : 0) : 0;
+                const fantaTxt = haVoto ? `FV ${fantaVal}` : "FV 0";
+                const statoSub = subentratiSet.has(ris.nome)
+                    ? `<span style="color:var(--accent-gold); font-weight:700; margin-left:4px;">• Subentrato</span>`
+                    : `<span style="color:var(--text-muted); margin-left:4px;">• In panchina</span>`;
+
+                voteBadgeHtml = `
+                    <div style="margin-top:4px; font-size:11px; display:flex; align-items:center; flex-wrap:wrap; gap:6px;">
+                        <span style="font-weight:800; color:${haVoto ? '#e2e8f0' : 'var(--accent-red)'};">${votoTxt}</span>
+                        <span style="font-weight:800; color:var(--accent-blue);">${fantaTxt}</span>
+                        ${statoSub}
+                    </div>
+                `;
+            }
+
             card.innerHTML = `
                 <div>
                     <div class="bench-player-meta">
@@ -1108,6 +1127,7 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false, ow
                     <div class="bench-player-name">
                         <div class="marquee-container" style="max-width:220px;"><span class="marquee-text">${ris.nome}</span></div>
                     </div>
+                    ${voteBadgeHtml}
                 </div>
             `;
             panchinaDiv.appendChild(card);
@@ -1119,17 +1139,53 @@ function renderRecapScreenReadOnly(sq, usernameOwner, fromClassifica = false, ow
     } else {
         document.getElementById("tabellino-container").innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:12px;">I voti per questa squadra non sono ancora stati calcolati.</p>`;
     }
-    
+
+    aggiornaOrdineRecapMobile(hasVoti);
     refreshAllMarquees();
 }
 
+function aggiornaOrdineRecapMobile(hasVoti) {
+    const recapScreen = document.getElementById("recap-screen");
+    const recapContent = recapScreen ? recapScreen.querySelector(".recap-content") : null;
+    const votiBox = recapScreen ? recapScreen.querySelector(".voti-box") : null;
+    if (!recapScreen || !recapContent || !votiBox) return;
+
+    const isMobile = window.innerWidth <= 768;
+
+    if (isMobile && hasVoti) {
+        // Su mobile dopo l'uscita dei voti: prima .voti-box (tabellino + totale), poi .recap-content (campo sopra e panchina sotto)
+        if (votiBox.nextElementSibling !== recapContent) {
+            recapScreen.insertBefore(votiBox, recapContent);
+        }
+    } else {
+        // Ordine standard: prima .recap-content (campo e panchina), poi .voti-box
+        if (recapContent.nextElementSibling !== votiBox) {
+            recapScreen.insertBefore(recapContent, votiBox);
+        }
+    }
+}
+
+window.addEventListener("resize", () => {
+    const recapScreen = document.getElementById("recap-screen");
+    if (recapScreen && recapScreen.style.display !== "none" && currentRecapSquadraObj) {
+        const hasVoti = !!(currentRecapSquadraObj.votiGiornata && Object.keys(currentRecapSquadraObj.votiGiornata).length > 0);
+        aggiornaOrdineRecapMobile(hasVoti);
+    }
+});
+
 function tornaAllaHome() {
+    const colonnaSinistraDraft = document.querySelector(".desktop-col-left");
+    if (colonnaSinistraDraft) colonnaSinistraDraft.style.display = "block";
+
+    const btnCancellaTutto = document.querySelector("#conferma-container button.btn-action-danger");
+    if (btnCancellaTutto) btnCancellaTutto.style.display = "inline-flex";
+
     renderWelcomeScreen();
 }
 
 function avviaTestDraft() {
     if (customPlayersList.length < 24) {
-        alert("Caricamento giocatori in corso o file giocatori.xlsx non valido.");
+        mostraNotifica("Lista Giocatori Non Pronta", "Caricamento giocatori in corso o file <strong>giocatori.xlsx</strong> non valido.", "warning");
         return;
     }
 
@@ -1162,30 +1218,30 @@ function avviaTestDraft() {
 
 async function preparaEAvviaDraft() {
     if (!isMarketOpen()) {
-        alert(`⚠️ Il mercato è chiuso per la Giornata ${ACTIVE_MATCHDAY}.`);
+        mostraNotifica("Mercato Chiuso", `⚠️ Il mercato è chiuso per la <strong>Giornata ${ACTIVE_MATCHDAY}</strong>.`, "warning");
         return;
     }
 
     const squadreGiornataCorrente = userSquadre.filter(sq => (sq.giornata !== undefined ? sq.giornata : 8) === ACTIVE_MATCHDAY);
     if (squadreGiornataCorrente.length >= 3) {
-        alert(`Hai già utilizzato tutti i 3 gettoni disponibili per la Giornata ${ACTIVE_MATCHDAY}!`);
+        mostraNotifica("Gettoni Esauriti", `Hai già utilizzato tutti i 3 gettoni disponibili per la <strong>Giornata ${ACTIVE_MATCHDAY}</strong>!`, "warning");
         return;
     }
 
     const inputName = document.getElementById("new-team-name-input").value.trim();
     if (!inputName) {
-        alert("Inserisci un nome per la tua nuova squadra!");
+        mostraNotifica("Nome Mancante", "Inserisci un nome per la tua nuova squadra prima di avviare il draft!", "warning");
         return;
     }
 
     const nomiEsistentiLega = await ottieniNomiSquadreGlobaliGiornata(ACTIVE_MATCHDAY);
     if (nomiEsistentiLega.includes(inputName.toLowerCase())) {
-        alert(`❌ Il nome "${inputName}" è già stato scelto da un utente per la Giornata ${ACTIVE_MATCHDAY}! Scegli un nome differente.`);
+        mostraNotifica("Nome Già In Uso", `❌ Il nome "<strong>${inputName}</strong>" è già stato scelto da un utente per la Giornata ${ACTIVE_MATCHDAY}! Scegli un nome differente.`, "error");
         return;
     }
 
     if (customPlayersList.length < 24) {
-        alert("Caricamento giocatori in corso o file giocatori.xlsx non valido.");
+        mostraNotifica("Lista Giocatori Non Pronta", "Caricamento giocatori in corso o file <strong>giocatori.xlsx</strong> non valido.", "warning");
         return;
     }
 
@@ -1217,7 +1273,7 @@ async function preparaEAvviaDraft() {
 }
 
 function resetDraftState() {
-    budget = 600;
+    budget = 800;
     turno = 0;
     moduloSelezionato = "";
     rosa = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
@@ -1225,6 +1281,12 @@ function resetDraftState() {
     riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
     availablePlayers = [...customPlayersList];
     
+    const colonnaSinistraDraft = document.querySelector(".desktop-col-left");
+    if (colonnaSinistraDraft) colonnaSinistraDraft.style.display = "block";
+
+    const btnCancellaTutto = document.querySelector("#conferma-container button.btn-action-danger");
+    if (btnCancellaTutto) btnCancellaTutto.style.display = "inline-flex";
+
     document.getElementById("campo-panel-container").style.display = "none";
     document.getElementById("panchina-panel-container").style.display = "none";
 
@@ -1236,8 +1298,15 @@ function resetDraftState() {
     updateDashboardCounters();
 }
 
-function annullaERicominciaDraft() {
-    if (confirm("Vuoi davvero ricominciare il draft? I giocatori selezionati verranno azzerati.")) {
+async function annullaERicominciaDraft() {
+    const ok = await mostraConferma(
+        "Ricomincia Draft",
+        "Vuoi davvero ricominciare il draft? I giocatori selezionati verranno azzerati.",
+        "warning",
+        "Sì, ricomincia",
+        "No"
+    );
+    if (ok) {
         incrementaDraftTentatiCloud();
         const titleHtml = isTestMode ? '<h2>Scegli il tuo giocatore (Test)</h2>' : '<h2>Scegli il tuo giocatore</h2>';
         const btnText = isTestMode ? 'Ricomincia Test' : 'Ricomincia Draft';
@@ -1354,7 +1423,7 @@ function renderPlayers() {
     }
 
     if (candidates.length === 0) {
-        alert(`Attenzione: Impossibile trovare giocatori compatibili con il budget residuo!`);
+        mostraNotifica("Budget Esaurito", "Impossibile trovare giocatori compatibili con il budget residuo.", "warning");
         showModuloSelection();
         return;
     }
@@ -1400,7 +1469,7 @@ function renderPlayers() {
         card.onclick = () => draft(p.nome);
 
         card.innerHTML = `
-            <div style="width: 100%;">
+            <div style="width: 100%; min-width: 0;">
                 <div class="player-name">
                     <div class="marquee-container">
                         <span class="marquee-text">${p.nome}</span>
@@ -1419,7 +1488,7 @@ function renderPlayers() {
 
 function draft(nome) {
     if (!isTestMode && !isMarketOpen()) {
-        alert("⚠️ Tempo scaduto! Il mercato è chiuso per questa giornata.");
+        mostraNotifica("Mercato Chiuso", "⚠️ Tempo scaduto! Il mercato è chiuso per questa giornata.", "warning");
         return;
     }
 
@@ -1427,12 +1496,12 @@ function draft(nome) {
     if (!p) return;
 
     if (rosa[p.ruolo].length >= limits[p.ruolo]) {
-        alert(`Hai già raggiunto il limite massimo di ${limits[p.ruolo]} giocatori per il ruolo ${p.ruolo}!`);
+        mostraNotifica("Limite Ruolo Raggiunto", `Hai già raggiunto il limite massimo di <strong>${limits[p.ruolo]}</strong> giocatori per il ruolo <strong>${p.ruolo}</strong>!`, "warning");
         return;
     }
 
     if (p.valore > budget) {
-        alert(`Non hai abbastanza crediti per acquistare ${p.nome}! Budget residuo: ${budget}`);
+        mostraNotifica("Crediti Insufficienti", `Non hai abbastanza crediti per acquistare <strong>${p.nome}</strong>! Budget residuo: <strong>${budget}</strong>`, "error");
         return;
     }
 
@@ -1501,7 +1570,7 @@ function renderSlots() {
 function schieraGiocatoreDaLista(playerObj, ruolo) {
     if (!isTestMode && !isMarketOpen()) return;
     if (!moduloSelezionato) {
-        alert("Scegli prima il modulo tattico");
+        mostraNotifica("Modulo Mancante", "Scegli prima il modulo tattico prima di schierare i giocatori!", "warning");
         return;
     }
 
@@ -1523,7 +1592,7 @@ function schieraGiocatoreDaLista(playerObj, ruolo) {
             if (riserveSelezionate[ruolo].length < 2) {
                 riserveSelezionate[ruolo].push(playerObj);
             } else {
-                alert(`Hai già esaurito i posti in campo e le 2 riserve per il ruolo ${ruolo}!`);
+                mostraNotifica("Posti Esauriti", `Hai già esaurito i posti in campo e le 2 riserve per il ruolo <strong>${ruolo}</strong>!`, "warning");
             }
         }
     }
@@ -1536,13 +1605,13 @@ function schieraGiocatoreDaLista(playerObj, ruolo) {
 function apriModaleScelta(ruolo, targetType, indexTitolare = null) {
     if (!isTestMode && !isMarketOpen()) return;
     if (!moduloSelezionato) {
-        alert("Scegli prima il modulo tattico");
+        mostraNotifica("Modulo Mancante", "Scegli prima il modulo tattico prima di schierare i giocatori!", "warning");
         return;
     }
 
     const giocatoriRuolo = rosa[ruolo];
     if (giocatoriRuolo.length === 0) {
-        alert(`Non hai acquistato alcun giocatore nel ruolo: ${ruolo}`);
+        mostraNotifica("Nessun Giocatore", `Non hai acquistato alcun giocatore nel ruolo: <strong>${ruolo}</strong>`, "warning");
         return;
     }
 
@@ -1752,7 +1821,7 @@ function showModuloSelection() {
 
 function setModulo() {
     if (!isTestMode && !isMarketOpen()) {
-        alert("⚠️ Tempo scaduto! Impossibile impostare la formazione.");
+        mostraNotifica("Mercato Chiuso", "⚠️ Tempo scaduto! Impossibile impostare la formazione.", "warning");
         return;
     }
 
@@ -1863,7 +1932,15 @@ function renderPanchinaGrafica() {
 }
 
 async function confermaFormazioneDefinitiva() {
-    if (schierati.length < 11) return alert("Devi schierare tutti gli 11 titolari!");
+    if (schierati.length < 11) {
+        mostraNotifica("Formazione Incompleta", "Devi schierare tutti gli <strong>11 titolari</strong> prima di confermare!", "warning");
+        return;
+    }
+
+    if (!haPanchinaCompleta()) {
+        mostraNotifica("Panchina Incompleta", "Devi schierare <strong>tutte le 8 riserve</strong> (2 Portieri, 2 Difensori, 2      	Centrocampisti e 2 Attaccanti) prima di confermare!", "warning");
+        return;
+    }
 
     if (isTestMode) {
         const squadraTestObj = {
@@ -1892,61 +1969,68 @@ async function confermaFormazioneDefinitiva() {
     }
 
     if (!isMarketOpen()) {
-        alert("⚠️ Tempo scaduto! Non è più possibile confermare la formazione.");
+        mostraNotifica("Mercato Chiuso", "⚠️ Tempo scaduto! Non è più possibile confermare la formazione.", "warning");
         return;
     }
 
-    if (confirm(`Confermi la squadra "${tempNomeSquadra}" per la Giornata ${ACTIVE_MATCHDAY}? Questa operazione scalerà 1 Gettone ed è definitiva.`)) {
-        try {
-            const nomiEsistentiLega = await ottieniNomiSquadreGlobaliGiornata(ACTIVE_MATCHDAY);
-            if (nomiEsistentiLega.includes(tempNomeSquadra.toLowerCase().trim())) {
-                alert(`❌ Un altro utente ha già registrato una squadra chiamata "${tempNomeSquadra}" per la Giornata ${ACTIVE_MATCHDAY}! Scegli un nome differente.`);
-                return;
-            }
+    const ok = await mostraConferma(
+        "Conferma Formazione",
+        `Confermi la squadra "<strong>${tempNomeSquadra}</strong>" per la Giornata ${ACTIVE_MATCHDAY}? Questa operazione scalerà 1 Gettone ed è definitiva.`,
+        "info",
+        "Sì, conferma",
+        "No"
+    );
+    if (!ok) return;
 
-            const userDocRef = db.collection("utenti").doc(currentUser.uid);
-            const docSnapshot = await userDocRef.get();
-            
-            let squadreEsistenti = [];
-            if (docSnapshot.exists && docSnapshot.data().squadre) {
-                squadreEsistenti = docSnapshot.data().squadre;
-            }
-
-            const squadreGiornataCorrente = squadreEsistenti.filter(s => (s.giornata !== undefined ? s.giornata : 8) === ACTIVE_MATCHDAY);
-            if (squadreGiornataCorrente.length >= 3) {
-                alert(`⚠️ Hai già utilizzato tutti i 3 gettoni disponibili per la Giornata ${ACTIVE_MATCHDAY}!`);
-                return;
-            }
-
-            const nuovaSquadra = {
-                giornata: ACTIVE_MATCHDAY,
-                nomeSquadra: tempNomeSquadra,
-                rosa: JSON.parse(JSON.stringify(rosa)),
-                schierati: JSON.parse(JSON.stringify(schierati)),
-                riserveSelezionate: JSON.parse(JSON.stringify(riserveSelezionate)),
-                budget: budget,
-                moduloSelezionato: moduloSelezionato,
-                formazioneBloccata: true,
-                votiGiornata: {},
-                punteggioTotale: null,
-                creataIl: new Date()
-            };
-
-            squadreEsistenti.push(nuovaSquadra);
-            userSquadre = squadreEsistenti;
-
-            await userDocRef.set({
-                squadre: userSquadre
-            }, { merge: true });
-
-            alert(`🎉 Squadra "${tempNomeSquadra}" convalidata e salvata con successo per la Giornata ${ACTIVE_MATCHDAY}!`);
-            document.getElementById("new-team-name-input").value = "";
-            await calcolaEVisualizzaTotaleSquadreGlobali(ACTIVE_MATCHDAY);
-            renderWelcomeScreen();
-
-        } catch (err) {
-            alert("❌ Errore durante il salvataggio: " + err.message);
+    try {
+        const nomiEsistentiLega = await ottieniNomiSquadreGlobaliGiornata(ACTIVE_MATCHDAY);
+        if (nomiEsistentiLega.includes(tempNomeSquadra.toLowerCase().trim())) {
+            mostraNotifica("Nome Già In Uso", `❌ Un altro utente ha già registrato una squadra chiamata "<strong>${tempNomeSquadra}</strong>" per la Giornata ${ACTIVE_MATCHDAY}! Scegli un nome differente.`, "error");
+            return;
         }
+
+        const userDocRef = db.collection("utenti").doc(currentUser.uid);
+        const docSnapshot = await userDocRef.get();
+        
+        let squadreEsistenti = [];
+        if (docSnapshot.exists && docSnapshot.data().squadre) {
+            squadreEsistenti = docSnapshot.data().squadre;
+        }
+
+        const squadreGiornataCorrente = squadreEsistenti.filter(s => (s.giornata !== undefined ? s.giornata : 8) === ACTIVE_MATCHDAY);
+        if (squadreGiornataCorrente.length >= 3) {
+            mostraNotifica("Gettoni Esauriti", `⚠️ Hai già utilizzato tutti i 3 gettoni disponibili per la <strong>Giornata ${ACTIVE_MATCHDAY}</strong>!`, "warning");
+            return;
+        }
+
+        const nuovaSquadra = {
+            giornata: ACTIVE_MATCHDAY,
+            nomeSquadra: tempNomeSquadra,
+            rosa: JSON.parse(JSON.stringify(rosa)),
+            schierati: JSON.parse(JSON.stringify(schierati)),
+            riserveSelezionate: JSON.parse(JSON.stringify(riserveSelezionate)),
+            budget: budget,
+            moduloSelezionato: moduloSelezionato,
+            formazioneBloccata: true,
+            votiGiornata: {},
+            punteggioTotale: null,
+            creataIl: new Date()
+        };
+
+        squadreEsistenti.push(nuovaSquadra);
+        userSquadre = squadreEsistenti;
+
+        await userDocRef.set({
+            squadre: userSquadre
+        }, { merge: true });
+
+        mostraNotifica("Formazione Salvata!", `🎉 Squadra "<strong>${tempNomeSquadra}</strong>" convalidata e salvata con successo per la Giornata ${ACTIVE_MATCHDAY}!`, "success");
+        document.getElementById("new-team-name-input").value = "";
+        await calcolaEVisualizzaTotaleSquadreGlobali(ACTIVE_MATCHDAY);
+        renderWelcomeScreen();
+
+    } catch (err) {
+        mostraNotifica("Errore Salvataggio", "❌ Errore durante il salvataggio: " + err.message, "error");
     }
 }
 
@@ -2009,9 +2093,9 @@ async function verificaECalcolaVotiAutomaticamente() {
                         if (matchRow) {
                             let rawVotoPuro = parseColumnVal(matchRow, ["voto", "Voto", "VOTO"]);
                             let rawFanta = parseColumnVal(matchRow, ["fantavoto", "Fantavoto", "FANTAVOTO"]);
-                            if (rawFanta === 0 && rawVotoPuro > 0) rawFanta = rawVotoPuro;
+                            let haGiocato = (rawVotoPuro > 0);
 
-                            if (rawFanta > 0 || rawVotoPuro > 0) {
+                            if (matchRow && haGiocato) {
                                 votiObj[p.nome] = {
                                     voto: rawVotoPuro,
                                     fantavoto: rawFanta,
@@ -2036,43 +2120,39 @@ async function verificaECalcolaVotiAutomaticamente() {
                         let vInfo = votiObj[tit.nome];
                         let eff = vInfo;
 
-                       let isSenzaVoto = false;
-if (!vInfo) {
-    isSenzaVoto = true;
-} else if (vInfo.sv === true) {
-    isSenzaVoto = true;
-} else if (vInfo.voto === undefined || vInfo.voto === null || vInfo.voto === 0) {
-    // Se il voto puro in pagella è 0 o assente, significa che non ha giocato / S.V.
-    isSenzaVoto = true;
-}
+                        let isSenzaVoto = false;
+                        if (!vInfo) {
+                            isSenzaVoto = true;
+                        } else if (vInfo.sv === true) {
+                            isSenzaVoto = true;
+                        } else if (vInfo.voto === undefined || vInfo.voto === null || vInfo.voto === 0) {
+                            isSenzaVoto = true;
+                        }
 
-if (isSenzaVoto) {
-    let riserveRuolo = (sq.riserveSelezionate || {})[tit.ruolo] || [];
-    let riservaValida = null;
+                        if (isSenzaVoto) {
+                            let riserveRuolo = (sq.riserveSelezionate || {})[tit.ruolo] || [];
+                            let riservaValida = null;
 
-    for (let ris of riserveRuolo) {
-        if (!riserveGiaSubentrate.has(ris.nome)) {
-            let risInfo = votiObj[ris.nome];
-            // Anche per la riserva verifichiamo che abbia un voto valido (non S.V.)
-            let risHaVotoValido = risInfo && risInfo.sv !== true && risInfo.voto > 0;
-            if (risHaVotoValido) {
-                riservaValida = { obj: ris, info: risInfo };
-                riserveGiaSubentrate.add(ris.nome);
-                break;
-            }
-        }
-    }
+                            for (let ris of riserveRuolo) {
+                                if (!riserveGiaSubentrate.has(ris.nome)) {
+                                    let risInfo = votiObj[ris.nome];
+                                    let risHaVotoValido = risInfo && risInfo.sv !== true && risInfo.voto > 0;
+                                    if (risHaVotoValido) {
+                                        riservaValida = { obj: ris, info: risInfo };
+                                        riserveGiaSubentrate.add(ris.nome);
+                                        break;
+                                    }
+                                }
+                            }
 
-    if (riservaValida) {
-        eff = riservaValida.info;
-    } else {
-        eff = { voto: 0, fantavoto: 0, sv: true };
-    }
-}
+                            if (riservaValida) {
+                                eff = riservaValida.info;
+                            } else {
+                                eff = { voto: 0, fantavoto: 0, sv: true };
+                            }
+                        }
                         totaleSquadra += (eff.fantavoto > 0 ? eff.fantavoto : 0);
                     });
-
-
 
                     sq.votiGiornata = votiObj;
                     sq.punteggioTotale = totaleSquadra;
@@ -2129,40 +2209,52 @@ function mostraTabellinoVoti(sq) {
     let totale = 0;
     let riserveGiaSubentrate = new Set();
 
-    sq.schierati.forEach(tit => {
+    (sq.schierati || []).forEach(tit => {
         let vInfo = sq.votiGiornata[tit.nome];
-let eff = vInfo;
-let note = "<span style='color:var(--accent-green)'>Titolare</span>";
+        let eff = vInfo;
+        let note = "<span style='color:var(--accent-green)'>Titolare</span>";
+        let subentratoSenzaVoto = null;
 
-let isSenzaVoto = false;
-if (!vInfo || vInfo.sv === true || vInfo.voto === undefined || vInfo.voto === null || vInfo.voto === 0) {
-    isSenzaVoto = true;
-}
+        let isSenzaVoto = false;
+        if (!vInfo || vInfo.sv === true || vInfo.voto === undefined || vInfo.voto === null || vInfo.voto === 0) {
+            isSenzaVoto = true;
+        }
 
-if (isSenzaVoto) {
-    let riserveRuolo = sq.riserveSelezionate[tit.ruolo] || [];
-    let riservaValida = null;
+        if (isSenzaVoto) {
+            let riserveRuolo = (sq.riserveSelezionate && sq.riserveSelezionate[tit.ruolo]) || [];
+            let riservaValida = null;
 
-    for (let ris of riserveRuolo) {
-        if (!riserveGiaSubentrate.has(ris.nome)) {
-            let risInfo = sq.votiGiornata[ris.nome];
-            let risHaVotoValido = risInfo && risInfo.sv !== true && risInfo.voto > 0;
-            if (risHaVotoValido) {
-                riservaValida = { obj: ris, info: risInfo };
-                riserveGiaSubentrate.add(ris.nome);
-                break;
+            for (let ris of riserveRuolo) {
+                if (!riserveGiaSubentrate.has(ris.nome)) {
+                    let risInfo = sq.votiGiornata[ris.nome];
+                    let risHaVotoValido = risInfo && risInfo.sv !== true && risInfo.voto > 0;
+                    if (risHaVotoValido) {
+                        riservaValida = { obj: ris, info: risInfo };
+                        riserveGiaSubentrate.add(ris.nome);
+                        break;
+                    }
+                }
+            }
+
+            if (riservaValida) {
+                eff = riservaValida.info;
+                note = `<span style='color:var(--accent-gold)'>🔁 Subentra (${riservaValida.obj.nome})</span>`;
+            } else {
+                note = "<span style='color:var(--accent-red)'>❌ S.V.</span>";
+                eff = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
+
+                // Se il titolare è S.V. e non c'è una riserva valida, verifica se una riserva del ruolo è subentrata senza voto (S.V.)
+                const riservaSv = riserveRuolo.find(ris => {
+                    if (riserveGiaSubentrate.has(ris.nome)) return false;
+                    const rInfo = sq.votiGiornata[ris.nome];
+                    return !rInfo || rInfo.sv === true || rInfo.voto === undefined || rInfo.voto === null || rInfo.voto === 0;
+                });
+                if (riservaSv) {
+                    riserveGiaSubentrate.add(riservaSv.nome);
+                    subentratoSenzaVoto = riservaSv;
+                }
             }
         }
-    }
-
-    if (riservaValida) {
-        eff = riservaValida.info;
-        note = `<span style='color:var(--accent-gold)'>🔁 Subentra (${riservaValida.obj.nome})</span>`;
-    } else {
-        note = "<span style='color:var(--accent-red)'>❌ S.V.</span>";
-        eff = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
-    }
-}
 
         totale += (eff.fantavoto > 0 ? eff.fantavoto : 0);
         let iconeHtml = generaIconeBonusMalus(eff);
@@ -2176,6 +2268,17 @@ if (isSenzaVoto) {
             <td>${iconeHtml}</td>
             <td><strong style="color:var(--accent-blue);">${eff.fantavoto > 0 ? eff.fantavoto : 0}</strong></td>
         </tr>`;
+
+        if (subentratoSenzaVoto) {
+            html += `<tr style="background: rgba(245, 158, 11, 0.06);">
+                <td><i class="${roleIcons[tit.ruolo]}"></i></td>
+                <td><div class="marquee-container" style="max-width: 140px;"><span class="marquee-text"><strong>${subentratoSenzaVoto.nome}</strong></span></div></td>
+                <td><span style='color:var(--accent-gold)'>🔁 Subentrato (S.V.)</span></td>
+                <td><strong style="color:var(--accent-red);">S.V.</strong></td>
+                <td><span style="color:var(--text-muted); font-size:10px;">-</span></td>
+                <td><strong style="color:var(--accent-blue);">0</strong></td>
+            </tr>`;
+        }
     });
 
     html += `</tbody></table>
@@ -2190,11 +2293,17 @@ if (isSenzaVoto) {
 // ==========================================
 
 async function caricaNuovaFotoProfiloBase64(event) {
+    if (!isViewingOwnProfile) {
+        mostraNotifica("Azione Non Consentita", "⛔ Non puoi modificare la foto del profilo di un altro utente.", "error");
+        event.target.value = "";
+        return;
+    }
+
     const file = event.target.files[0];
     if (!file) return;
 
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-        alert("Formato non valido! Puoi caricare solo immagini JPG, PNG o WEBP.");
+        mostraNotifica("Formato Non Valido", "Puoi caricare solo immagini <strong>JPG</strong>, <strong>PNG</strong> o <strong>WEBP</strong>.", "warning");
         event.target.value = "";
         return;
     }
@@ -2226,7 +2335,7 @@ async function caricaNuovaFotoProfiloBase64(event) {
 
             try {
                 if (!currentUser) {
-                    alert("Errore: utente non autenticato.");
+                    mostraNotifica("Sessione Scaduta", "Errore: utente non autenticato.", "error");
                     return;
                 }
 
@@ -2236,14 +2345,13 @@ async function caricaNuovaFotoProfiloBase64(event) {
 
                 aggiornaAvatarGrafica(base64String);
                 
-                // Aggiorna subito anche i traguardi nel profilo se l'utente è lì
                 const uDoc = await db.collection("utenti").doc(currentUser.uid).get();
                 if (uDoc.exists) renderizzaTraguardi(uDoc.data());
 
-                alert("📸 Foto profilo aggiornata con successo!");
+                mostraNotifica("Foto Aggiornata", "📸 Foto profilo aggiornata con successo!", "success");
 
             } catch (err) {
-                alert("Errore nel salvataggio sul database: " + err.message);
+                mostraNotifica("Errore Salvataggio", "Errore nel salvataggio sul database: " + err.message, "error");
             }
         };
     };
@@ -2301,7 +2409,6 @@ function aggiornaAvatarGrafica(url) {
     }
 }
 
-
 // ==========================================
 // ROUTING RAPIDO DALLA HOME ALLE MISSIONI
 // ==========================================
@@ -2309,16 +2416,13 @@ function aggiornaAvatarGrafica(url) {
 async function vaiAMissioniProfilo() {
     if (!currentUser) return;
 
-    // 1. Apriamo il profilo dell'utente loggato
     await apriProfiloUtente(currentUser.uid);
 
-    // 2. Facciamo uno scroll fluido diretto alla sezione Traguardi
     setTimeout(() => {
         const targetSection = document.getElementById("badge-grid-container");
         if (targetSection) {
             targetSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
             
-            // Effetto grafico pulsante per far capire all'utente dove si trova
             const parentCard = targetSection.closest('.profilo-section-card') || targetSection.parentElement;
             if (parentCard) {
                 parentCard.style.transition = "transform 0.3s, border-color 0.3s";
@@ -2333,8 +2437,6 @@ async function vaiAMissioniProfilo() {
     }, 150);
 }
 
-
-
 // ==========================================
 // GESTIONE TRAGUARDI (ALTA LEGGIBILITÀ)
 // ==========================================
@@ -2348,7 +2450,6 @@ function renderizzaTraguardi(uData) {
     const numSquadre = squadre.length;
     const haFoto = uData && uData.photoURL && uData.photoURL.trim() !== "";
 
-    // Lista traguardi con descrizioni chiare ed estese
     const listaTraguardi = [
         {
             id: "primo_scatto",
@@ -2402,7 +2503,6 @@ function renderizzaTraguardi(uData) {
         }
     ];
 
-    // Layout a colonna singola (o doppia su schermi grandi) per dare respiro al testo
     container.style.display = "flex";
     container.style.flexDirection = "column";
     container.style.gap = "10px";
@@ -2419,13 +2519,11 @@ function renderizzaTraguardi(uData) {
         item.style.opacity = t.sbloccato ? "1" : "0.75";
         item.style.gap = "12px";
 
-        // Stato / Progresso ben visibile a destra
         let badgeProgresso = t.sbloccato 
             ? `<div style="background: rgba(16, 185, 129, 0.15); border: 1px solid var(--accent-neon-green); color: var(--accent-neon-green); font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; white-space: nowrap;">✔ SBLOCCATO</div>`
             : `<div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 12px; font-weight: 800; padding: 6px 12px; border-radius: 8px; white-space: nowrap; text-align: center;">${t.attuale} / ${t.target}</div>`;
 
         item.innerHTML = `
-            <!-- Sinistra: Icona + Testi estesi -->
             <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;">
                 <div style="width: 40px; height: 40px; min-width: 40px; border-radius: 8px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 18px; color: ${t.sbloccato ? t.colore : 'var(--text-muted)'};">
                     <i class="${t.icona}"></i>
@@ -2436,7 +2534,6 @@ function renderizzaTraguardi(uData) {
                 </div>
             </div>
 
-            <!-- Destra: Box Avanzamento Stile Draft -->
             <div>
                 ${badgeProgresso}
             </div>
@@ -2446,45 +2543,58 @@ function renderizzaTraguardi(uData) {
     });
 }
 
-
 // ==========================================
 // LOGICA MODIFICA FORMAZIONE SALVATA
 // ==========================================
 
 function avviaModificaFormazioneSalvata() {
-    if (!isMarketOpen()) {
-        alert("⚠️ Tempo scaduto! Il mercato è chiuso e le formazioni sono bloccate per questo turno.");
-        return;
-    }
-
     if (!currentRecapSquadraObj) return;
 
     const sq = currentRecapSquadraObj;
+    const giornataSquadra = sq.giornata !== undefined ? sq.giornata : ACTIVE_MATCHDAY;
 
-    // Carichiamo la rosa esistente (senza rifare il draft)
+    if (giornataSquadra < ACTIVE_MATCHDAY) {
+        mostraNotifica("Giornata Conclusa", "❌ Impossibile modificare le formazioni delle giornate precedenti o concluse.", "error");
+        return;
+    }
+
+    if (!isMarketOpenForMatchday(giornataSquadra)) {
+        mostraNotifica("Mercato Chiuso", "⚠️ Tempo scaduto! Il mercato è chiuso e le formazioni sono bloccate per questo turno.", "warning");
+        return;
+    }
+
     rosa = JSON.parse(JSON.stringify(sq.rosa || { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] }));
     schierati = JSON.parse(JSON.stringify(sq.schierati || []));
     riserveSelezionate = JSON.parse(JSON.stringify(sq.riserveSelezionate || { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] }));
     moduloSelezionato = sq.moduloSelezionato;
-    budget = sq.budget !== undefined ? sq.budget : 600;
+    budget = sq.budget !== undefined ? sq.budget : 800;
     tempNomeSquadra = sq.nomeSquadra;
     isTestMode = false;
 
-    // Nascondiamo il pannello di draft dei giocatori (perché i 24 della rosa sono già stati scelti)
-    document.getElementById("draft-panel").style.display = "none";
+    const colonnaSinistraDraft = document.querySelector(".desktop-col-left");
+    if (colonnaSinistraDraft) {
+        colonnaSinistraDraft.style.display = "none";
+    }
+
     document.getElementById("welcome-screen").style.display = "none";
     document.getElementById("recap-screen").style.display = "none";
     document.getElementById("main-app").style.display = "flex";
+    document.getElementById("admin-screen").style.display = "none";
 
-    document.getElementById("current-draft-team-title").innerText = `Modifica Formazione: ${sq.nomeSquadra}`;
+    document.getElementById("current-draft-team-title").innerText = `Modifica Formazione: ${sq.nomeSquadra} (G${giornataSquadra})`;
     
     document.getElementById("campo-panel-container").style.display = "block";
     document.getElementById("panchina-panel-container").style.display = "block";
     document.getElementById("conferma-container").style.display = "flex";
 
-    // Sostituiamo il tasto di conferma normale con quello per salvare la modifica
-    document.getElementById("btn-conferma-formazione").onclick = salvaModificaFormazioneSuCloud;
-    document.getElementById("btn-conferma-formazione").innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Salva Modifiche Formazione`;
+    const btnCancellaTutto = document.querySelector("#conferma-container button.btn-action-danger");
+    if (btnCancellaTutto) {
+        btnCancellaTutto.style.display = "none";
+    }
+
+    const btnConferma = document.getElementById("btn-conferma-formazione");
+    btnConferma.onclick = salvaModificaFormazioneSuCloud;
+    btnConferma.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Salva Modifiche Formazione`;
 
     ripristinaCampoTattico();
     renderSlots();
@@ -2494,58 +2604,376 @@ function avviaModificaFormazioneSalvata() {
 }
 
 async function salvaModificaFormazioneSuCloud() {
-    if (!isMarketOpen()) {
-        alert("⚠️ Tempo scaduto! Il mercato ha chiuso durante le tue modifiche. Le modifiche non possono essere salvate.");
+    const btnCancellaTutto = document.querySelector("#conferma-container button.btn-action-danger");
+    if (btnCancellaTutto) {
+        btnCancellaTutto.style.display = "inline-flex";
+    }
+
+    const colonnaSinistraDraft = document.querySelector(".desktop-col-left");
+    if (colonnaSinistraDraft) {
+        colonnaSinistraDraft.style.display = "block";
+    }
+
+    if (!currentRecapSquadraObj) return;
+    const giornataSquadra = currentRecapSquadraObj.giornata !== undefined ? currentRecapSquadraObj.giornata : ACTIVE_MATCHDAY;
+
+    if (!isMarketOpenForMatchday(giornataSquadra)) {
+        mostraNotifica("Mercato Chiuso", "⚠️ Tempo scaduto! Il mercato ha chiuso durante le tue modifiche. Le modifiche non sono state salvate.", "warning");
         tornaAllaHome();
         return;
     }
 
     if (schierati.length < 11) {
-        alert("Devi schierare tutti gli 11 titolari!");
+        mostraNotifica("Formazione Incompleta", "Devi schierare tutti gli <strong>11 titolari</strong>!", "warning");
         return;
     }
 
-    if (confirm(`Confermi le modifiche alla formazione di "${tempNomeSquadra}"?`)) {
-        try {
-            const userDocRef = db.collection("utenti").doc(currentUser.uid);
-            const docSnapshot = await userDocRef.get();
-            
-            if (!docSnapshot.exists) return alert("Utente non trovato.");
-
-            let squadreEsistenti = docSnapshot.data().squadre || [];
-
-            // Troviamo l'indice della squadra nel database
-            let indexTarget = currentRecapSquadraIndex;
-            if (indexTarget === -1 || indexTarget >= squadreEsistenti.length) {
-                indexTarget = squadreEsistenti.findIndex(s => s.nomeSquadra.toLowerCase() === tempNomeSquadra.toLowerCase() && (s.giornata !== undefined ? s.giornata : 8) === ACTIVE_MATCHDAY);
-            }
-
-            if (indexTarget === -1) {
-                alert("Errore: Squadra non trovata nel database.");
-                return;
-            }
-
-            // Aggiorniamo solo lo schieramento titolari e riserve
-            squadreEsistenti[indexTarget].schierati = JSON.parse(JSON.stringify(schierati));
-            squadreEsistenti[indexTarget].riserveSelezionate = JSON.parse(JSON.stringify(riserveSelezionate));
-            squadreEsistenti[indexTarget].moduloSelezionato = moduloSelezionato;
-            squadreEsistenti[indexTarget].modificataIl = new Date();
-
-            userSquadre = squadreEsistenti;
-
-            await userDocRef.update({ squadre: userSquadre });
-
-            alert("✅ Formazione aggiornata con successo!");
-
-            // Ripristiniamo la funzione di conferma predefinita per i nuovi draft
-            document.getElementById("btn-conferma-formazione").onclick = confermaFormazioneDefinitiva;
-            document.getElementById("draft-panel").style.display = "block";
-
-            // Riapriamo il recap con la nuova formazione aggiornata
-            apriRecapSquadraUtenteCorrente(indexTarget);
-
-        } catch (err) {
-            alert("❌ Errore durante l'aggiornamento: " + err.message);
-        }
+if (!haPanchinaCompleta()) {
+        mostraNotifica("Panchina Incompleta", "Devi schierare <strong>tutte le 8 riserve</strong> (2 per ruolo) prima di salvare le modifiche!", "warning");
+        return;
     }
+
+    const ok = await mostraConferma(
+        "Salva Modifiche",
+        `Confermi le modifiche alla formazione di "<strong>${tempNomeSquadra}</strong>"?`,
+        "info",
+        "Sì, salva",
+        "No"
+    );
+    if (!ok) return;
+
+    try {
+        const userDocRef = db.collection("utenti").doc(currentUser.uid);
+        const docSnapshot = await userDocRef.get();
+        
+        if (!docSnapshot.exists) {
+            mostraNotifica("Errore Utente", "Utente non trovato nel database.", "error");
+            return;
+        }
+
+        let squadreEsistenti = docSnapshot.data().squadre || [];
+
+        let indexTarget = currentRecapSquadraIndex;
+        if (indexTarget === -1 || indexTarget >= squadreEsistenti.length) {
+            indexTarget = squadreEsistenti.findIndex(s => s.nomeSquadra.toLowerCase() === tempNomeSquadra.toLowerCase() && (s.giornata !== undefined ? s.giornata : ACTIVE_MATCHDAY) === giornataSquadra);
+        }
+
+        if (indexTarget === -1) {
+            mostraNotifica("Squadra Non Trovata", "Errore: Squadra non trovata nel database.", "error");
+            return;
+        }
+
+        squadreEsistenti[indexTarget].schierati = JSON.parse(JSON.stringify(schierati));
+        squadreEsistenti[indexTarget].riserveSelezionate = JSON.parse(JSON.stringify(riserveSelezionate));
+        squadreEsistenti[indexTarget].moduloSelezionato = moduloSelezionato;
+        squadreEsistenti[indexTarget].modificataIl = new Date();
+
+        userSquadre = squadreEsistenti;
+
+        await userDocRef.update({ squadre: userSquadre });
+
+        mostraNotifica("Modifiche Salvate", "✅ Formazione aggiornata con successo!", "success");
+
+        document.getElementById("btn-conferma-formazione").onclick = confermaFormazioneDefinitiva;
+       
+        const draftPanel = document.getElementById("draft-panel");
+        if (draftPanel) draftPanel.style.display = "block";
+
+        apriRecapSquadraUtenteCorrente(indexTarget);
+
+    } catch (err) {
+        mostraNotifica("Errore Aggiornamento", "❌ Errore durante l'aggiornamento: " + err.message, "error");
+    }
+}
+
+// ==========================================
+// LOGICA PANNELLO ADMIN & BACKOFFICE
+// ==========================================
+
+async function controllaRuoloAdmin(uData) {
+    const adminBtn = document.getElementById("admin-nav-button");
+    if (uData && uData.isAdmin === true) {
+        if (adminBtn) adminBtn.style.display = "inline-flex";
+    } else {
+        if (adminBtn) adminBtn.style.display = "none";
+    }
+}
+
+async function apriPannelloAdmin() {
+    if (!currentUser) return;
+    
+    try {
+        const uDoc = await db.collection("utenti").doc(currentUser.uid).get();
+        if (!uDoc.exists || uDoc.data().isAdmin !== true) {
+            mostraNotifica("Accesso Negato", "⛔ Non disponi dei privilegi di amministratore.", "error");
+            return;
+        }
+    } catch (e) {
+        mostraNotifica("Errore Permessi", "Errore di verifica permessi.", "error");
+        return;
+    }
+
+    document.getElementById("welcome-screen").style.display = "none";
+    document.getElementById("main-app").style.display = "none";
+    document.getElementById("recap-screen").style.display = "none";
+    document.getElementById("classifica-screen").style.display = "none";
+    document.getElementById("profilo-screen").style.display = "none";
+    document.getElementById("admin-screen").style.display = "block";
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    caricaStatisticheAdmin();
+}
+
+async function caricaStatisticheAdmin() {
+    try {
+        const snap = await db.collection("utenti").get();
+        let totaleUtenti = snap.size;
+        let totaleSquadre = 0;
+
+        snap.forEach(doc => {
+            const squadre = doc.data().squadre || [];
+            totaleSquadre += squadre.length;
+        });
+
+        const elUtenti = document.getElementById("admin-stat-utenti");
+        const elSquadre = document.getElementById("admin-stat-squadre");
+        
+        if (elUtenti) elUtenti.innerText = totaleUtenti;
+        if (elSquadre) elSquadre.innerText = totaleSquadre;
+    } catch (e) {
+        console.error("Errore caricamento statistiche admin:", e);
+    }
+}
+
+async function adminEseguiRicalcoloGiornata() {
+    const gInput = parseInt(document.getElementById("admin-input-giornata").value);
+    if (isNaN(gInput) || gInput < 1) {
+        mostraNotifica("Giornata Non Valida", "Inserisci un numero di giornata valido.", "warning");
+        return;
+    }
+    
+    await ricalcolaTuttaLaGiornata(gInput);
+}
+
+async function ricalcolaTuttaLaGiornata(giornata) {
+    const ok = await mostraConferma(
+        "Forza Ricalcolo",
+        `Vuoi forzare il ricalcolo e la sovrascrittura dei punteggi per <strong>TUTTE</strong> le squadre della Giornata ${giornata}?`,
+        "warning",
+        "Sì, ricalcola",
+        "No"
+    );
+    if (!ok) return;
+    
+    try {
+        mostraNotifica("Ricalcolo In Corso", `🔄 Avvio ricalcolo massivo per la <strong>Giornata ${giornata}</strong>...`, "info");
+        
+        const fileName = `voti_ok${giornata}.xlsx`;
+        let fileResponse;
+        try {
+            fileResponse = await fetch(fileName);
+            if (!fileResponse.ok) throw new Error("File non trovato");
+        } catch (e) {
+            mostraNotifica("File Voti Mancante", `❌ Impossibile trovare il file "<strong>${fileName}</strong>" nella directory principale. Assicurati di averlo caricato.`, "error");
+            return;
+        }
+
+        let arrayBuffer = await fileResponse.arrayBuffer();
+        let workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
+        let nomeFoglioVoti = workbook.SheetNames.find(s => s.trim().toLowerCase() === "voti") || workbook.SheetNames[0];
+        let rows = XLSX.utils.sheet_to_json(workbook.Sheets[nomeFoglioVoti]);
+
+        const snapshot = await db.collection("utenti").get();
+        let squadreAggiornateTotali = 0;
+
+        for (const docUser of snapshot.docs) {
+            let uData = docUser.data();
+            let squadreArr = uData.squadre || [];
+            let modificato = false;
+
+            squadreArr.forEach(sq => {
+                let giornataSquadra = sq.giornata !== undefined ? sq.giornata : 8;
+                
+                if (giornataSquadra === giornata) {
+                    let votiObj = {};
+                    let totaleSquadra = 0;
+                    let riserveGiaSubentrate = new Set();
+
+                    const tutteLeRiserve = Object.values(sq.riserveSelezionate || {}).flat();
+                    const tuttiGiocatori = [...(sq.schierati || []), ...tutteLeRiserve];
+
+                    tuttiGiocatori.forEach(p => {
+                        let nomePulito = p.nome.trim().toLowerCase();
+                        let matchRow = rows.find(row => {
+                            let nomeInRow = String(row.nome || row.Nome || row.NOME || row.calciatore || row.Calciatore || row.Giocatore || "").trim().toLowerCase();
+                            return nomeInRow === nomePulito || nomeInRow.includes(nomePulito) || nomePulito.includes(nomeInRow);
+                        });
+
+                        if (matchRow) {
+                            let rawVotoPuro = parseColumnVal(matchRow, ["voto", "Voto", "VOTO"]);
+                            let rawFanta = parseColumnVal(matchRow, ["fantavoto", "Fantavoto", "FANTAVOTO"]);
+                            let haGiocato = (rawVotoPuro > 0);
+
+                            if (haGiocato) {
+                                votiObj[p.nome] = {
+                                    voto: rawVotoPuro,
+                                    fantavoto: rawFanta,
+                                    sv: false,
+                                    gf: parseColumnVal(matchRow, ["gf"]),
+                                    gs: parseColumnVal(matchRow, ["gs"]),
+                                    ass: parseColumnVal(matchRow, ["ass"]),
+                                    au: parseColumnVal(matchRow, ["au"]),
+                                    esp: parseColumnVal(matchRow, ["esp", "Esp"]),
+                                    amm: parseColumnVal(matchRow, ["amm", "Amm"]),
+                                    rp: parseColumnVal(matchRow, ["rp"]),
+                                    rs: parseColumnVal(matchRow, ["rs"]),
+                                    rf: parseColumnVal(matchRow, ["rf"])
+                                };
+                                return;
+                            }
+                        }
+                        votiObj[p.nome] = { voto: 0, fantavoto: 0, sv: true, gf:0, gs:0, ass:0, au:0, esp:0, amm:0, rp:0, rs:0, rf:0 };
+                    });
+
+                    (sq.schierati || []).forEach(tit => {
+                        let vInfo = votiObj[tit.nome];
+                        let eff = vInfo;
+                        let isSenzaVoto = false;
+
+                        if (!vInfo || vInfo.sv === true || vInfo.voto === undefined || vInfo.voto === null || vInfo.voto === 0) {
+                            isSenzaVoto = true;
+                        }
+
+                        if (isSenzaVoto) {
+                            let riserveRuolo = (sq.riserveSelezionate || {})[tit.ruolo] || [];
+                            let riservaValida = null;
+
+                            for (let ris of riserveRuolo) {
+                                if (!riserveGiaSubentrate.has(ris.nome)) {
+                                    let risInfo = votiObj[ris.nome];
+                                    let risHaVotoValido = risInfo && risInfo.sv !== true && risInfo.voto > 0;
+                                    if (risHaVotoValido) {
+                                        riservaValida = { obj: ris, info: risInfo };
+                                        riserveGiaSubentrate.add(ris.nome);
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (riservaValida) {
+                                eff = riservaValida.info;
+                            } else {
+                                eff = { voto: 0, fantavoto: 0, sv: true };
+                            }
+                        }
+                        totaleSquadra += (eff.fantavoto > 0 ? eff.fantavoto : 0);
+                    });
+
+                    sq.votiGiornata = votiObj;
+                    sq.punteggioTotale = totaleSquadra;
+                    modificato = true;
+                    squadreAggiornateTotali++;
+                }
+            });
+
+            if (modificato) {
+                await db.collection("utenti").doc(docUser.id).update({ squadre: squadreArr });
+            }
+        }
+
+        if (currentUser) {
+            await caricaDatiUtenteCloud();
+        }
+
+        mostraNotifica("Ricalcolo Completato", `✅ Ricalcolo completato con successo! Aggiornate <strong>${squadreAggiornateTotali}</strong> squadre per la Giornata ${giornata}.`, "success");
+        caricaStatisticheAdmin();
+
+    } catch (err) {
+        mostraNotifica("Errore Ricalcolo", "❌ Errore durante il ricalcolo massivo: " + err.message, "error");
+    }
+}
+
+function mostraNotifica(titolo, messaggio, tipo = 'info') {
+    const modal = document.getElementById('custom-alert-modal');
+    const box = document.getElementById('custom-alert-box');
+    const icon = document.getElementById('custom-alert-icon');
+    const titleEl = document.getElementById('custom-alert-title');
+    const msgEl = document.getElementById('custom-alert-message');
+
+    box.classList.remove('alert-type-error', 'alert-type-success', 'alert-type-warning', 'alert-type-info');
+    box.classList.add(`alert-type-${tipo}`);
+
+    if (tipo === 'error') {
+        icon.className = 'fa-solid fa-triangle-exclamation';
+    } else if (tipo === 'success') {
+        icon.className = 'fa-solid fa-circle-check';
+    } else if (tipo === 'warning') {
+        icon.className = 'fa-solid fa-circle-exclamation';
+    } else {
+        icon.className = 'fa-solid fa-circle-info';
+    }
+
+    titleEl.textContent = titolo;
+    msgEl.innerHTML = messaggio;
+    modal.style.display = 'flex';
+}
+
+function chiudiNotificaPersonalizzata() {
+    document.getElementById('custom-alert-modal').style.display = 'none';
+}
+
+// ==========================================
+// MODALE DI CONFERMA SÌ / NO PERSONALIZZATA
+// ==========================================
+
+let confirmResolver = null;
+
+function mostraConferma(titolo, messaggio, tipo = 'warning', testoSi = 'Sì', testoNo = 'No') {
+    return new Promise((resolve) => {
+        confirmResolver = resolve;
+
+        const modal = document.getElementById('custom-confirm-modal');
+        const box = document.getElementById('custom-confirm-box');
+        const icon = document.getElementById('custom-confirm-icon');
+        const titleEl = document.getElementById('custom-confirm-title');
+        const msgEl = document.getElementById('custom-confirm-message');
+        const btnYes = document.getElementById('custom-confirm-yes');
+        const btnNo = document.getElementById('custom-confirm-no');
+
+        box.classList.remove('alert-type-error', 'alert-type-success', 'alert-type-warning', 'alert-type-info');
+        box.classList.add(`alert-type-${tipo}`);
+
+        if (tipo === 'error') {
+            icon.className = 'fa-solid fa-triangle-exclamation';
+        } else if (tipo === 'success') {
+            icon.className = 'fa-solid fa-circle-check';
+        } else if (tipo === 'warning') {
+            icon.className = 'fa-solid fa-circle-question';
+        } else {
+            icon.className = 'fa-solid fa-circle-info';
+        }
+
+        titleEl.textContent = titolo;
+        msgEl.innerHTML = messaggio;
+        btnYes.innerHTML = `<i class="fa-solid fa-check"></i> ${testoSi}`;
+        btnNo.innerHTML = `<i class="fa-solid fa-xmark"></i> ${testoNo}`;
+
+        modal.style.display = 'flex';
+    });
+}
+
+function rispondiConferma(scelta) {
+    const modal = document.getElementById('custom-confirm-modal');
+    if (modal) modal.style.display = 'none';
+
+    if (typeof confirmResolver === 'function') {
+        const resolveFn = confirmResolver;
+        confirmResolver = null;
+        resolveFn(Boolean(scelta));
+    }
+}
+
+function haPanchinaCompleta() {
+    const ruoli = ["Portiere", "Difensore", "Centrocampista", "Attaccante"];
+    return ruoli.every(ruolo => Array.isArray(riserveSelezionate[ruolo]) && riserveSelezionate[ruolo].length >= 2);
 }
