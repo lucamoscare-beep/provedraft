@@ -367,6 +367,8 @@ auth.onAuthStateChanged(async (user) => {
 
         document.getElementById('user-display-name').innerText = displayUsername;
         document.getElementById('welcome-greeting').innerText = `Bentornato Mister ${displayUsername}!`;
+        const introGreetingEl = document.getElementById('welcome-intro-greeting');
+        if (introGreetingEl) introGreetingEl.innerText = `Bentornato Mister ${displayUsername}!`;
         await caricaDatiUtenteCloud();
     } else {
         currentUser = null;
@@ -505,6 +507,21 @@ function updateHomeStatusBannerState() {
         icon.className = "fa-solid fa-trophy";
         text.innerText = `Voti aggiornati per la giornata ${ultimaGiornataVoti}! Guarda i risultati delle tue squadre`;
     }
+}
+
+function vaiARegoleGuida() {
+    const targetBox = document.getElementById("guida-4-passi-box");
+    if (!targetBox) return;
+
+    targetBox.scrollIntoView({ behavior: "smooth", block: "start" });
+    targetBox.style.transition = "transform 0.3s, border-color 0.3s";
+    const prevBorder = targetBox.style.borderColor;
+    targetBox.style.borderColor = "var(--accent-blue)";
+    targetBox.style.transform = "scale(1.01)";
+    setTimeout(() => {
+        targetBox.style.transform = "scale(1)";
+        targetBox.style.borderColor = prevBorder || "";
+    }, 650);
 }
 
 function renderWelcomeScreen() {
@@ -1795,106 +1812,27 @@ function rimuoviSlotSelezionato(ruolo, targetType, indexTitolare = null) {
     renderPanchinaGrafica();
 }
 
-// ==========================================
-// MODALE SCELTA MODULO TATTICO A CARD
-// ==========================================
-
-const MODULI_DISPONIBILI = [
-    { codice: "4-4-2", desc: "4 Dif • 4 Cen • 2 Att" },
-    { codice: "4-3-3", desc: "4 Dif • 3 Cen • 3 Att" },
-    { codice: "3-4-3", desc: "3 Dif • 4 Cen • 3 Att" },
-    { codice: "4-5-1", desc: "4 Dif • 5 Cen • 1 Att" },
-    { codice: "3-5-2", desc: "3 Dif • 5 Cen • 2 Att" }
-];
-
-let pendingModuloSelezionato = "";
-
-function apriModaleSceltaModulo(moduloPredefinito = "") {
-    if (!isTestMode && !isMarketOpen()) {
-        mostraNotifica("Mercato Chiuso", "⚠️ Tempo scaduto! Impossibile impostare la formazione.", "warning");
-        return;
-    }
-
-    const modal = document.getElementById("custom-module-modal");
-    const grid = document.getElementById("custom-module-grid");
-    const titleEl = document.getElementById("custom-module-title");
-    const subtitleEl = document.getElementById("custom-module-subtitle");
-
-    if (!modal || !grid) {
-        setModulo(moduloPredefinito || "4-4-2");
-        return;
-    }
-
-    pendingModuloSelezionato = moduloPredefinito || moduloSelezionato || "4-4-2";
-    if (titleEl) {
-        titleEl.textContent = isTestMode
-            ? "Scegli il Modulo (Test Draft)"
-            : `Scegli il Modulo per ${tempNomeSquadra || "la Squadra"}`;
-    }
-    if (subtitleEl) {
-        subtitleEl.textContent = "Tocca una scheda per selezionare lo schieramento e poi conferma.";
-    }
-
-    grid.innerHTML = "";
-    MODULI_DISPONIBILI.forEach(mod => {
-        const card = document.createElement("button");
-        card.type = "button";
-        card.className = `module-option-card ${mod.codice === pendingModuloSelezionato ? "selected" : ""}`;
-        card.dataset.modulo = mod.codice;
-        card.innerHTML = `
-            <span class="module-option-code">${mod.codice}</span>
-            <span class="module-option-desc">${mod.desc}</span>
-        `;
-        card.onclick = () => {
-            pendingModuloSelezionato = mod.codice;
-            grid.querySelectorAll(".module-option-card").forEach(el => {
-                el.classList.toggle("selected", el.dataset.modulo === pendingModuloSelezionato);
-            });
-        };
-        grid.appendChild(card);
-    });
-
-    modal.style.display = "flex";
-}
-
-function annullaSceltaModulo() {
-    const modal = document.getElementById("custom-module-modal");
-    if (modal) modal.style.display = "none";
-    pendingModuloSelezionato = "";
-}
-
-function confermaSceltaModulo() {
-    if (!pendingModuloSelezionato) {
-        mostraNotifica("Modulo Mancante", "Seleziona una scheda modulo prima di confermare.", "warning");
-        return;
-    }
-    const scelto = pendingModuloSelezionato;
-    const modal = document.getElementById("custom-module-modal");
-    if (modal) modal.style.display = "none";
-    pendingModuloSelezionato = "";
-    setModulo(scelto);
-}
-
 function showModuloSelection() {
     const headerTitle = isTestMode ? `Test Draft Completato!` : `Draft Completato per ${tempNomeSquadra}!`;
-    const moduloLabel = moduloSelezionato ? `Modulo attuale: <strong>${moduloSelezionato}</strong>` : "Nessun modulo ancora selezionato";
-
+    
     document.getElementById("draft-panel").innerHTML = `
         <h3 style="text-align:center;">${headerTitle}</h3>
-        <p id="modulo-attuale-label" style="text-align:center; font-size:12px; color: var(--accent-gold); font-weight: 700; margin-bottom: 12px;">
-            ${moduloLabel}
-        </p>
-        <div style="text-align:center;">
-            <button type="button" onclick="apriModaleSceltaModulo(moduloSelezionato || '4-4-2')" class="btn-action-primary" style="max-width: 280px; width: 100%;">
-                <i class="fa-solid fa-chess-board"></i> ${moduloSelezionato ? "Cambia Modulo Tattico" : "Scegli Modulo Tattico"}
-            </button>
+        <p style="text-align:center; font-size:12px; color:var(--text-muted); margin-bottom:10px;">Scegli il modulo tattico per schierare la formazione:</p>
+        <div class="modulo-selector-box">
+            <select id="modulo" onchange="setModulo()" class="styled-select">
+                <option value="">-- Seleziona Modulo --</option>
+                <option value="4-4-2">4-4-2</option>
+                <option value="4-3-3">4-3-3</option>
+                <option value="3-4-3">3-4-3</option>
+                <option value="4-5-1">4-5-1</option>
+                <option value="3-5-2">3-5-2</option>
+            </select>
         </div>
         <div style="text-align:center; margin-top:12px;">
-            <button type="button" onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-trash-can"></i> Scarta Rosa e Ricomincia</button>
+            <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-trash-can"></i> Scarta Rosa e Ricomincia</button>
         </div>
     `;
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    apriModaleSceltaModulo(moduloSelezionato || "4-4-2");
 }
 
 function setModulo(nuovoModulo) {
@@ -1909,11 +1847,6 @@ function setModulo(nuovoModulo) {
 
     moduloSelezionato = valoreScelto;
     if (selectEl) selectEl.value = moduloSelezionato;
-
-    const labelEl = document.getElementById("modulo-attuale-label");
-    if (labelEl) {
-        labelEl.innerHTML = `Modulo selezionato: <strong>${moduloSelezionato}</strong>`;
-    }
 
     schierati = [];
     riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };

@@ -247,6 +247,19 @@
 
 <!-- LANDING PAGE -->
 <div id="welcome-screen">
+    <!-- 0. BOX IN ALTO SOPRA IL COUNTDOWN -->
+    <div id="welcome-intro-banner" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95)); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 14px; padding: 14px 16px; margin-bottom: 14px; color: #e2e8f0; font-size: 13px; line-height: 1.55;">
+        <div id="welcome-intro-greeting" style="font-weight: 800; color: var(--accent-gold); font-size: 15px; margin-bottom: 4px;">
+            Bentornato Mister Footable_ok!
+        </div>
+        <div>
+            Come funziona in 4 passi: scegli un nome e avvia il Draft (24 scelte da 5 opzioni per formare una rosa di 3 portieri, 7 difensori, 8 centrocampisti e 6 attaccanti), poi imposta modulo, 11 titolari e 8 riserve prima dell'inizio della giornata.
+            <button type="button" id="scopri-di-piu-link" onclick="vaiARegoleGuida()" style="background: none; border: none; padding: 0 0 0 4px; color: var(--accent-blue); font-weight: 800; font-size: 13px; cursor: pointer; text-decoration: underline;">
+                Scopri di più
+            </button>
+        </div>
+    </div>
+
     <!-- 1. COUNTDOWN SCADENZA GIORNATA -->
     <div class="deadline-banner">
         <div class="deadline-info">
@@ -349,7 +362,7 @@
     </div>
 
     <!-- 6. CARD REGOLE E DESCRIZIONE GENERALE -->
-    <div class="welcome-card">
+    <div class="welcome-card" id="guida-4-passi-box">
         <div class="welcome-title" id="welcome-greeting">Benvenuto nel Fantacalcio Draft!</div>
         <p style="color:var(--text-muted); font-size:13px; line-height:1.6; margin-bottom:15px;">
             <strong>Come funziona in 4 passi:</strong> scegli un nome e avvia il Draft (24 scelte da 5 opzioni per formare una rosa di 3 portieri, 7 difensori, 8 centrocampisti e 6 attaccanti), poi imposta modulo, 11 titolari e 8 riserve prima dell'inizio della giornata.
