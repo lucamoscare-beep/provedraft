@@ -125,7 +125,8 @@ async function inizializzaGiornataEDeadlineDinamica() {
         }
     }
 
-    ACTIVE_MATCHDAY = trovata;
+
+ACTIVE_MATCHDAY = trovata;
     const fallbackInfo = CALENDARIO_FALLBACK[ACTIVE_MATCHDAY] || CALENDARIO_FALLBACK[13];
     CURRENT_MATCHDAY_START = fallbackInfo.inizio;
     CURRENT_MATCHDAY_END = fallbackInfo.fine;
@@ -366,9 +367,10 @@ auth.onAuthStateChanged(async (user) => {
         } catch(e) {}
 
         document.getElementById('user-display-name').innerText = displayUsername;
-        document.getElementById('welcome-greeting').innerText = `Bentornato Mister ${displayUsername}!`;
         const introGreetingEl = document.getElementById('welcome-intro-greeting');
-        if (introGreetingEl) introGreetingEl.innerText = `Bentornato Mister ${displayUsername}!`;
+        if (introGreetingEl) {
+            introGreetingEl.innerHTML = `<i class="fa-solid fa-crown"></i><span>Bentornato Mister ${displayUsername}!</span>`;
+        }
         await caricaDatiUtenteCloud();
     } else {
         currentUser = null;
@@ -2241,7 +2243,7 @@ function mostraTabellinoVoti(sq) {
         }
 
         if (isSenzaVoto) {
-            let riserveRuolo = (sq.riserveSelezionate && sq.riserveSelezionate[tit.ruolo]) || [];
+            let riserveRuolo = (sq.riserveSelezionate || {})[tit.ruolo] || [];
             let riservaValida = null;
 
             for (let ris of riserveRuolo) {
