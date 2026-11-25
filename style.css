@@ -2600,3 +2600,102 @@ h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
         grid-template-columns: 1fr;
     }
 }
+
+/* ==========================================
+   BOX SCELTA MODULO TATTICO
+   ========================================== */
+.modulo-selection-card {
+    background: linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.92));
+    border: 1.5px solid rgba(56, 189, 248, 0.35);
+    border-radius: 16px;
+    padding: 18px 16px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+}
+
+.modulo-selection-header {
+    text-align: center;
+    margin-bottom: 14px;
+}
+
+.modulo-selection-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(56, 189, 248, 0.14);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    color: var(--accent-blue);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 8px;
+}
+
+.modulo-selection-header h3 {
+    margin: 0 0 4px 0;
+    font-size: 17px;
+    font-weight: 900;
+    color: #fff;
+}
+
+.modulo-selection-header p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.modulo-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
+    gap: 10px;
+}
+
+.modulo-card-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 12px 8px;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.modulo-card-btn:hover {
+    border-color: var(--accent-blue);
+    background: rgba(56, 189, 248, 0.12);
+    transform: translateY(-2px);
+}
+
+.modulo-card-btn.active {
+    border-color: var(--accent-neon-green);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.22), rgba(15, 23, 42, 0.95));
+    box-shadow: 0 0 16px rgba(16, 185, 129, 0.28);
+}
+
+.modulo-card-code {
+    font-size: 18px;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: 0.5px;
+}
+
+.modulo-card-btn.active .modulo-card-code {
+    color: var(--accent-neon-green);
+}
+
+.modulo-card-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent-gold);
+}
+
+.modulo-card-desc {
+    font-size: 10px;
+    color: var(--text-muted);
+}

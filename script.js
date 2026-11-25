@@ -1816,22 +1816,35 @@ function rimuoviSlotSelezionato(ruolo, targetType, indexTitolare = null) {
 
 function showModuloSelection() {
     const headerTitle = isTestMode ? `Test Draft Completato!` : `Draft Completato per ${tempNomeSquadra}!`;
-    
+    const moduliDisponibili = [
+        { codice: "4-4-2", label: "Equilibrato", desc: "4 Dif • 4 Cen • 2 Att" },
+        { codice: "4-3-3", label: "Offensivo", desc: "4 Dif • 3 Cen • 3 Att" },
+        { codice: "3-4-3", label: "Trazione Anteriore", desc: "3 Dif • 4 Cen • 3 Att" },
+        { codice: "4-5-1", label: "Copertura", desc: "4 Dif • 5 Cen • 1 Att" },
+        { codice: "3-5-2", label: "Centrocampo Folto", desc: "3 Dif • 5 Cen • 2 Att" }
+    ];
+
+    const cardsHtml = moduliDisponibili.map(m => `
+        <button type="button" class="modulo-card-btn ${moduloSelezionato === m.codice ? 'active' : ''}" data-modulo="${m.codice}" onclick="setModulo('${m.codice}')">
+            <span class="modulo-card-code">${m.codice}</span>
+            <span class="modulo-card-label">${m.label}</span>
+            <span class="modulo-card-desc">${m.desc}</span>
+        </button>
+    `).join("");
+
     document.getElementById("draft-panel").innerHTML = `
-        <h3 style="text-align:center;">${headerTitle}</h3>
-        <p style="text-align:center; font-size:12px; color:var(--text-muted); margin-bottom:10px;">Scegli il modulo tattico per schierare la formazione:</p>
-        <div class="modulo-selector-box">
-            <select id="modulo" onchange="setModulo()" class="styled-select">
-                <option value="">-- Seleziona Modulo --</option>
-                <option value="4-4-2">4-4-2</option>
-                <option value="4-3-3">4-3-3</option>
-                <option value="3-4-3">3-4-3</option>
-                <option value="4-5-1">4-5-1</option>
-                <option value="3-5-2">3-5-2</option>
-            </select>
-        </div>
-        <div style="text-align:center; margin-top:12px;">
-            <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-trash-can"></i> Scarta Rosa e Ricomincia</button>
+        <div class="modulo-selection-card">
+            <div class="modulo-selection-header">
+                <div class="modulo-selection-badge"><i class="fa-solid fa-chess-board"></i> SCELTA TATTICA</div>
+                <h3>${headerTitle}</h3>
+                <p>Seleziona il modulo tattico per schierare titolari e riserve:</p>
+            </div>
+            <div class="modulo-cards-grid">
+                ${cardsHtml}
+            </div>
+            <div style="text-align:center; margin-top:14px;">
+                <button onclick="annullaERicominciaDraft()" class="btn-action-danger"><i class="fa-solid fa-trash-can"></i> Scarta Rosa e Ricomincia</button>
+            </div>
         </div>
     `;
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1849,6 +1862,10 @@ function setModulo(nuovoModulo) {
 
     moduloSelezionato = valoreScelto;
     if (selectEl) selectEl.value = moduloSelezionato;
+
+    document.querySelectorAll(".modulo-card-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.modulo === moduloSelezionato);
+    });
 
     schierati = [];
     riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
