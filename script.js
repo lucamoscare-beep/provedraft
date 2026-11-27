@@ -529,21 +529,30 @@ function updateHomeStatusBannerState() {
 }
 
 function vaiARegoleGuida() {
-    const targetBox = document.getElementById("guida-4-passi-box");
-    if (!targetBox) return;
+    const boxino = document.getElementById("istruzioni-4-passi-boxino");
+    if (!boxino) return;
 
-    targetBox.scrollIntoView({ behavior: "smooth", block: "start" });
-    targetBox.style.transition = "transform 0.3s, border-color 0.3s";
-    const prevBorder = targetBox.style.borderColor;
-    targetBox.style.borderColor = "var(--accent-blue)";
-    targetBox.style.transform = "scale(1.01)";
+    boxino.style.display = "block";
+    boxino.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    boxino.style.transition = "transform 0.3s, border-color 0.3s";
+    const prevBorder = boxino.style.borderColor;
+    boxino.style.borderColor = "var(--accent-blue)";
+    boxino.style.transform = "scale(1.01)";
     setTimeout(() => {
-        targetBox.style.transform = "scale(1)";
-        targetBox.style.borderColor = prevBorder || "";
+        boxino.style.transform = "scale(1)";
+        boxino.style.borderColor = prevBorder || "";
     }, 650);
 }
 
+function chiudiRegoleGuida() {
+    const boxino = document.getElementById("istruzioni-4-passi-boxino");
+    if (boxino) {
+        boxino.style.display = "none";
+    }
+}
+
 function renderWelcomeScreen() {
+    chiudiRegoleGuida();
     document.getElementById("welcome-screen").style.display = "block";
     document.getElementById("main-app").style.display = "none";
     document.getElementById("recap-screen").style.display = "none";

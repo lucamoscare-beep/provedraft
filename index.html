@@ -255,9 +255,9 @@
         </div>
         <div>
             Come funziona in 4 passi: scegli un nome e avvia il Draft (24 scelte da 5 opzioni per formare una rosa di 3 portieri, 7 difensori, 8 centrocampisti e 6 attaccanti), poi imposta modulo, 11 titolari e 8 riserve prima dell'inizio della giornata.
-            <button type="button" id="scopri-di-piu-link" onclick="vaiARegoleGuida()" style="background: none; border: none; padding: 0 0 0 4px; color: var(--accent-blue); font-weight: 800; font-size: 13px; cursor: pointer; text-decoration: underline;">
-                Scopri di più
-            </button>
+            <button type="button" id="scopri-di-piu-link" class="scopri-di-piu-btn" onclick="vaiARegoleGuida()">
+    <i class="fa-solid fa-circle-info"></i> Istruzioni di gioco
+</button>
         </div>
     </div>
 
@@ -363,31 +363,37 @@
     </div>
 
     <!-- 6. ISTRUZIONI DI GIOCO -->
-    <div class="welcome-card" id="guida-4-passi-box">
-        <div class="welcome-title" id="welcome-greeting">Istruzioni di gioco</div>
+    <div id="istruzioni-4-passi-boxino" class="istruzioni-boxino" style="display: none;">
+    <div class="istruzioni-boxino-header">
+        <span><i class="fa-solid fa-book-open"></i> Istruzioni di gioco</span>
+        <button type="button" class="istruzioni-boxino-close" onclick="chiudiRegoleGuida()" title="Chiudi istruzioni">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
 
-        <div class="rules-grid">
-            <div class="rule-box">
-                <i class="fa-solid fa-coins"></i>
-                <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">1. 3 Gettoni ogni Giornata</h4>
-                <p style="color:var(--text-muted); font-size:12px; margin:0; line-height:1.45;">Hai fino a <strong>3 gettoni</strong> per ogni giornata: ogni squadra salvata consuma 1 gettone e partecipa alla sfida del turno.</p>
-            </div>
-            <div class="rule-box">
-                <i class="fa-solid fa-rotate"></i>
-                <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">2. Draft Ripetibili e Modifiche</h4>
-                <p style="color:var(--text-muted); font-size:12px; margin:0; line-height:1.45;">Finché non confermi la rosa puoi rifare il Draft tutte le volte che vuoi; dopo il salvataggio, finché il mercato è aperto, puoi cambiare modulo, titolari e panchina.</p>
-            </div>
-            <div class="rule-box">
-                <i class="fa-solid fa-sack-dollar"></i>
-                <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">3. 800 Crediti di Budget</h4>
-                <p style="color:var(--text-muted); font-size:12px; margin:0; line-height:1.45;">Parti con <strong>800 crediti</strong> per completare i 24 acquisti rispettando i limiti per ruolo. Gestisci bene i crediti: ti servono anche in classifica.</p>
-            </div>
-            <div class="rule-box">
-                <i class="fa-solid fa-ranking-star"></i>
-                <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">4. Classifica e Crediti Residui</h4>
-                <p style="color:var(--text-muted); font-size:12px; margin:0; line-height:1.45;">Ogni giornata ha una classifica dedicata basata sui punti ottenuti; a parità di punteggio vince chi ha più <strong>crediti residui</strong>.</p>
-            </div>
+    <div class="rules-grid">
+        <div class="rule-box">
+            <i class="fa-solid fa-coins"></i>
+            <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">1. 3 Gettoni ogni Giornata</h4>
+            <p style="color:var(--text-muted); font-size:12px; margin:0; line-height:1.45;">Hai fino a <strong>3 gettoni</strong> per ogni giornata: ogni squadra salvata consuma 1 gettone e partecipa alla sfida del turno.</p>
         </div>
+        <div class="rule-box">
+            <i class="fa-solid fa-rotate"></i>
+            <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">2. Draft Ripetibili e Modifiche</h4>
+            <p style="color:var(--text-muted); font-size:12px; margin:0; line-height:1.45;">Finché non confermi la rosa puoi rifare il Draft tutte le volte che vuoi; dopo il salvataggio, finché il mercato è aperto, puoi cambiare modulo, titolari e panchina.</p>
+        </div>
+        <div class="rule-box">
+            <i class="fa-solid fa-sack-dollar"></i>
+            <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">3. 800 Crediti di Budget</h4>
+            <p style="color:var(--text-muted); font-size:12px; margin:0; line-height:1.45;">Parti con <strong>800 crediti</strong> per completare i 24 acquisti rispettando i limiti per ruolo. Gestisci bene i crediti: ti servono anche in classifica.</p>
+        </div>
+        <div class="rule-box">
+            <i class="fa-solid fa-ranking-star"></i>
+            <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">4. Classifica e Crediti Residui</h4>
+            <p style="color:var(--text-muted); font-size:12px; margin:0; line-height:1.45;">Ogni giornata ha una classifica dedicata basata sui punti ottenuti; a parità di punteggio vince chi ha più <strong>crediti residui</strong>.</p>
+        </div>
+    </div>
+</div>
 
         <div style="margin-top:25px;">
             <h3 style="font-size:15px; color:#fff; border-bottom:1px solid var(--card-border); padding-bottom:6px;" id="user-created-teams-title">Le tue Squadre iscritte alla giornata di campionato in corso</h3>
