@@ -14,36 +14,100 @@ if (!firebase.apps.length) {
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// ----------------------------------------------------
-// CALENDARIO MANUALE DI RIFERIMENTO (SENZA API ESTERNE)
-// ----------------------------------------------------
-const CALENDARIO_FALLBACK = {
-    8: { inizio: new Date("2026-10-20T18:30:00"), fine: new Date("2026-10-22T23:00:00") },
-    9: { inizio: new Date("2026-10-27T18:30:00"), fine: new Date("2026-10-29T23:00:00") },
-    10: { inizio: new Date("2026-10-31T15:30:00"), fine: new Date("2026-11-02T23:00:00") },
-    11: { inizio: new Date("2026-11-06T20:45:00"), fine: new Date("2026-11-08T23:00:00") },
-    12: { inizio: new Date("2026-11-21T15:00:00"), fine: new Date("2026-11-23T23:00:00") },
-    13: { inizio: new Date("2026-11-27T20:45:00"), fine: new Date("2026-11-30T23:00:00") },
-    14: { inizio: new Date("2026-12-04T20:45:00"), fine: new Date("2026-12-07T23:00:00") },
-    15: { inizio: new Date("2026-12-11T12:45:00"), fine: new Date("2026-12-14T23:00:00") },
-    16: { inizio: new Date("2026-12-18T18:30:00"), fine: new Date("2026-12-20T23:00:00") }
+
+// =========================================================
+// CONFIGURAZIONE DINAMICA GIORNATE E DEADLINE (SCADENZE)
+// =========================================================
+const MATCHDAY_DEADLINES = {
+    8: new Date("2025-10-26T12:29:00+01:00").getTime(),
+    9: new Date("2025-10-29T18:29:00+01:00").getTime(),
+    10: new Date("2025-11-01T14:59:00+01:00").getTime(),
+    11: new Date("2025-11-07T20:44:00+01:00").getTime(),
+    12: new Date("2025-11-22T14:59:00+01:00").getTime(),
+    13: new Date("2025-11-28T20:44:00+01:00").getTime(),
+    14: new Date("2025-12-05T20:44:00+01:00").getTime(),
+    15: new Date("2025-12-12T20:44:00+01:00").getTime(),
+    16: new Date("2025-12-20T14:59:00+01:00").getTime(),
+    17: new Date("2025-12-27T12:29:00+01:00").getTime(),
+    18: new Date("2026-01-03T12:29:00+01:00").getTime(),
+    19: new Date("2026-01-06T14:59:00+01:00").getTime(),
+    20: new Date("2026-01-10T14:59:00+01:00").getTime(),
+    21: new Date("2026-01-16T20:44:00+01:00").getTime(),
+    22: new Date("2026-01-23T20:44:00+01:00").getTime(),
+    23: new Date("2026-01-30T20:44:00+01:00").getTime(),
+    24: new Date("2026-02-06T20:44:00+01:00").getTime(),
+    25: new Date("2026-02-13T20:44:00+01:00").getTime(),
+    26: new Date("2026-02-20T20:44:00+01:00").getTime(),
+    27: new Date("2026-02-27T20:44:00+01:00").getTime(),
+    28: new Date("2026-03-06T20:44:00+01:00").getTime(),
+    29: new Date("2026-03-13T20:44:00+01:00").getTime(),
+    30: new Date("2026-03-20T20:44:00+01:00").getTime(),
+    31: new Date("2026-04-04T14:59:00+01:00").getTime(),
+    32: new Date("2026-04-11T14:59:00+01:00").getTime(),
+    33: new Date("2026-04-18T14:59:00+01:00").getTime(),
+    34: new Date("2026-04-25T14:59:00+01:00").getTime(),
+    35: new Date("2026-05-02T14:59:00+01:00").getTime(),
+    36: new Date("2026-05-09T14:59:00+01:00").getTime(),
+    37: new Date("2026-05-16T14:59:00+01:00").getTime(),
+    38: new Date("2026-05-23T14:59:00+01:00").getTime()
 };
 
-let ACTIVE_MATCHDAY = 13;
-let CURRENT_MATCHDAY_START = null;
-let CURRENT_MATCHDAY_END = null;
+function getCurrentActiveMatchday() {
+    const now = Date.now();
+    const matchdays = Object.keys(MATCHDAY_DEADLINES).map(Number).sort((a, b) => a - b);
 
-let currentUser = null;
+    for (let g of matchdays) {
+        if (now < MATCHDAY_DEADLINES[g]) {
+            return g;
+        }
+    }
+    return matchdays[matchdays.length - 1] || 8;
+}
+
+function getDeadlineForMatchday(matchday) {
+    return MATCHDAY_DEADLINES[matchday] || MATCHDAY_DEADLINES[8];
+}
+
+function getUltimaGiornataConVoti() {
+    const active = getCurrentActiveMatchday();
+    return active > 1 ? active - 1 : 1;
+}
+
+// Variabili globali di gioco
+let ACTIVE_MATCHDAY = getCurrentActiveMatchday();
+let DEADLINE_TIMESTAMP = getDeadlineForMatchday(ACTIVE_MATCHDAY);
+
+let budget = 800;
+let turno = 0;
+let moduloSelezionato = "";
+const limits = { Portiere: 3, Difensore: 8, Centrocampista: 8, Attaccante: 6 };
+let rosa = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
+let schierati = [];
+let riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
 let customPlayersList = [];
 let availablePlayers = [];
-let budget = 800;
+
+// Variabili di stato Utente & Squadre
+let currentUser = null;
+let userSquadre = [];
+let currentSelectedMatchday = ACTIVE_MATCHDAY;
+let isTestMode = false;
+let tempNomeSquadra = "";
+
+// Variabile per tracciare se l'utente sta visualizzando il proprio profilo
 let isViewingOwnProfile = false;
 
-const limits = { Portiere: 3, Difensore: 7, Centrocampista: 8, Attaccante: 6 };
+// Variabili per tracciare la squadra visualizzata nel recap e la sua posizione
+let currentRecapSquadraObj = null;
+let currentRecapSquadraIndex = -1;
+
+// Variabile globale per verificare la disponibilità dei voti ok
+let isVotiOkAvailable = false;
+
 const roleIcons = {
-    Portiere: "fa-solid fa-hand",
-    Difensore: "fa-solid fa-shield-halved",
-    Centrocampista: "fa-solid fa-person-running",
+    Portiere: "fa-solid fa-hands",
+    Difensore: "fa-solid fa-shield",
+    Centrocampista: "fa-solid fa-bolt",
     Attaccante: "fa-solid fa-futbol"
 };
 
@@ -54,54 +118,54 @@ const roleColors = {
     Attaccante: "var(--role-att)"
 };
 
-let userSquadre = [];
-let activeTeamIndex = -1;
-let isVotiOkAvailable = false;
-let currentSelectedMatchday = ACTIVE_MATCHDAY;
+// =========================================================
+// FUNZIONE UNIFICATA PER ESTRARRE IL VERO USERNAME
+// =========================================================
+function getRealUsername(uData, authUser) {
+    if (uData && uData.username && uData.username.trim() !== "") {
+        return uData.username.trim();
+    }
+    if (authUser && authUser.displayName && authUser.displayName.trim() !== "") {
+        return authUser.displayName.trim();
+    }
+    if (authUser && authUser.email) {
+        return authUser.email.split("@")[0];
+    }
+    return "Fantallenatore";
+}
 
-let currentRecapSquadraObj = null;
-let currentRecapSquadraIndex = -1;
+// =========================================================
+// SISTEMA MARQUEE DINAMICO CONTINUO PER TESTI TRONCATI
+// =========================================================
+function initMarqueeElements() {
+    const containers = document.querySelectorAll('.marquee-container');
+    containers.forEach(container => {
+        const textSpan = container.querySelector('.marquee-text');
+        if (!textSpan) return;
 
-let tempNomeSquadra = "";
-let isTestMode = false;
-let rosa = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
-let schierati = [];
-let riserveSelezionate = { Portiere: [], Difensore: [], Centrocampista: [], Attaccante: [] };
+        textSpan.classList.remove('scroll-active');
+        textSpan.style.removeProperty('--scroll-distance');
+        textSpan.style.removeProperty('--scroll-duration');
 
-let turno = 0;
-let moduloSelezionato = "";
-
-// Funzione di utilità per attivare il marquee solo se il testo è più lungo del contenitore
-function initMarquee(el, isInline = false) {
-    if (!el) return;
-    el.classList.add('marquee-container');
-    if (isInline) el.classList.add('inline');
-
-    const textEl = el.querySelector('.marquee-text');
-    if (!textEl) return;
-
-    textEl.classList.remove('scroll-active');
-
-    requestAnimationFrame(() => {
-        const containerWidth = el.clientWidth;
-        const textWidth = textEl.scrollWidth;
+        const containerWidth = container.clientWidth;
+        const textWidth = textSpan.scrollWidth;
 
         if (textWidth > containerWidth && containerWidth > 0) {
-            const distance = containerWidth - textWidth - 5;
-            textEl.style.setProperty('--scroll-distance', `${distance}px`);
-            const duration = Math.max(3, Math.abs(distance) * 0.04);
-            textEl.style.setProperty('--scroll-duration', `${duration}s`);
-            textEl.classList.add('scroll-active');
-        } else {
-            textEl.style.removeProperty('--scroll-distance');
+            const overflow = textWidth - containerWidth;
+            const distance = -(overflow + 12);
+            const duration = Math.max(3, Math.min(8, overflow / 20));
+
+            textSpan.style.setProperty('--scroll-distance', `${distance}px`);
+            textSpan.style.setProperty('--scroll-duration', `${duration}s`);
+            textSpan.classList.add('scroll-active');
         }
     });
 }
 
 function refreshAllMarquees() {
-    document.querySelectorAll('.marquee-container').forEach(el => {
-        const isInline = el.classList.contains('inline');
-        initMarquee(el, isInline);
+    requestAnimationFrame(() => {
+        initMarqueeElements();
+        setTimeout(initMarqueeElements, 150);
     });
 }
 
@@ -109,447 +173,333 @@ window.addEventListener('resize', () => {
     refreshAllMarquees();
 });
 
-async function inizializzaGiornataEDeadlineDinamica() {
-    localStorage.removeItem("draft_seriea_matchday_info");
-    localStorage.removeItem("draft_seriea_matchday_time");
+// =========================================================
+// GESTIONE AUTENTICAZIONE LANDING E-SPORT
+// =========================================================
+function switchAuthTab(tabName) {
+    const loginTab = document.getElementById("tab-login");
+    const registerTab = document.getElementById("tab-register");
+    const loginForm = document.getElementById("login-form");
+    const registerForm = document.getElementById("register-form");
 
-    const adesso = new Date();
-    const giornateOrdinate = Object.keys(CALENDARIO_FALLBACK)
-        .map(n => parseInt(n, 10))
-        .sort((a, b) => a - b);
-
-    let trovata = giornateOrdinate[giornateOrdinate.length - 1] || 13;
-    for (const giornata of giornateOrdinate) {
-        const info = CALENDARIO_FALLBACK[giornata];
-        if (adesso <= info.fine) {
-            trovata = giornata;
-            break;
-        }
+    if (tabName === "login") {
+        loginTab.classList.add("active");
+        registerTab.classList.remove("active");
+        loginForm.style.display = "block";
+        registerForm.style.display = "none";
+    } else {
+        registerTab.classList.add("active");
+        loginTab.classList.remove("active");
+        registerForm.style.display = "block";
+        loginForm.style.display = "none";
     }
-
-    ACTIVE_MATCHDAY = trovata;
-    const fallbackInfo = CALENDARIO_FALLBACK[ACTIVE_MATCHDAY] || CALENDARIO_FALLBACK[13];
-    CURRENT_MATCHDAY_START = fallbackInfo.inizio;
-    CURRENT_MATCHDAY_END = fallbackInfo.fine;
-    currentSelectedMatchday = getUltimaGiornataConVoti();
 }
 
-function getUltimaGiornataConVoti() {
-    return Math.max(1, ACTIVE_MATCHDAY - 1);
-}
-
-function getRealUsername(uData, defaultAuthUser) {
-    if (uData && uData.username && uData.username.trim() !== "") {
-        return uData.username.trim();
-    }
-    if (uData && uData.displayName && uData.displayName.trim() !== "") {
-        return uData.displayName.trim();
-    }
-    if (uData && (uData.nome || uData.cognome)) {
-        const nomeCompleto = `${uData.nome || ''} ${uData.cognome || ''}`.trim();
-        if (nomeCompleto !== "") return nomeCompleto;
-    }
-    if (uData && uData.email && uData.email.includes('@')) {
-        return uData.email.split('@')[0];
-    }
-    if (defaultAuthUser) {
-        if (defaultAuthUser.displayName && defaultAuthUser.displayName.trim() !== "") {
-            return defaultAuthUser.displayName.trim();
-        }
-        if (defaultAuthUser.email && defaultAuthUser.email.includes('@')) {
-            return defaultAuthUser.email.split('@')[0];
-        }
-    }
-    return "Utente";
-}
-
-function isMarketOpen() {
-    if (isTestMode) return true;
-    const adesso = new Date();
-    if (!CURRENT_MATCHDAY_START || !CURRENT_MATCHDAY_END) return true;
-
-    if (adesso >= CURRENT_MATCHDAY_START && adesso <= CURRENT_MATCHDAY_END) {
-        return false;
-    }
-
-    if (adesso > CURRENT_MATCHDAY_END) {
-        inizializzaGiornataEDeadlineDinamica();
-        return true;
-    }
-
-    return true;
-}
-
-function isMarketOpenForMatchday(giornata) {
-    if (isTestMode) return true;
-
-    if (giornata < ACTIVE_MATCHDAY) {
-        return false;
-    }
-
-    if (giornata === ACTIVE_MATCHDAY) {
-        return isMarketOpen();
-    }
-
-    return true;
-}
-
-function initCountdown() {
-    function updateTimer() {
-        const now = new Date();
-        if (!CURRENT_MATCHDAY_START || !CURRENT_MATCHDAY_END) return;
-
-        const adesso = new Date();
-
-        if (adesso >= CURRENT_MATCHDAY_START && adesso <= CURRENT_MATCHDAY_END) {
-            document.querySelectorAll(".countdown-timer").forEach(el => el.innerHTML = `<span style='color:var(--accent-red); font-size:15px; font-weight:900;'>🔒 G${ACTIVE_MATCHDAY} IN CORSO (BLOCCATO)</span>`);
-            const textEl = document.getElementById("welcome-deadline-text");
-            if (textEl) textEl.innerText = `Le partite della giornata ${ACTIVE_MATCHDAY} sono in corso. Il mercato riaprirà al termine dell'ultimo match.`;
-            return;
-        }
-
-        if (adesso > CURRENT_MATCHDAY_END) {
-            inizializzaGiornataEDeadlineDinamica();
-            return;
-        }
-
-        const diff = CURRENT_MATCHDAY_START - now;
-        if (diff <= 0) {
-            inizializzaGiornataEDeadlineDinamica();
-            return;
-        }
-
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const secs = Math.floor((diff % (1000 * 60)) / 1000);
-
-        ["w-cd-days"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(days).padStart(2, '0'); });
-        ["w-cd-hours"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(hours).padStart(2, '0'); });
-        ["w-cd-mins"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(mins).padStart(2, '0'); });
-        ["w-cd-secs"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(secs).padStart(2, '0'); });
-
-        ["recap-cd-days"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(days).padStart(2, '0'); });
-        ["recap-cd-hours"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(hours).padStart(2, '0'); });
-        ["recap-cd-mins"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(mins).padStart(2, '0'); });
-        ["recap-cd-secs"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = String(secs).padStart(2, '0'); });
-
-        const textEl = document.getElementById("welcome-deadline-text");
-        if (textEl) textEl.innerText = `Iscrivi le tue squadre alla giornata ${ACTIVE_MATCHDAY} entro l'inizio della prima partita:`;
-    }
-
-    updateTimer();
-    setInterval(updateTimer, 1000);
-}
-
-document.addEventListener("DOMContentLoaded", async () => {
-    await inizializzaGiornataEDeadlineDinamica();
-    initCountdown();
-    await caricaGiocatoriDaExcel();
-    await verificaDisponibilitaVotiOk();
-    await verificaECalcolaVotiAutomaticamente();
-});
-
-function togglePasswordVisibility(inputId, iconElement) {
+function togglePasswordVisibility(inputId, iconEl) {
     const input = document.getElementById(inputId);
+    if (!input) return;
     if (input.type === "password") {
         input.type = "text";
-        iconElement.classList.remove("fa-eye");
-        iconElement.classList.add("fa-eye-slash");
+        iconEl.classList.remove("fa-eye");
+        iconEl.classList.add("fa-eye-slash");
     } else {
         input.type = "password";
-        iconElement.classList.remove("fa-eye-slash");
-        iconElement.classList.add("fa-eye");
+        iconEl.classList.remove("fa-eye-slash");
+        iconEl.classList.add("fa-eye");
     }
 }
 
-function switchAuthTab(tab) {
-    const loginForm = document.getElementById('login-form');
-    const regForm = document.getElementById('register-form');
-    const forgotForm = document.getElementById('forgot-form');
-    const tabsHeader = document.getElementById('auth-tabs-header');
-
-    loginForm.style.display = 'none';
-    regForm.style.display = 'none';
-    forgotForm.style.display = 'none';
-
-    document.getElementById('tab-login-btn').className = '';
-    document.getElementById('tab-register-btn').className = '';
-
-    if (tab === 'login') {
-        loginForm.style.display = 'block';
-        document.getElementById('tab-login-btn').className = 'active';
-        tabsHeader.style.display = 'flex';
-    } else if (tab === 'register') {
-        regForm.style.display = 'block';
-        document.getElementById('tab-register-btn').className = 'active';
-        tabsHeader.style.display = 'flex';
-    } else if (tab === 'forgot') {
-        forgotForm.style.display = 'block';
-        tabsHeader.style.display = 'none';
+function resetPasswordPrompt() {
+    const emailInput = document.getElementById("login-email");
+    const email = emailInput ? emailInput.value.trim() : "";
+    if (!email) {
+        mostraNotifica("Email Mancante", "Inserisci il tuo indirizzo email nel campo Email per ricevere il link di recupero password.", "warning");
+        return;
     }
+
+    auth.sendPasswordResetEmail(email)
+        .then(() => {
+            mostraNotifica("Email Inviata", `📧 Link per reimpostare la password inviato a <strong>${email}</strong>.`, "success");
+        })
+        .catch((error) => {
+            mostraNotifica("Errore Recupero Password", error.message, "error");
+        });
 }
 
-async function handleForgotPassword(e) {
-    e.preventDefault();
-    const email = document.getElementById('forgot-email').value.trim();
-    try {
-        await auth.sendPasswordResetEmail(email);
-        mostraNotifica("Email Inviata", "✉️ Email di ripristino inviata! Controlla la tua casella di posta.", "success");
-        switchAuthTab('login');
-    } catch (err) {
-        mostraNotifica("Errore Invio", "❌ Errore durante l'invio dell'email: " + err.message, "error");
+document.addEventListener("DOMContentLoaded", () => {
+    const loginForm = document.getElementById("login-form");
+    const registerForm = document.getElementById("register-form");
+
+    if (loginForm) {
+        loginForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const email = document.getElementById("login-email").value.trim();
+            const password = document.getElementById("login-password").value;
+
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+            } catch (error) {
+                mostraNotifica("Accesso Fallito", "Credenziali non valide o errore durante l'accesso: " + error.message, "error");
+            }
+        });
     }
-}
 
-async function handleRegister(e) {
-    e.preventDefault();
-    const username = document.getElementById('reg-username').value.trim();
-    const nome = document.getElementById('reg-nome').value.trim();
-    const cognome = document.getElementById('reg-cognome').value.trim();
-    const email = document.getElementById('reg-email').value.trim();
-    const password = document.getElementById('reg-password').value;
+    if (registerForm) {
+        registerForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const username = document.getElementById("reg-username").value.trim();
+            const email = document.getElementById("reg-email").value.trim();
+            const password = document.getElementById("reg-password").value;
 
-    try {
-        const res = await auth.createUserWithEmailAndPassword(email, password);
-        try {
-            await res.user.updateProfile({ displayName: username });
-        } catch (profileErr) {}
+            if (!username || username.length < 2) {
+                mostraNotifica("Username Non Valido", "Scegli un username di almeno 2 caratteri.", "warning");
+                return;
+            }
 
-        try {
-            await db.collection("utenti").doc(res.user.uid).set({
-                username: username,
-                displayName: username,
-                nome: nome,
-                cognome: cognome,
-                email: email,
-                squadre: [],
-                draftTentati: 0,
-                creatoIl: new Date()
-            }, { merge: true });
-        } catch (fsErr) {
-            console.warn("Errore scrittura profilo Firestore:", fsErr);
-        }
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const uid = userCredential.user.uid;
 
-        const modal = document.getElementById('auth-modal');
-        const globalHeader = document.getElementById('global-header-bar');
-        if (modal) modal.style.display = 'none';
-        if (globalHeader) globalHeader.style.display = 'flex';
+                await userCredential.user.updateProfile({ displayName: username });
 
-        mostraNotifica("Registrazione Completata", `Registrazione completata! Benvenuto, <strong>${username}</strong>.`, "success");
-    } catch (err) {
-        mostraNotifica("Errore Registrazione", err.message, "error");
+                await db.collection("utenti").doc(uid).set({
+                    username: username,
+                    email: email,
+                    squadre: [],
+                    draftTentati: 0,
+                    createdAt: new Date()
+                });
+
+            } catch (error) {
+                mostraNotifica("Registrazione Fallita", error.message, "error");
+            }
+        });
     }
-}
+});
 
-async function handleLogin(e) {
-    e.preventDefault();
-    const email = document.getElementById('login-email').value.trim();
-    const password = document.getElementById('login-password').value;
-
-    try {
-        await auth.signInWithEmailAndPassword(email, password);
-    } catch (err) {
-        mostraNotifica("Errore Login", err.message, "error");
-    }
-}
-
+// =========================================================
+// GESTIONE STATO AUTH FIREBASE
+// =========================================================
 auth.onAuthStateChanged(async (user) => {
-    const modal = document.getElementById('auth-modal');
-    const globalHeader = document.getElementById('global-header-bar');
+    const authModal = document.getElementById("auth-modal");
+    const globalHeader = document.getElementById("global-header");
 
     if (user) {
         currentUser = user;
-        if (modal) modal.style.display = 'none';
-        if (globalHeader) globalHeader.style.display = 'flex';
+        if (authModal) authModal.style.display = "none";
+        if (globalHeader) globalHeader.style.display = "flex";
 
-        let displayUsername = getRealUsername(null, user);
-        try {
-            const userDoc = await db.collection("utenti").doc(user.uid).get();
-            if (userDoc.exists) {
-                const uData = userDoc.data();
-                displayUsername = getRealUsername(uData, user);
-
-                controllaRuoloAdmin(uData);
-
-                if (uData && uData.photoURL) {
-                    aggiornaAvatarGrafica(uData.photoURL);
-                } else {
-                    aggiornaAvatarGrafica(null);
-                }
-            }
-        } catch (e) {}
-
-        const displayEl = document.getElementById('user-display-name');
-        if (displayEl) displayEl.innerText = displayUsername;
-
-        const introGreetingEl = document.getElementById('welcome-intro-greeting');
-        if (introGreetingEl) {
-            introGreetingEl.innerHTML = `<i class="fa-solid fa-crown"></i><span>Bentornato Mister ${displayUsername}!</span>`;
-        }
+        await caricaGiocatoriDaExcel();
         await caricaDatiUtenteCloud();
+        await verificaECalcolaVotiAutomaticamente();
+        await calcolaEVisualizzaTotaleSquadreGlobali(ACTIVE_MATCHDAY);
+        renderWelcomeScreen();
+        startCountdownTimer();
+        refreshAllMarquees();
     } else {
         currentUser = null;
-        if (modal) modal.style.display = 'flex';
-        if (globalHeader) globalHeader.style.display = 'none';
+        if (authModal) authModal.style.display = "flex";
+        if (globalHeader) globalHeader.style.display = "none";
     }
 });
 
-async function logout() {
-    const ok = await mostraConferma(
-        "Disconnessione",
-        "Vuoi davvero disconnetterti dal tuo account?",
-        "warning",
-        "Sì, esci",
-        "No"
-    );
-    if (ok) {
-        auth.signOut().then(() => location.reload());
-    }
+function logoutUtente() {
+    auth.signOut().then(() => {
+        window.location.reload();
+    });
 }
 
+// =========================================================
+// CARICAMENTO DATI UTENTE DA FIRESTORE & CALCOLO SQUADRE GLOBALI
+// =========================================================
 async function caricaDatiUtenteCloud() {
     if (!currentUser) return;
     try {
-        const doc = await db.collection("utenti").doc(currentUser.uid).get();
-        if (doc.exists) {
-            const uData = doc.data();
-            userSquadre = uData.squadre || [];
+        const docRef = db.collection("utenti").doc(currentUser.uid);
+        const doc = await docRef.get();
 
-            if (uData && uData.photoURL) {
-                aggiornaAvatarGrafica(uData.photoURL);
-            }
+        let uData = null;
+        if (doc.exists) {
+            uData = doc.data();
+            userSquadre = uData.squadre || [];
         } else {
             userSquadre = [];
         }
-        await calcolaEVisualizzaTotaleSquadreGlobali(ACTIVE_MATCHDAY);
-        renderWelcomeScreen();
-    } catch (err) {
-        console.error("Errore caricamento dati utente:", err);
-        renderWelcomeScreen();
-    }
+
+        const realUsername = getRealUsername(uData, currentUser);
+        document.getElementById("user-name-display").innerText = realUsername;
+
+        if (uData && uData.photoURL && uData.photoURL.trim() !== "") {
+            aggiornaAvatarGrafica(uData.photoURL);
+        } else {
+            aggiornaAvatarGrafica("");
+        }
+
+        controllaRuoloAdmin(uData);
+
+    } catch (err) {}
 }
 
-async function calcolaEVisualizzaTotaleSquadreGlobali(giornataCorrente = ACTIVE_MATCHDAY) {
+async function calcolaEVisualizzaTotaleSquadreGlobali(giornata) {
     try {
+        if (!giornata) giornata = ACTIVE_MATCHDAY;
+
         const snapshot = await db.collection("utenti").get();
-        let conteggioTotale = 0;
+        let totaleSquadreGiornata = 0;
 
         snapshot.forEach(doc => {
             const uData = doc.data();
             const squadreArr = uData.squadre || [];
+
             squadreArr.forEach(sq => {
                 let g = sq.giornata !== undefined ? sq.giornata : 8;
-                if (g === giornataCorrente) conteggioTotale++;
+                if (g === giornata) {
+                    totaleSquadreGiornata++;
+                }
             });
         });
 
-        const badgeEl = document.getElementById("total-global-teams-count");
+        const badgeEl = document.getElementById("global-teams-count");
         if (badgeEl) {
-            badgeEl.innerText = conteggioTotale;
-            badgeEl.style.cursor = "pointer";
-            badgeEl.onclick = () => apriSchermataClassifica(giornataCorrente);
+            badgeEl.innerText = totaleSquadreGiornata;
         }
-
-        const titleEl = document.getElementById("global-teams-card-title");
-        if (titleEl) {
-            titleEl.innerText = `Squadre Iscritte (Giornata ${giornataCorrente})`;
-            titleEl.style.cursor = "pointer";
-            titleEl.onclick = () => apriSchermataClassifica(giornataCorrente);
-        }
-
-        const globalCardBox = document.querySelector(".global-teams-card") || (badgeEl ? badgeEl.parentElement : null);
-        if (globalCardBox) {
-            globalCardBox.style.cursor = "pointer";
-            globalCardBox.onclick = () => apriSchermataClassifica(giornataCorrente);
-        }
-
-    } catch (err) {
-        const badgeEl = document.getElementById("total-global-teams-count");
-        if (badgeEl) badgeEl.innerText = "0";
-    }
+    } catch (err) {}
 }
 
 async function ottieniNomiSquadreGlobaliGiornata(giornata) {
+    let nomi = [];
     try {
         const snapshot = await db.collection("utenti").get();
-        let nomiSquadre = [];
-
         snapshot.forEach(doc => {
             const uData = doc.data();
             const squadreArr = uData.squadre || [];
             squadreArr.forEach(sq => {
                 let g = sq.giornata !== undefined ? sq.giornata : 8;
                 if (g === giornata && sq.nomeSquadra) {
-                    nomiSquadre.push(sq.nomeSquadra.toLowerCase().trim());
+                    nomi.push(sq.nomeSquadra.trim().toLowerCase());
                 }
             });
         });
-        return nomiSquadre;
-    } catch (err) {
-        return [];
+    } catch (err) {}
+    return nomi;
+}
+
+// =========================================================
+// GESTIONE COUNTDOWN & BLOCCO MERCATO DINAMICO PER GIORNATA
+// =========================================================
+function isMarketOpen() {
+    ACTIVE_MATCHDAY = getCurrentActiveMatchday();
+    DEADLINE_TIMESTAMP = getDeadlineForMatchday(ACTIVE_MATCHDAY);
+    return Date.now() < DEADLINE_TIMESTAMP;
+}
+
+function isMarketOpenForMatchday(matchday) {
+    const deadline = getDeadlineForMatchday(matchday);
+    return Date.now() < deadline;
+}
+
+function startCountdownTimer() {
+    function updateTimer() {
+        ACTIVE_MATCHDAY = getCurrentActiveMatchday();
+        DEADLINE_TIMESTAMP = getDeadlineForMatchday(ACTIVE_MATCHDAY);
+
+        const now = Date.now();
+        const distance = DEADLINE_TIMESTAMP - now;
+
+        const deadlineLabel = document.getElementById("deadline-label-text");
+        if (deadlineLabel) {
+            deadlineLabel.innerHTML = `CHIUSURA MERCATO GIORNATA ${ACTIVE_MATCHDAY}:`;
+        }
+
+        if (distance < 0) {
+            document.getElementById("cd-days").innerText = "00";
+            document.getElementById("cd-hours").innerText = "00";
+            document.getElementById("cd-minutes").innerText = "00";
+            document.getElementById("cd-seconds").innerText = "00";
+            return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        document.getElementById("cd-days").innerText = String(days).padStart(2, '0');
+        document.getElementById("cd-hours").innerText = String(hours).padStart(2, '0');
+        document.getElementById("cd-minutes").innerText = String(minutes).padStart(2, '0');
+        document.getElementById("cd-seconds").innerText = String(seconds).padStart(2, '0');
     }
+
+    updateTimer();
+    setInterval(updateTimer, 1000);
 }
 
-function verificaDisponibilitaVotiOk() {
-    const ultimaGiornataVoti = getUltimaGiornataConVoti();
-    const fileName = `voti_ok${ultimaGiornataVoti}.xlsx`;
-    fetch(fileName, { method: "HEAD" })
-        .then(res => {
-            isVotiOkAvailable = res.ok;
-            updateHomeStatusBannerState();
-        })
-        .catch(() => {
-            isVotiOkAvailable = false;
-            updateHomeStatusBannerState();
-        });
-}
-
+// =========================================================
+// AGGIORNAMENTO BANNER DINAMICO STATO VOTI IN HOMEPAGE
+// =========================================================
 function updateHomeStatusBannerState() {
-    const container = document.getElementById("home-status-banner-container");
     const banner = document.getElementById("home-status-banner");
-    const icon = document.getElementById("home-status-icon");
-    const text = document.getElementById("home-status-text");
+    if (!banner) return;
+
     const ultimaGiornataVoti = getUltimaGiornataConVoti();
 
-    container.style.display = "block";
-
-    banner.style.cursor = "pointer";
-    banner.onclick = () => apriSchermataClassifica(ultimaGiornataVoti);
-
-    if (!isVotiOkAvailable) {
-        banner.className = "home-status-banner waiting";
-        icon.className = "fa-solid fa-hourglass-half";
-        text.innerText = `In attesa dei voti della giornata ${ultimaGiornataVoti}`;
-    } else {
+    if (isVotiOkAvailable) {
         banner.className = "home-status-banner ready";
-        icon.className = "fa-solid fa-trophy";
-        text.innerText = `Voti aggiornati per la giornata ${ultimaGiornataVoti}! Guarda i risultati delle tue squadre`;
+        banner.innerHTML = `<i class="fa-solid fa-trophy"></i> <span>🏆 Voti e classifica della Giornata ${ultimaGiornataVoti} disponibili! Clicca per visualizzare</span>`;
+        banner.onclick = () => apriSchermataClassifica(ultimaGiornataVoti);
+    } else {
+        banner.className = "home-status-banner waiting";
+        banner.innerHTML = `<i class="fa-solid fa-clock"></i> <span>⏳ In attesa dei voti ufficiali della Giornata ${ultimaGiornataVoti}</span>`;
+        banner.onclick = null;
     }
 }
 
-function vaiARegoleGuida() {
-    const targetBox = document.getElementById("guida-4-passi-box");
-    if (!targetBox) return;
-
-    targetBox.scrollIntoView({ behavior: "smooth", block: "start" });
-    targetBox.style.transition = "transform 0.3s, border-color 0.3s";
-    const prevBorder = targetBox.style.borderColor;
-    targetBox.style.borderColor = "var(--accent-blue)";
-    targetBox.style.transform = "scale(1.01)";
-    setTimeout(() => {
-        targetBox.style.transform = "scale(1)";
-        targetBox.style.borderColor = prevBorder || "";
-    }, 650);
+// =========================================================
+// TOGGLE GUIDA 4 PASSI IN HOMEPAGE
+// =========================================================
+function aggiornaStatoBottoneGuida(isOpen) {
+    const btn = document.getElementById("scopri-di-piu-link");
+    if (!btn) return;
+    btn.setAttribute("aria-expanded", String(isOpen));
+    btn.innerHTML = isOpen
+        ? `<i class="fa-solid fa-circle-chevron-up"></i> Nascondi`
+        : `<i class="fa-solid fa-circle-info"></i> Scopri di più`;
 }
 
+function toggleGuida4Passi() {
+    const guidaBox = document.getElementById("guida-4-passi-box");
+    if (!guidaBox) return;
+
+    const isCurrentlyOpen = guidaBox.style.display === "block";
+    if (isCurrentlyOpen) {
+        guidaBox.style.display = "none";
+        aggiornaStatoBottoneGuida(false);
+    } else {
+        guidaBox.style.display = "block";
+        aggiornaStatoBottoneGuida(true);
+    }
+}
+
+// =========================================================
+// RENDERING SCHERMATE (HOME / DRAFT / CLASSIFICA / PROFILO / RECAP)
+// =========================================================
 function renderWelcomeScreen() {
+    ACTIVE_MATCHDAY = getCurrentActiveMatchday();
+    DEADLINE_TIMESTAMP = getDeadlineForMatchday(ACTIVE_MATCHDAY);
+
     document.getElementById("welcome-screen").style.display = "block";
     document.getElementById("main-app").style.display = "none";
     document.getElementById("recap-screen").style.display = "none";
     document.getElementById("classifica-screen").style.display = "none";
     document.getElementById("profilo-screen").style.display = "none";
     document.getElementById("admin-screen").style.display = "none";
+
+    // Mantieni la guida sempre chiusa di default all'ingresso nella Home
+    const guidaBox = document.getElementById("guida-4-passi-box");
+    if (guidaBox) {
+        guidaBox.style.display = "none";
+        aggiornaStatoBottoneGuida(false);
+    }
 
     const squadreGiornataCorrente = userSquadre.filter(sq => (sq.giornata !== undefined ? sq.giornata : 8) === ACTIVE_MATCHDAY);
 
