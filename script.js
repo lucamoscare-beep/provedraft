@@ -580,7 +580,7 @@ function renderWelcomeScreen() {
 
     updateHomeStatusBannerState();
 
-    document.getElementById("user-created-teams-title").innerText = `Le tue Squadre create per la giornata di campionato n°${ACTIVE_MATCHDAY}`;
+    document.getElementById("user-created-teams-title").innerText = `Le tue Squadre • Giornata ${ACTIVE_MATCHDAY}`;
 
     const container = document.getElementById("created-teams-container");
     container.innerHTML = "";

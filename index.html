@@ -245,56 +245,90 @@
     </div>
 </div>
 
-<!-- LANDING PAGE -->
+<!-- LANDING PAGE MOBILE-FIRST -->
 <div id="welcome-screen">
-    <!-- 0. BOX IN ALTO SOPRA IL COUNTDOWN -->
-    <div id="welcome-intro-banner" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.98)); border: 1.5px solid var(--accent-gold); box-shadow: 0 6px 20px rgba(251, 191, 36, 0.14); border-radius: 14px; padding: 15px 17px; margin-bottom: 14px; color: #e2e8f0; font-size: 13px; line-height: 1.55;">
-        <div id="welcome-intro-greeting" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(251, 191, 36, 0.14); border: 1px solid rgba(251, 191, 36, 0.45); color: var(--accent-gold); font-weight: 900; font-size: 15px; padding: 5px 12px; border-radius: 999px; margin-bottom: 8px; letter-spacing: 0.2px;">
+    <!-- 1. SALUTO COMPATTO + ACCESSO RAPIDO ALLE REGOLE -->
+    <div id="welcome-intro-banner" class="welcome-top-strip">
+        <div id="welcome-intro-greeting" class="welcome-greeting-pill">
             <i class="fa-solid fa-crown"></i>
-            <span>Bentornato Mister Footable_ok!</span>
+            <span>Bentornato Mister!</span>
         </div>
-        <div>
-            Come funziona in 4 passi: scegli un nome e avvia il Draft (24 scelte da 5 opzioni per formare una rosa di 3 portieri, 7 difensori, 8 centrocampisti e 6 attaccanti), poi imposta modulo, 11 titolari e 8 riserve prima dell'inizio della giornata.
-            <button type="button" id="scopri-di-piu-link" class="scopri-di-piu-btn" onclick="vaiARegoleGuida()">
-    <i class="fa-solid fa-circle-info"></i> Istruzioni di gioco
-</button>
+        <button type="button" id="scopri-di-piu-link" class="scopri-di-piu-btn" onclick="vaiARegoleGuida()">
+            <i class="fa-solid fa-circle-info"></i> Regole
+        </button>
+    </div>
+
+    <!-- BOX ISTRUZIONI (Aperto solo su richiesta) -->
+    <div id="istruzioni-4-passi-boxino" class="istruzioni-boxino" style="display: none;">
+        <div class="istruzioni-boxino-header">
+            <span><i class="fa-solid fa-book-open"></i> Come funziona in 4 passi</span>
+            <button type="button" class="istruzioni-boxino-close" onclick="chiudiRegoleGuida()" title="Chiudi istruzioni">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <p style="font-size: 12px; color: #cbd5e1; margin: 0 0 12px 0; line-height: 1.5;">
+            Scegli un nome e avvia il Draft (24 scelte da 5 opzioni per formare una rosa di 3P, 7D, 8C, 6A), poi imposta modulo, 11 titolari e 8 riserve prima dell'inizio della giornata.
+        </p>
+        <div class="rules-grid">
+            <div class="rule-box">
+                <i class="fa-solid fa-coins"></i>
+                <h4>1. 3 Gettoni ogni Giornata</h4>
+                <p>Hai fino a <strong>3 gettoni</strong> per turno: ogni squadra salvata consuma 1 gettone.</p>
+            </div>
+            <div class="rule-box">
+                <i class="fa-solid fa-rotate"></i>
+                <h4>2. Draft Ripetibili e Modifiche</h4>
+                <p>Prima della conferma puoi rifare il Draft; dopo il salvataggio puoi cambiare modulo e formazione a mercato aperto.</p>
+            </div>
+            <div class="rule-box">
+                <i class="fa-solid fa-sack-dollar"></i>
+                <h4>3. 800 Crediti di Budget</h4>
+                <p>Parti con <strong>800 crediti</strong> per 24 acquisti. I crediti residui fanno da spareggio in classifica.</p>
+            </div>
+            <div class="rule-box">
+                <i class="fa-solid fa-ranking-star"></i>
+                <h4>4. Classifica di Giornata</h4>
+                <p>Sfida secca ogni turno: a parità di punti vince chi ha più <strong>crediti residui</strong>.</p>
+            </div>
         </div>
     </div>
 
-    <!-- 1. COUNTDOWN SCADENZA GIORNATA -->
+    <!-- 2. COUNTDOWN SCADENZA GIORNATA -->
     <div class="deadline-banner">
         <div class="deadline-info">
             <i class="fa-solid fa-stopwatch"></i>
-            <span id="welcome-deadline-text">Iscrivi le tue squadre alla prossima giornata entro:</span>
+            <span id="welcome-deadline-text">Iscrivi le tue squadre entro:</span>
         </div>
         <div class="countdown-timer">
-            <div class="countdown-box"><div class="countdown-number" id="w-cd-days">00</div><div class="countdown-label">Giorni</div></div>
+            <div class="countdown-box"><div class="countdown-number" id="w-cd-days">00</div><div class="countdown-label">GG</div></div>
             <div class="countdown-dots">:</div>
-            <div class="countdown-box"><div class="countdown-number" id="w-cd-hours">00</div><div class="countdown-label">Ore</div></div>
+            <div class="countdown-box"><div class="countdown-number" id="w-cd-hours">00</div><div class="countdown-label">ORE</div></div>
             <div class="countdown-dots">:</div>
-            <div class="countdown-box"><div class="countdown-number" id="w-cd-mins">00</div><div class="countdown-label">Minuti</div></div>
+            <div class="countdown-box"><div class="countdown-number" id="w-cd-mins">00</div><div class="countdown-label">MIN</div></div>
             <div class="countdown-dots">:</div>
-            <div class="countdown-box"><div class="countdown-number" id="w-cd-secs">00</div><div class="countdown-label">Secondi</div></div>
+            <div class="countdown-box"><div class="countdown-number" id="w-cd-secs">00</div><div class="countdown-label">SEC</div></div>
         </div>
     </div>
 
-    <!-- 2. SUBITO SOTTO IL COUNTDOWN: CREAZIONE NUOVA SQUADRA (DRAFT) -->
-    <div class="welcome-card" style="border: 1px solid var(--accent-gold); background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95)); margin-bottom: 15px;">
-        <h3 style="font-size: 17px; color: var(--accent-gold); margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
-            <i class="fa-solid fa-shirt"></i> Inizia un nuovo Draft. Scegli i migliori. Schiera la tua formazione.
+    <!-- 3. AZIONE PRINCIPALE: CREAZIONE NUOVA SQUADRA -->
+    <div class="welcome-card hero-draft-card">
+        <h3 class="hero-draft-title">
+            <i class="fa-solid fa-shirt"></i> Nuova Squadra &bull; Avvia Draft
         </h3>
-        <p style="color:var(--text-muted); font-size:14px; margin-bottom:12px;">
-            Scegli il nome della tua squadra e scendi in campo. Sfrutta tutti i gettoni a disposizione per questo turno.
+        <p class="hero-draft-sub">
+            Inserisci il nome del club e scegli i 24 giocatori per la giornata in corso.
         </p>
 
-        <div class="tokens-status-box" style="padding: 0; background: transparent; border: none;">
+        <div class="tokens-status-box">
             <div id="new-team-creation-area">
-                <div style="display:flex; justify-content:center; gap:10px; margin:0 auto; flex-wrap:wrap;">
-                    <div class="input-wrapper" style="flex:1; min-width:220px;">
+                <div class="hero-draft-form">
+                    <div class="input-wrapper">
                         <i class="fa-solid fa-signature input-icon"></i>
-                        <input type="text" id="new-team-name-input" class="styled-input" placeholder="es. Real Fanta 1" style="padding-left: 36px;">
+                        <input type="text" id="new-team-name-input" class="styled-input" placeholder="Es. Real Fanta 1" maxlength="26">
                     </div>
-                    <button onclick="preparaEAvviaDraft()" class="btn-action-primary" style="padding: 10px 20px;"><i class="fa-solid fa-play"></i> INIZIA DRAFT</button>
+                    <button onclick="preparaEAvviaDraft()" class="btn-action-primary hero-draft-btn">
+                        <i class="fa-solid fa-play"></i> INIZIA DRAFT
+                    </button>
                 </div>
             </div>
             <div id="tokens-exhausted-msg" style="display:none; color:var(--accent-gold); font-weight:700; font-size:13px; text-align: center;">
@@ -303,116 +337,84 @@
         </div>
     </div>
 
-    <!-- 3. SUBITO DOPO LA CREAZIONE SQUADRA: SQUADRE ISCRITTE E GETTONI RIMASTI -->
+    <!-- 4. KPI AFFIANCATI (GETTONI & SQUADRE ISCRITTE) -->
     <div class="top-info-row">
+        <div class="top-info-card tokens-box-inline">
+            <div class="kpi-left">
+                <i class="fa-solid fa-coins"></i>
+                <div class="top-info-text">
+                    <div class="title-text">Gettoni</div>
+                    <div class="sub-text">Tuoi disponibili</div>
+                </div>
+            </div>
+            <div class="tokens-badge-number" id="tokens-count-display-inline">3/3</div>
+        </div>
+
         <div class="top-info-card global-teams-box">
-            <div style="display:flex; align-items:center; gap:12px;">
+            <div class="kpi-left">
                 <i class="fa-solid fa-shield-halved"></i>
                 <div class="top-info-text">
-                    <div class="title-text" id="global-teams-card-title">Squadre Iscritte</div>
-                    <div class="sub-text">Il numero di squadre totale iscritto per questa giornata di campionato</div>
+                    <div class="title-text" id="global-teams-card-title">Iscritte</div>
+                    <div class="sub-text">Totale turno</div>
                 </div>
             </div>
             <div class="global-teams-badge-number" id="total-global-teams-count">...</div>
         </div>
-
-        <div class="top-info-card tokens-box-inline">
-            <div style="display:flex; align-items:center; gap:12px;">
-                <i class="fa-solid fa-coins"></i>
-                <div class="top-info-text">
-                    <div class="title-text">Gettoni Rimasti</div>
-                    <div class="sub-text">Disponibili per te</div>
-                </div>
-            </div>
-            <div class="tokens-badge-number" id="tokens-count-display-inline">3 / 3</div>
-        </div>
     </div>
 
-    <!-- 4. WIDGET RAPIDI (Profilo & Missioni) -->
-    <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
-        <div class="home-profile-banner" onclick="apriProfiloUtente(currentUser.uid)" style="flex: 2; min-width: 250px; margin-bottom: 0;">
-            <div class="home-profile-left">
-                <div class="home-profile-icon"><i class="fa-solid fa-id-badge"></i></div>
-                <div class="home-profile-text">
-                    <div class="title">Le mie statistiche di gioco</div>
-                    <div class="subtitle">Visualizza i tuoi podi, record personali e storico delle tue squadre</div>
-                </div>
-            </div>
-            <div style="color: var(--accent-blue); font-size: 16px; padding-right: 5px;">
-                <i class="fa-solid fa-arrow-right"></i>
-            </div>
-        </div>
-
-        <div onclick="vaiAMissioniProfilo()" class="home-profile-banner" style="flex: 1; min-width: 180px; margin-bottom: 0; cursor: pointer; background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(79, 70, 229, 0.2)); border: 1px solid #a78bfa;">
-            <div class="home-profile-left">
-                <div class="home-profile-icon" style="background: rgba(139, 92, 246, 0.3); color: #c4b5fd;"><i class="fa-solid fa-rocket"></i></div>
-                <div class="home-profile-text">
-                    <div class="title" style="color: #c4b5fd;">Missioni & Traguardi</div>
-                    <div class="subtitle">Completa le missioni e sblocca i tuoi badge</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 5. BANNER VOTI AGGIORNATI -->
-    <div id="home-status-banner-container" style="display:none; margin-bottom: 15px;">
+    <!-- 5. BANNER STATO VOTI -->
+    <div id="home-status-banner-container" style="display:none; margin-bottom: 14px;">
         <div id="home-status-banner" class="home-status-banner" onclick="apriSchermataClassifica()">
             <i id="home-status-icon" class="fa-solid fa-hourglass-half"></i>
             <span id="home-status-text">In attesa dei voti della giornata</span>
         </div>
     </div>
 
-    <!-- 6. ISTRUZIONI DI GIOCO -->
-    <div id="istruzioni-4-passi-boxino" class="istruzioni-boxino" style="display: none;">
-    <div class="istruzioni-boxino-header">
-        <span><i class="fa-solid fa-book-open"></i> Istruzioni di gioco</span>
-        <button type="button" class="istruzioni-boxino-close" onclick="chiudiRegoleGuida()" title="Chiudi istruzioni">
-            <i class="fa-solid fa-xmark"></i>
+    <!-- 6. LE TUE SQUADRE DEL TURNO (SUBITO ACCESSIBILI) -->
+    <div class="welcome-card my-teams-section-card">
+        <h3 class="section-heading-compact" id="user-created-teams-title">
+            Le tue Squadre iscritte
+        </h3>
+        <div id="created-teams-container" class="created-teams-list">
+            <p style="color:var(--text-muted); font-size:12px;">Nessuna squadra ancora creata per questo turno.</p>
+        </div>
+    </div>
+
+    <!-- 7. GRIGLIA RAPIDA NAVIGAZIONE (CLASSIFICA, STATISTICHE, MISSIONI, TEST) -->
+    <div class="home-quick-grid">
+        <button type="button" onclick="apriSchermataClassifica()" class="quick-nav-tile tile-gold">
+            <i class="fa-solid fa-ranking-star"></i>
+            <div>
+                <div class="tile-title">Classifica</div>
+                <div class="tile-sub">Risultati e podi</div>
+            </div>
+        </button>
+
+        <button type="button" onclick="apriProfiloUtente(currentUser.uid)" class="quick-nav-tile tile-blue">
+            <i class="fa-solid fa-id-badge"></i>
+            <div>
+                <div class="tile-title">Statistiche</div>
+                <div class="tile-sub">Record e storico</div>
+            </div>
+        </button>
+
+        <button type="button" onclick="vaiAMissioniProfilo()" class="quick-nav-tile tile-purple">
+            <i class="fa-solid fa-rocket"></i>
+            <div>
+                <div class="tile-title">Missioni</div>
+                <div class="tile-sub">Badge e traguardi</div>
+            </div>
+        </button>
+
+        <button type="button" onclick="avviaTestDraft()" class="quick-nav-tile tile-slate">
+            <i class="fa-solid fa-vials"></i>
+            <div>
+                <div class="tile-title">Test Draft</div>
+                <div class="tile-sub">Prova senza gettoni</div>
+            </div>
         </button>
     </div>
-
-    <div class="rules-grid">
-        <div class="rule-box">
-            <i class="fa-solid fa-coins"></i>
-            <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">1. 3 Gettoni ogni Giornata</h4>
-            <p style="color:var(--text-muted); font-size:12px; margin:0; line-height:1.45;">Hai fino a <strong>3 gettoni</strong> per ogni giornata: ogni squadra salvata consuma 1 gettone e partecipa alla sfida del turno.</p>
-        </div>
-        <div class="rule-box">
-            <i class="fa-solid fa-rotate"></i>
-            <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">2. Draft Ripetibili e Modifiche</h4>
-            <p style="color:var(--text-muted); font-size:12px; margin:0; line-height:1.45;">Finché non confermi la rosa puoi rifare il Draft tutte le volte che vuoi; dopo il salvataggio, finché il mercato è aperto, puoi cambiare modulo, titolari e panchina.</p>
-        </div>
-        <div class="rule-box">
-            <i class="fa-solid fa-sack-dollar"></i>
-            <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">3. 800 Crediti di Budget</h4>
-            <p style="color:var(--text-muted); font-size:12px; margin:0; line-height:1.45;">Parti con <strong>800 crediti</strong> per completare i 24 acquisti rispettando i limiti per ruolo. Gestisci bene i crediti: ti servono anche in classifica.</p>
-        </div>
-        <div class="rule-box">
-            <i class="fa-solid fa-ranking-star"></i>
-            <h4 style="color:#fff; font-size:13px; margin-bottom:4px;">4. Classifica e Crediti Residui</h4>
-            <p style="color:var(--text-muted); font-size:12px; margin:0; line-height:1.45;">Ogni giornata ha una classifica dedicata basata sui punti ottenuti; a parità di punteggio vince chi ha più <strong>crediti residui</strong>.</p>
-        </div>
-    </div>
 </div>
-
-        <div style="margin-top:25px;">
-            <h3 style="font-size:15px; color:#fff; border-bottom:1px solid var(--card-border); padding-bottom:6px;" id="user-created-teams-title">Le tue Squadre iscritte alla giornata di campionato in corso</h3>
-            <div id="created-teams-container" class="created-teams-list">
-                <p style="color:var(--text-muted); font-size:12px;">Nessuna squadra ancora creata per questo turno.</p>
-            </div>
-        </div>
-
-        <div class="home-nav-buttons">
-            <button onclick="apriSchermataClassifica()" class="btn-home-classifica">
-                <i class="fa-solid fa-ranking-star"></i> Vedi classifica di giornata
-            </button>
-            <button onclick="avviaTestDraft()" class="btn-home-test">
-                <i class="fa-solid fa-vials"></i> Test Draft (No Firebase)
-            </button>
-        </div>
-    </div>
-</div>
-
 
 <!-- SCHERMATA BACKOFFICE ADMIN -->
 
@@ -437,6 +439,8 @@
             <i class="fa-solid fa-house"></i> Ritorna alla Home
         </button>
     </div>
+
+
 
  <!-- GRID STRUMENTI ADMIN -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
